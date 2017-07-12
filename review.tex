@@ -45,9 +45,58 @@
 
 \subsection{Principle Component Analysis}
 
-\section{Probabalistic Graphical Models}
+\section{Probabilistic Graphical Models}
 
 \subsection{Viterbi and Forward Backward Algorithm}
+
+\renewcommand{\o}{\mathbf{o}}
+\newcommand{\x}{\mathbf{x}}
+
+The key to deriving the forward backward algorithm for the linear-chain CRF is to realize that there is no fundamental difference between HMM and CRF.
+The likelihood of a linear-chain CRF is defined to be the product of all the potentials. But before we get mixed up in math here: $o_i$ denotes observation and $x_i$ denotes the hidden state.
+
+\eq{
+P(\x) = \prod_i \phi(x_i) \prod_{i,i+1} \phi(x_i, x_{i+1})
+}
+
+On the other hand, the likelihood of the equivalent HMM model is the following:
+
+\eq{
+P(x) = \prod_i P(o_i | x_i) P(x_i | x_{i+1})
+}
+Note this product is incorrect when $i = n$, but let's ignore that.
+
+Now if you squint really closely, you're realize that these two equations are actually the same thing. We can just replace $P(o_i|x_i)$ with $\phi(x_i)$ and $P(x_i|x_{i+1})$ with $\phi(x_i, x_{i+1})$. So it suffices to solve inference on the general setting of CRFs. However, we'll start on HMMs simply to avoid a bit of headaches.
+
+We want to solve for $P(x_k|\o)$. The key is the following manipulation:
+
+\eq{
+  P(x_k|\o) &= \frac{P(\o|x_k)p(x_k)}{P(\o)} \\
+  &\propto P(\o|x_k)p(x_k) \\
+  &= P(\o_{1:k}|x_k)P(\o_{k+1:n}|x_k)P(x_k) \\
+}
+
+Let's take that second term and apply Bayes' Theorem again
+
+\eq{
+  P(\o_{k+1:n}|x_k) &= \frac{P(x_k | \o_{k+1:n}) P(\o_{k+1:n})}{P(x_k)} \\
+  &\propto \frac{P(x_k | \o_{k+1:n})}{P(x_k)}
+}
+
+And substitute it back in...
+
+\eq{
+  P(\o_{1:k}|x_k)P(\o_{k+1:n}|x_k)P(x_k) &= P(\o_{1:k}|x_k)\frac{P(x_k | \o_{k+1:n})}{P(x_k)}P(x_k)\\
+  &= P(\o_{1:k}|x_k)P(x_k | \o_{k+1:n})
+}
+
+So now we just need to figure out how to compute $P(\o_{1:k}|x_k)$ and $P(x_k|o_{k+1:n})$. We can do this inductively. To do this, we specify that each $x_i$ is a categorical variables in one of $m$ classes indexed by $j$. In the base case, we are given $P(o_1 | x_1)$. 
+y
+\eq{
+  P(o_{1:k}|x_k) = 0
+}
+
+finish this tomorrow.
 
 \subsection{Message Passing and Loopy Belief Propagation}
 
@@ -77,6 +126,8 @@
 \subsection{Importance Sampling}
 
 \subsection{Monte Carlo Markov Chain}
+
+\subsubsection{Metropolis Hastings}
 
 \subsubsection{Reversible Jump MCMC}
 

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016/Debian) (preloaded format=pdflatex 2017.7.11)  12 JUL 2017 00:54
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016/Debian) (preloaded format=pdflatex 2017.7.11)  12 JUL 2017 01:58
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -414,48 +414,152 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 (/usr/share/texlive/texmf-dist/tex/latex/microtype/mt-msb.cfg
 File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 )
-(./review_flymake.toc
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <12> on input line 2.
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 2.
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <6> on input line 2.
- [1
-
-{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
-[2])
+(./review_flymake.toc)
 \tf@toc=\write4
 \openout4 = `review_flymake.toc'.
 
- [3]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 145.
- [4]
-Overfull \vbox (1073.17686pt too high) has occurred while \output is active []
+ [1
+
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <12> on input line 57.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <8> on input line 57.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <6> on input line 57.
+
+Runaway argument?
+ 
+/home/ricson/code/latex/review_flymake.tex:63: Paragraph ended before \align* w
+as complete.
+<to be read again> 
+                   \par 
+l.63 }
+      
+I suspect you've forgotten a `}', causing me to apply this
+control sequence to too much text. How can we recover?
+My plan is to forget the whole thing and hope for the best.
+
+/home/ricson/code/latex/review_flymake.tex:63: Missing $ inserted.
+<inserted text> 
+                $
+l.63 }
+      
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+/home/ricson/code/latex/review_flymake.tex:63: Missing \endgroup inserted.
+<inserted text> 
+                \endgroup 
+l.63 }
+      
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+/home/ricson/code/latex/review_flymake.tex:63: Display math should end with $$.
+<to be read again> 
+                   \par 
+l.63 }
+      
+The `$' that I just saw supposedly matches a previous `$$'.
+So I shall assume that you typed `$$' both times.
+
+/home/ricson/code/latex/review_flymake.tex:63: Misplaced \cr.
+\math@cr@@@ ->\cr 
+                  
+l.63 }
+      
+I can't figure out why you would want to use a tab mark
+or \cr or \span just now. If something like a right brace
+up above has ended a previous alignment prematurely,
+you're probably due for more error messages, and you
+might try typing `S' now just to see what is salvageable.
+
+/home/ricson/code/latex/review_flymake.tex:63: Misplaced \noalign.
+\math@cr@@ ... \iffalse }\fi \math@cr@@@ \noalign 
+                                                  {\vskip #1\relax }
+l.63 }
+      
+I expect to see \noalign only after the \cr of
+an alignment. Proceed, and I'll ignore this case.
+
+/home/ricson/code/latex/review_flymake.tex:63: Misplaced \noalign.
+\black@ #1->\noalign 
+                     {\ifdim #1>\displaywidth \dimen@ \prevdepth \nointerlin...
+l.63 }
+      
+I expect to see \noalign only after the \cr of
+an alignment. Proceed, and I'll ignore this case.
+
+/home/ricson/code/latex/review_flymake.tex:63: Extra }, or forgotten \endgroup.
+
+\endalign ->\math@cr \black@ \totwidth@ \egroup 
+                                                \ifingather@ \restorealignst...
+l.63 }
+      
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+/home/ricson/code/latex/review_flymake.tex:63: Missing $ inserted.
+<inserted text> 
+                $
+l.63 }
+      
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+/home/ricson/code/latex/review_flymake.tex:63: Display math should end with $$.
+<to be read again> 
+                   \endgroup 
+l.63 }
+      
+The `$' that I just saw supposedly matches a previous `$$'.
+So I shall assume that you typed `$$' both times.
+
+[2]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 160.
+ [3] [4]
+Overfull \vbox (706.23341pt too high) has occurred while \output is active []
 
 
 [5]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 145.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 160.
  (./review_flymake.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 145.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 145.
-Package rerunfilecheck Info: File `review_flymake.out' has not changed.
-(rerunfilecheck)             Checksum: AE3939AAC1CD1A852322DC96914C23FB;4294.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 145.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 160.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 160.
+
+
+Package rerunfilecheck Warning: File `review_flymake.out' has changed.
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+Package rerunfilecheck Info: Checksums for `review_flymake.out':
+(rerunfilecheck)             Before: D41D8CD98F00B204E9800998ECF8427E;0
+(rerunfilecheck)             After:  2E75AED16D79DD1B9C91CBF0E3AC5645;4373.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 160.
  ) 
 Here is how much of TeX's memory you used:
- 7639 strings out of 494945
- 115903 string characters out of 6181032
- 234859 words of memory out of 5000000
- 10771 multiletter control sequences out of 15000+600000
- 43011 words of font info for 51 fonts, out of 8000000 for 9000
+ 7646 strings out of 494945
+ 116012 string characters out of 6181032
+ 233859 words of memory out of 5000000
+ 10775 multiletter control sequences out of 15000+600000
+ 48893 words of font info for 53 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 31i,6n,38p,289b,365s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 31i,10n,38p,289b,350s stack positions out of 5000i,500n,10000p,200000b,80000s
 
 pdfTeX warning: \pdfdraftmode enabled, not changing output pdf
 
 PDF statistics:
- 149 PDF objects out of 1000 (max. 8388607)
- 68 named destinations out of 1000 (max. 500000)
- 5633 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 92 PDF objects out of 1000 (max. 8388607)
+ 69 named destinations out of 1000 (max. 500000)
+ 6657 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -1,313 +1,74 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016/Debian) (preloaded format=pdflatex 2017.7.11)  12 JUL 2017 00:33
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016/Debian) (preloaded format=prv_review 2017.7.12)  12 JUL 2017 02:15
 entering extended mode
  restricted \write18 enabled.
- file:line:error style messages enabled.
  %&-line parsing enabled.
-**\nonstopmode\nofiles\PassOptionsToPackage{active,tightpage,auctex}{preview}\A
-tBeginDocument{\ifx\ifPreview\undefined\RequirePackage[displaymath,floats,graph
-ics,textmath,sections,footnotes]{preview}[2004/11/05]\fi} \input _region_.tex
-(./_region_.tex  !name(review.tex)
-(/usr/share/texlive/texmf-dist/tex/latex/base/article.cls
-Document Class: article 2014/09/29 v1.4h Standard LaTeX document class
-(/usr/share/texlive/texmf-dist/tex/latex/base/size12.clo
-File: size12.clo 2014/09/29 v1.4h Standard LaTeX file (size option)
-)
-\c@part=\count79
-\c@section=\count80
-\c@subsection=\count81
-\c@subsubsection=\count82
-\c@paragraph=\count83
-\c@subparagraph=\count84
-\c@figure=\count85
-\c@table=\count86
-\abovecaptionskip=\skip41
-\belowcaptionskip=\skip42
-\bibindent=\dimen102
-)
-(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsmath.sty
-Package: amsmath 2016/11/05 v2.16a AMS math features
-\@mathmargin=\skip43
-
-For additional information on amsmath, use the `?' option.
-(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amstext.sty
-Package: amstext 2000/06/29 v2.01 AMS text
-
-(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsgen.sty
-File: amsgen.sty 1999/11/30 v2.0 generic functions
-\@emptytoks=\toks14
-\ex@=\dimen103
-))
-(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsbsy.sty
-Package: amsbsy 1999/11/29 v1.2d Bold Symbols
-\pmbraise@=\dimen104
-)
-(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsopn.sty
-Package: amsopn 2016/03/08 v2.02 operator names
-)
-\inf@bad=\count87
-LaTeX Info: Redefining \frac on input line 213.
-\uproot@=\count88
-\leftroot@=\count89
-LaTeX Info: Redefining \overline on input line 375.
-\classnum@=\count90
-\DOTSCASE@=\count91
-LaTeX Info: Redefining \ldots on input line 472.
-LaTeX Info: Redefining \dots on input line 475.
-LaTeX Info: Redefining \cdots on input line 596.
-\Mathstrutbox@=\box26
-\strutbox@=\box27
-\big@size=\dimen105
-LaTeX Font Info:    Redeclaring font encoding OML on input line 712.
-LaTeX Font Info:    Redeclaring font encoding OMS on input line 713.
-\macc@depth=\count92
-\c@MaxMatrixCols=\count93
-\dotsspace@=\muskip10
-\c@parentequation=\count94
-\dspbrk@lvl=\count95
-\tag@help=\toks15
-\row@=\count96
-\column@=\count97
-\maxfields@=\count98
-\andhelp@=\toks16
-\eqnshift@=\dimen106
-\alignsep@=\dimen107
-\tagshift@=\dimen108
-\tagwidth@=\dimen109
-\totwidth@=\dimen110
-\lineht@=\dimen111
-\@envbody=\toks17
-\multlinegap=\skip44
-\multlinetaggap=\skip45
-\mathdisplay@stack=\toks18
-LaTeX Info: Redefining \[ on input line 2817.
-LaTeX Info: Redefining \] on input line 2818.
-)
-(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/amssymb.sty
-Package: amssymb 2013/01/14 v3.01 AMS font symbols
-
-(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/amsfonts.sty
-Package: amsfonts 2013/01/14 v3.01 Basic AMSFonts support
-\symAMSa=\mathgroup4
-\symAMSb=\mathgroup5
-LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
-(Font)                  U/euf/m/n --> U/euf/b/n on input line 106.
-))
-(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphicx.sty
-Package: graphicx 2014/10/28 v1.0g Enhanced LaTeX Graphics (DPC,SPQR)
-
-(/usr/share/texlive/texmf-dist/tex/latex/graphics/keyval.sty
-Package: keyval 2014/10/28 v1.15 key=value parser (DPC)
-\KV@toks@=\toks19
-)
-(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphics.sty
-Package: graphics 2016/10/09 v1.0u Standard LaTeX Graphics (DPC,SPQR)
-
-(/usr/share/texlive/texmf-dist/tex/latex/graphics/trig.sty
-Package: trig 2016/01/03 v1.10 sin cos tan (DPC)
-)
-(/usr/share/texlive/texmf-dist/tex/latex/graphics-cfg/graphics.cfg
-File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
-)
-Package graphics Info: Driver file: pdftex.def on input line 99.
-
-(/usr/share/texlive/texmf-dist/tex/latex/graphics-def/pdftex.def
-File: pdftex.def 2017/01/12 v0.06k Graphics/color for pdfTeX
-
-(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/infwarerr.sty
-Package: infwarerr 2016/05/16 v1.4 Providing info/warning/error messages (HO)
-)
-(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/ltxcmds.sty
-Package: ltxcmds 2016/05/16 v1.23 LaTeX kernel commands for general use (HO)
-)
-\Gread@gobject=\count99
-))
-\Gin@req@height=\dimen112
-\Gin@req@width=\dimen113
-)
-(/usr/share/texlive/texmf-dist/tex/latex/microtype/microtype.sty
-Package: microtype 2016/05/14 v2.6a Micro-typographical refinements (RS)
-\MT@toks=\toks20
-\MT@count=\count100
-LaTeX Info: Redefining \textls on input line 774.
-\MT@outer@kern=\dimen114
-LaTeX Info: Redefining \textmicrotypecontext on input line 1310.
-\MT@listname@count=\count101
-
-(/usr/share/texlive/texmf-dist/tex/latex/microtype/microtype-pdftex.def
-File: microtype-pdftex.def 2016/05/14 v2.6a Definitions specific to pdftex (RS)
-
-LaTeX Info: Redefining \lsstyle on input line 916.
-LaTeX Info: Redefining \lslig on input line 916.
-\MT@outer@space=\skip46
-)
-Package microtype Info: Loading configuration file microtype.cfg.
-
-(/usr/share/texlive/texmf-dist/tex/latex/microtype/microtype.cfg
-File: microtype.cfg 2016/05/14 v2.6a microtype main configuration file (RS)
-))
-(/usr/share/texmf/tex/latex/lm/lmodern.sty
-Package: lmodern 2009/10/30 v1.6 Latin Modern Fonts
-LaTeX Font Info:    Overwriting symbol font `operators' in version `normal'
-(Font)                  OT1/cmr/m/n --> OT1/lmr/m/n on input line 22.
-LaTeX Font Info:    Overwriting symbol font `letters' in version `normal'
-(Font)                  OML/cmm/m/it --> OML/lmm/m/it on input line 23.
-LaTeX Font Info:    Overwriting symbol font `symbols' in version `normal'
-(Font)                  OMS/cmsy/m/n --> OMS/lmsy/m/n on input line 24.
-LaTeX Font Info:    Overwriting symbol font `largesymbols' in version `normal'
-(Font)                  OMX/cmex/m/n --> OMX/lmex/m/n on input line 25.
-LaTeX Font Info:    Overwriting symbol font `operators' in version `bold'
-(Font)                  OT1/cmr/bx/n --> OT1/lmr/bx/n on input line 26.
-LaTeX Font Info:    Overwriting symbol font `letters' in version `bold'
-(Font)                  OML/cmm/b/it --> OML/lmm/b/it on input line 27.
-LaTeX Font Info:    Overwriting symbol font `symbols' in version `bold'
-(Font)                  OMS/cmsy/b/n --> OMS/lmsy/b/n on input line 28.
-LaTeX Font Info:    Overwriting symbol font `largesymbols' in version `bold'
-(Font)                  OMX/cmex/m/n --> OMX/lmex/m/n on input line 29.
-LaTeX Font Info:    Overwriting math alphabet `\mathbf' in version `normal'
-(Font)                  OT1/cmr/bx/n --> OT1/lmr/bx/n on input line 31.
-LaTeX Font Info:    Overwriting math alphabet `\mathsf' in version `normal'
-(Font)                  OT1/cmss/m/n --> OT1/lmss/m/n on input line 32.
-LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `normal'
-(Font)                  OT1/cmr/m/it --> OT1/lmr/m/it on input line 33.
-LaTeX Font Info:    Overwriting math alphabet `\mathtt' in version `normal'
-(Font)                  OT1/cmtt/m/n --> OT1/lmtt/m/n on input line 34.
-LaTeX Font Info:    Overwriting math alphabet `\mathbf' in version `bold'
-(Font)                  OT1/cmr/bx/n --> OT1/lmr/bx/n on input line 35.
-LaTeX Font Info:    Overwriting math alphabet `\mathsf' in version `bold'
-(Font)                  OT1/cmss/bx/n --> OT1/lmss/bx/n on input line 36.
-LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `bold'
-(Font)                  OT1/cmr/bx/it --> OT1/lmr/bx/it on input line 37.
-LaTeX Font Info:    Overwriting math alphabet `\mathtt' in version `bold'
-(Font)                  OT1/cmtt/m/n --> OT1/lmtt/m/n on input line 38.
-)
-(/usr/share/texlive/texmf-dist/tex/latex/hyperref/hyperref.sty
-Package: hyperref 2016/06/24 v6.83q Hypertext links for LaTeX
-
-(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/hobsub-hyperref.sty
-Package: hobsub-hyperref 2016/05/16 v1.14 Bundle oberdiek, subset hyperref (HO)
-
-
-(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/hobsub-generic.sty
-Package: hobsub-generic 2016/05/16 v1.14 Bundle oberdiek, subset generic (HO)
-Package: hobsub 2016/05/16 v1.14 Construct package bundles (HO)
-Package hobsub Info: Skipping package `infwarerr' (already loaded).
-Package hobsub Info: Skipping package `ltxcmds' (already loaded).
-Package: ifluatex 2016/05/16 v1.4 Provides the ifluatex switch (HO)
-Package ifluatex Info: LuaTeX not detected.
-Package: ifvtex 2016/05/16 v1.6 Detect VTeX and its facilities (HO)
-Package ifvtex Info: VTeX not detected.
-Package: intcalc 2016/05/16 v1.2 Expandable calculations with integers (HO)
-Package: ifpdf 2016/05/14 v3.1 Provides the ifpdf switch
-Package: etexcmds 2016/05/16 v1.6 Avoid name clashes with e-TeX commands (HO)
-Package etexcmds Info: Could not find \expanded.
-(etexcmds)             That can mean that you are not using pdfTeX 1.50 or
-(etexcmds)             that some package has redefined \expanded.
-(etexcmds)             In the latter case, load this package earlier.
-Package: kvsetkeys 2016/05/16 v1.17 Key value parser (HO)
-Package: kvdefinekeys 2016/05/16 v1.4 Define keys (HO)
-Package: pdftexcmds 2016/05/21 v0.22 Utility functions of pdfTeX for LuaTeX (HO
-)
-Package pdftexcmds Info: LuaTeX not detected.
-Package pdftexcmds Info: \pdf@primitive is available.
-Package pdftexcmds Info: \pdf@ifprimitive is available.
-Package pdftexcmds Info: \pdfdraftmode found.
-Package: pdfescape 2016/05/16 v1.14 Implements pdfTeX's escape features (HO)
-Package: bigintcalc 2016/05/16 v1.4 Expandable calculations on big integers (HO
-)
-Package: bitset 2016/05/16 v1.2 Handle bit-vector datatype (HO)
-Package: uniquecounter 2016/05/16 v1.3 Provide unlimited unique counter (HO)
-)
-Package hobsub Info: Skipping package `hobsub' (already loaded).
-Package: letltxmacro 2016/05/16 v1.5 Let assignment for LaTeX macros (HO)
-Package: hopatch 2016/05/16 v1.3 Wrapper for package hooks (HO)
-Package: xcolor-patch 2016/05/16 xcolor patch
-Package: atveryend 2016/05/16 v1.9 Hooks at the very end of document (HO)
-Package atveryend Info: \enddocument detected (standard20110627).
-Package: atbegshi 2016/06/09 v1.18 At begin shipout hook (HO)
-Package: refcount 2016/05/16 v3.5 Data extraction from label references (HO)
-Package: hycolor 2016/05/16 v1.8 Color options for hyperref/bookmark (HO)
-)
-(/usr/share/texlive/texmf-dist/tex/generic/ifxetex/ifxetex.sty
-Package: ifxetex 2010/09/12 v0.6 Provides ifxetex conditional
-)
-(/usr/share/texlive/texmf-dist/tex/latex/oberdiek/auxhook.sty
-Package: auxhook 2016/05/16 v1.4 Hooks for auxiliary files (HO)
-)
-(/usr/share/texlive/texmf-dist/tex/latex/oberdiek/kvoptions.sty
-Package: kvoptions 2016/05/16 v3.12 Key value format for package options (HO)
-)
-\@linkdim=\dimen115
-\Hy@linkcounter=\count102
-\Hy@pagecounter=\count103
-
-(/usr/share/texlive/texmf-dist/tex/latex/hyperref/pd1enc.def
-File: pd1enc.def 2016/06/24 v6.83q Hyperref: PDFDocEncoding definition (HO)
-)
-\Hy@SavedSpaceFactor=\count104
-
-(/usr/share/texlive/texmf-dist/tex/latex/latexconfig/hyperref.cfg
-File: hyperref.cfg 2002/06/06 v1.2 hyperref configuration of TeXLive
-)
-Package hyperref Info: Hyper figures OFF on input line 4486.
-Package hyperref Info: Link nesting OFF on input line 4491.
-Package hyperref Info: Hyper index ON on input line 4494.
-Package hyperref Info: Plain pages OFF on input line 4501.
-Package hyperref Info: Backreferencing OFF on input line 4506.
-Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
-Package hyperref Info: Bookmarks ON on input line 4735.
-\c@Hy@tempcnt=\count105
-
-(/usr/share/texlive/texmf-dist/tex/latex/url/url.sty
-\Urlmuskip=\muskip11
-Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
-)
-LaTeX Info: Redefining \url on input line 5088.
-\XeTeXLinkMargin=\dimen116
-\Fld@menulength=\count106
-\Field@Width=\dimen117
-\Fld@charsize=\dimen118
-Package hyperref Info: Hyper figures OFF on input line 6342.
-Package hyperref Info: Link nesting OFF on input line 6347.
-Package hyperref Info: Hyper index ON on input line 6350.
-Package hyperref Info: backreferencing OFF on input line 6357.
-Package hyperref Info: Link coloring OFF on input line 6362.
-Package hyperref Info: Link coloring with OCG OFF on input line 6367.
-Package hyperref Info: PDF/A mode OFF on input line 6372.
-LaTeX Info: Redefining \ref on input line 6412.
-LaTeX Info: Redefining \pageref on input line 6416.
-\Hy@abspage=\count107
-\c@Item=\count108
-\c@Hfootnote=\count109
-)
-
-Package hyperref Message: Driver (autodetected): hpdftex.
-
-(/usr/share/texlive/texmf-dist/tex/latex/hyperref/hpdftex.def
-File: hpdftex.def 2016/06/24 v6.83q Hyperref driver for pdfTeX
-\Fld@listcount=\count110
-\c@bookmark@seq@number=\count111
-
-(/usr/share/texlive/texmf-dist/tex/latex/oberdiek/rerunfilecheck.sty
-Package: rerunfilecheck 2016/05/16 v1.8 Rerun checks for auxiliary files (HO)
-Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
-82.
-)
-\Hy@SectionHShift=\skip47
-)
-
-./_region_.tex:15: LaTeX Error: Command \list already defined.
-               Or name \end... illegal, see p.192 of the manual.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.15 ...{\list}[1]{\begin{itemize}#1\end{itemize}}
-                                                  
-Your command was ignored.
-Type  I <command> <return>  to replace it with another command,
-or  <return>  to continue without it.
-
+**&prv_review _region_.tex
+(./_region_.tex
+LaTeX2e <2017/01/01> patch level 3
+Babel <3.9r> and hyphenation patterns for 3 language(s) loaded.
+CUSTOMISED FORMAT. Preloaded files:
+        .
+ article.cls    2014/09/29 v1.4h Standard LaTeX document class
+  size12.clo    2014/09/29 v1.4h Standard LaTeX file (size option)
+ amsmath.sty    2016/11/05 v2.16a AMS math features
+ amstext.sty    2000/06/29 v2.01 AMS text
+  amsgen.sty    1999/11/30 v2.0 generic functions
+  amsbsy.sty    1999/11/29 v1.2d Bold Symbols
+  amsopn.sty    2016/03/08 v2.02 operator names
+ amssymb.sty    2013/01/14 v3.01 AMS font symbols
+amsfonts.sty    2013/01/14 v3.01 Basic AMSFonts support
+graphicx.sty    2014/10/28 v1.0g Enhanced LaTeX Graphics (DPC,SPQR)
+  keyval.sty    2014/10/28 v1.15 key=value parser (DPC)
+graphics.sty    2016/10/09 v1.0u Standard LaTeX Graphics (DPC,SPQR)
+    trig.sty    2016/01/03 v1.10 sin cos tan (DPC)
+graphics.cfg    2016/06/04 v1.11 sample graphics configuration
+  pdftex.def    2017/01/12 v0.06k Graphics/color for pdfTeX
+infwarerr.sty    2016/05/16 v1.4 Providing info/warning/error messages (HO)
+ ltxcmds.sty    2016/05/16 v1.23 LaTeX kernel commands for general use (HO)
+microtype.sty    2016/05/14 v2.6a Micro-typographical refinements (RS)
+microtype-pdftex.def    2016/05/14 v2.6a Definitions specific to pdftex (RS)
+microtype.cfg    2016/05/14 v2.6a microtype main configuration file (RS)
+ lmodern.sty    2009/10/30 v1.6 Latin Modern Fonts
+hyperref.sty    2016/06/24 v6.83q Hypertext links for LaTeX
+hobsub-hyperref.sty    2016/05/16 v1.14 Bundle oberdiek, subset hyperref (HO)
+hobsub-generic.sty    2016/05/16 v1.14 Bundle oberdiek, subset generic (HO)
+  hobsub.sty    2016/05/16 v1.14 Construct package bundles (HO)
+ifluatex.sty    2016/05/16 v1.4 Provides the ifluatex switch (HO)
+  ifvtex.sty    2016/05/16 v1.6 Detect VTeX and its facilities (HO)
+ intcalc.sty    2016/05/16 v1.2 Expandable calculations with integers (HO)
+   ifpdf.sty    2016/05/14 v3.1 Provides the ifpdf switch
+etexcmds.sty    2016/05/16 v1.6 Avoid name clashes with e-TeX commands (HO)
+kvsetkeys.sty    2016/05/16 v1.17 Key value parser (HO)
+kvdefinekeys.sty    2016/05/16 v1.4 Define keys (HO)
+pdftexcmds.sty    2016/05/21 v0.22 Utility functions of pdfTeX for LuaTeX (HO)
+pdfescape.sty    2016/05/16 v1.14 Implements pdfTeX's escape features (HO)
+bigintcalc.sty    2016/05/16 v1.4 Expandable calculations on big integers (HO)
+  bitset.sty    2016/05/16 v1.2 Handle bit-vector datatype (HO)
+uniquecounter.sty    2016/05/16 v1.3 Provide unlimited unique counter (HO)
+letltxmacro.sty    2016/05/16 v1.5 Let assignment for LaTeX macros (HO)
+ hopatch.sty    2016/05/16 v1.3 Wrapper for package hooks (HO)
+xcolor-patch.sty    2016/05/16 xcolor patch
+atveryend.sty    2016/05/16 v1.9 Hooks at the very end of document (HO)
+atbegshi.sty    2016/06/09 v1.18 At begin shipout hook (HO)
+refcount.sty    2016/05/16 v3.5 Data extraction from label references (HO)
+ hycolor.sty    2016/05/16 v1.8 Color options for hyperref/bookmark (HO)
+ ifxetex.sty    2010/09/12 v0.6 Provides ifxetex conditional
+ auxhook.sty    2016/05/16 v1.4 Hooks for auxiliary files (HO)
+kvoptions.sty    2016/05/16 v3.12 Key value format for package options (HO)
+  pd1enc.def    2016/06/24 v6.83q Hyperref: PDFDocEncoding definition (HO)
+hyperref.cfg    2002/06/06 v1.2 hyperref configuration of TeXLive
+     url.sty    2013/09/16  ver 3.4  Verb mode for urls, etc.
+ hpdftex.def    2016/06/24 v6.83q Hyperref driver for pdfTeX
+rerunfilecheck.sty    2016/05/16 v1.8 Rerun checks for auxiliary files (HO)
+  ot1lmr.fd    2009/10/30 v1.6 Font defs for Latin Modern
+  omllmm.fd    2009/10/30 v1.6 Font defs for Latin Modern
+ omslmsy.fd    2009/10/30 v1.6 Font defs for Latin Modern
+ omxlmex.fd    2009/10/30 v1.6 Font defs for Latin Modern
+    umsa.fd    2013/01/14 v3.01 AMS symbols A
+    umsb.fd    2013/01/14 v3.01 AMS symbols B
+ ot1lmtt.fd    2009/10/30 v1.6 Font defs for Latin Modern
+ ot1lmss.fd    2009/10/30 v1.6 Font defs for Latin Modern
+        .
 No file _region_.aux.
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 17.
 LaTeX Font Info:    ... okay on input line 17.
@@ -323,10 +84,6 @@ LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 17.
 LaTeX Font Info:    ... okay on input line 17.
 LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 17.
 LaTeX Font Info:    ... okay on input line 17.
-LaTeX Font Info:    Try loading font information for OT1+lmr on input line 17.
-(/usr/share/texmf/tex/latex/lm/ot1lmr.fd
-File: ot1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
-)
 (/usr/share/texmf/tex/latex/preview/preview.sty
 Package: preview 2010/02/14 11.90 (AUCTeX/preview-latex)
 
@@ -406,45 +163,20 @@ LaTeX Info: Redefining \pageref on input line 17.
 LaTeX Info: Redefining \nameref on input line 17.
 
  !name(review.tex) !offset(-3) 
-LaTeX Font Info:    Try loading font information for OML+lmm on input line 22.
- (/usr/share/texmf/tex/latex/lm/omllmm.fd
-File: omllmm.fd 2009/10/30 v1.6 Font defs for Latin Modern
-)
-LaTeX Font Info:    Try loading font information for OMS+lmsy on input line 22.
-
-
-(/usr/share/texmf/tex/latex/lm/omslmsy.fd
-File: omslmsy.fd 2009/10/30 v1.6 Font defs for Latin Modern
-)
-LaTeX Font Info:    Try loading font information for OMX+lmex on input line 22.
-
-
-(/usr/share/texmf/tex/latex/lm/omxlmex.fd
-File: omxlmex.fd 2009/10/30 v1.6 Font defs for Latin Modern
-)
 LaTeX Font Info:    External font `lmex10' loaded for size
 (Font)              <14.4> on input line 22.
 LaTeX Font Info:    External font `lmex10' loaded for size
 (Font)              <10> on input line 22.
 LaTeX Font Info:    External font `lmex10' loaded for size
 (Font)              <7> on input line 22.
-LaTeX Font Info:    Try loading font information for U+msa on input line 22.
 
-(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
-File: umsa.fd 2013/01/14 v3.01 AMS symbols A
-)
 (/usr/share/texlive/texmf-dist/tex/latex/microtype/mt-msa.cfg
 File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
-)
-LaTeX Font Info:    Try loading font information for U+msb on input line 22.
-
-(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
-File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
 (/usr/share/texlive/texmf-dist/tex/latex/microtype/mt-msb.cfg
 File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 )
-./_region_.tex:23: Preview: Snippet 1 started.
+! Preview: Snippet 1 started.
 <-><->
       
 l.23 \tableofcontents
@@ -452,7 +184,7 @@ l.23 \tableofcontents
 Not a real error.
 
 Preview: Tightpage -32891 -32891 32891 32891
-./_region_.tex:23: Preview: Snippet 1 ended.(762760+0x25559040).
+! Preview: Snippet 1 ended.(762760+0x25559040).
 <-><->
       
 l.23 \tableofcontents
@@ -460,14 +192,14 @@ l.23 \tableofcontents
 Not a real error.
 
 [1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
-./_region_.tex:27: Preview: Snippet 2 started.
+! Preview: Snippet 2 started.
 <-><->
       
 l.27 \section
              {Probability Theory}
 Not a real error.
 
-./_region_.tex:27: Preview: Snippet 2 ended.(796922+220200x25559040).
+! Preview: Snippet 2 ended.(796922+220200x25559040).
 <-><->
       
 l.27 \section{Probability Theory}
@@ -477,179 +209,1357 @@ Not a real error.
 [2
 
 ]
-./_region_.tex:29: Preview: Snippet 3 started.
+! Preview: Snippet 3 started.
 <-><->
       
-l.29 \section
-             {Information Theory}
+l.29 \subsection
+                {Conjugate Priors}
 Not a real error.
 
-./_region_.tex:29: Preview: Snippet 3 ended.(796922+220200x25559040).
+! Preview: Snippet 3 ended.(635633+183500x25559040).
 <-><->
       
-l.29 \section{Information Theory}
-                                 
+l.29 \subsection{Conjugate Priors}
+                                  
 Not a real error.
 
 [3
 
 ]
-./_region_.tex:31: Preview: Snippet 4 started.
+! Preview: Snippet 4 started.
 <-><->
       
-l.31 \section
-             {Probabalistic Graphical Models}
+l.31 \subsection
+                {Basic manipulations of Multivariate Gaussians}
 Not a real error.
 
-./_region_.tex:31: Preview: Snippet 4 ended.(796922+220200x25559040).
+! Preview: Snippet 4 ended.(664101+183500x25559040).
 <-><->
       
-l.31 \section{Probabalistic Graphical Models}
-                                             
+l.31 ...c manipulations of Multivariate Gaussians}
+                                                  
 Not a real error.
 
 [4
 
 ]
-./_region_.tex:33: Preview: Snippet 5 started.
+! Preview: Snippet 5 started.
 <-><->
       
-l.33 \section
-             {Linear and Nonlinear Bayesian Models}
+l.33 \subsection
+                {Extremal Value Distributions}
 Not a real error.
 
-./_region_.tex:33: Preview: Snippet 5 ended.(796922+220200x25559040).
+! Preview: Snippet 5 ended.(664101+0x25559040).
 <-><->
       
-l.33 ...tion{Linear and Nonlinear Bayesian Models}
-                                                  
+l.33 \subsection{Extremal Value Distributions}
+                                              
 Not a real error.
 
 [5
 
 ]
-./_region_.tex:35: Preview: Snippet 6 started.
+! Preview: Snippet 6 started.
 <-><->
       
 l.35 \section
-             {Variational Methods}
+             {Information Theory}
 Not a real error.
 
-./_region_.tex:35: Preview: Snippet 6 ended.(796922+0x25559040).
+! Preview: Snippet 6 ended.(796922+220200x25559040).
 <-><->
       
-l.35 \section{Variational Methods}
-                                  
+l.35 \section{Information Theory}
+                                 
 Not a real error.
 
 [6
 
 ]
-./_region_.tex:37: Preview: Snippet 7 started.
+! Preview: Snippet 7 started.
 <-><->
       
-l.37 \section
-             {Sampling Algorithms}
+l.37 \subsection
+                {Basics}
 Not a real error.
 
-./_region_.tex:37: Preview: Snippet 7 ended.(796922+220200x25559040).
+! Preview: Snippet 7 ended.(635633+0x25559040).
 <-><->
       
-l.37 \section{Sampling Algorithms}
-                                  
+l.37 \subsection{Basics}
+                        
 Not a real error.
 
 [7
 
 ]
-./_region_.tex:39: Preview: Snippet 8 started.
+! Preview: Snippet 8 started.
 <-><->
       
-l.39 \section
-             {Optimization}
+l.39 \subsection
+                {KL Divergence}
 Not a real error.
 
-./_region_.tex:39: Preview: Snippet 8 ended.(762760+220200x25559040).
+! Preview: Snippet 8 ended.(635633+183500x25559040).
 <-><->
       
-l.39 \section{Optimization}
-                           
+l.39 \subsection{KL Divergence}
+                               
 Not a real error.
 
 [8
 
 ]
-./_region_.tex:41: Preview: Snippet 9 started.
+! Preview: Snippet 9 started.
 <-><->
       
-l.41 \section
-             {Reinforcement Learning}
+l.41 \subsection
+                {Fisher Information Matrix}
 Not a real error.
 
-./_region_.tex:41: Preview: Snippet 9 ended.(796922+220200x25559040).
+! Preview: Snippet 9 ended.(664101+0x25559040).
 <-><->
       
-l.41 \section{Reinforcement Learning}
-                                     
+l.41 \subsection{Fisher Information Matrix}
+                                           
 Not a real error.
 
 [9
 
 ]
-./_region_.tex:43: Preview: Snippet 10 started.
+! Preview: Snippet 10 started.
 <-><->
       
 l.43 \section
-             {Neural Networks}
+             {Linear Algebra}
 Not a real error.
 
-./_region_.tex:43: Preview: Snippet 10 ended.(796922+0x25559040).
+! Preview: Snippet 10 ended.(796922+220200x25559040).
 <-><->
       
-l.43 \section{Neural Networks}
-                              
+l.43 \section{Linear Algebra}
+                             
 Not a real error.
 
 [10
 
 ]
-./_region_.tex:45: Preview: Snippet 11 started.
+! Preview: Snippet 11 started.
 <-><->
       
-l.45 \section
-             {Miscellaneous}
+l.45 \subsection
+                {Identities}
 Not a real error.
 
-./_region_.tex:45: Preview: Snippet 11 ended.(796922+0x25559040).
+! Preview: Snippet 11 ended.(664101+0x25559040).
 <-><->
       
-l.45 \section{Miscellaneous}
+l.45 \subsection{Identities}
                             
 Not a real error.
 
 [11
 
 ]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 47.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 47.
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 47.
-Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 47.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 47.
+! Preview: Snippet 12 started.
+<-><->
+      
+l.47 \subsection
+                {Singular Value Decomposition}
+Not a real error.
+
+! Preview: Snippet 12 ended.(664101+183500x25559040).
+<-><->
+      
+l.47 \subsection{Singular Value Decomposition}
+                                              
+Not a real error.
+
+[12
+
+]
+! Preview: Snippet 13 started.
+<-><->
+      
+l.49 \subsection
+                {Principle Component Analysis}
+Not a real error.
+
+! Preview: Snippet 13 ended.(664101+183500x25559040).
+<-><->
+      
+l.49 \subsection{Principle Component Analysis}
+                                              
+Not a real error.
+
+[13
+
+]
+! Preview: Snippet 14 started.
+<-><->
+      
+l.51 \section
+             {Probabilistic Graphical Models}
+Not a real error.
+
+! Preview: Snippet 14 ended.(796922+220200x25559040).
+<-><->
+      
+l.51 \section{Probabilistic Graphical Models}
+                                             
+Not a real error.
+
+[14
+
+]
+! Preview: Snippet 15 started.
+<-><->
+      
+l.53 \subsection
+                {Viterbi and Forward Backward Algorithm}
+Not a real error.
+
+! Preview: Snippet 15 ended.(664101+183500x25559040).
+<-><->
+      
+l.53 ...on{Viterbi and Forward Backward Algorithm}
+                                                  
+Not a real error.
+
+[15
+
+]
+! Preview: Snippet 16 started.
+<-><->
+      
+l.59 ...But before we get mixed up in math here: $
+                                                  o_i$ denotes observation a...
+
+Not a real error.
+
+! Preview: Snippet 16 ended.(338603+117964x592608).
+<-><->
+      
+l.59 ...before we get mixed up in math here: $o_i$
+                                                   denotes observation and $...
+
+Not a real error.
+
+[16]
+! Preview: Snippet 17 started.
+<-><->
+      
+l.59 ...math here: $o_i$ denotes observation and $
+                                                  x_i$ denotes the hidden st...
+
+Not a real error.
+
+! Preview: Snippet 17 ended.(338603+117964x660012).
+<-><->
+      
+l.59 ... here: $o_i$ denotes observation and $x_i$
+                                                   denotes the hidden state.
+Not a real error.
+
+[17]
+! Preview: Snippet 18 started.
+<-><->
+      
+l.63 }
+      
+Not a real error.
+
+! Preview: Snippet 18 ended.(1671891+0x17947232).
+<-><->
+      
+l.63 }
+      
+Not a real error.
+
+[18]
+! Preview: Snippet 19 started.
+<-><->
+      
+l.69 }
+      
+Not a real error.
+
+! Preview: Snippet 19 ended.(1569946+0x17664441).
+<-><->
+      
+l.69 }
+      
+Not a real error.
+
+[19]
+! Preview: Snippet 20 started.
+<-><->
+      
+l.70 Note this product is incorrect when $
+                                          i = n$, but let's ignore that.
+Not a real error.
+
+! Preview: Snippet 20 ended.(515577+0x1758186).
+<-><->
+      
+l.70 Note this product is incorrect when $i = n$
+                                                , but let's ignore that.
+Not a real error.
+
+[20]
+! Preview: Snippet 21 started.
+<-><->
+      
+l.72 ...ally the same thing. We can just replace $
+                                                  P(o_i|x_i)$ with $\phi(x_i...
+
+Not a real error.
+
+! Preview: Snippet 21 ended.(589824+196608x2673277).
+<-><->
+      
+l.72 ...me thing. We can just replace $P(o_i|x_i)$
+                                                   with $\phi(x_i)$ and $P(x...
+
+Not a real error.
+
+[21]
+! Preview: Snippet 22 started.
+<-><->
+      
+l.72 ...g. We can just replace $P(o_i|x_i)$ with $
+                                                  \phi(x_i)$ and $P(x_i|x_{i...
+
+Not a real error.
+
+! Preview: Snippet 22 ended.(589824+196608x1714666).
+<-><->
+      
+l.72 ...just replace $P(o_i|x_i)$ with $\phi(x_i)$
+                                                   and $P(x_i|x_{i+1})$ with...
+
+Not a real error.
+
+[22]
+! Preview: Snippet 23 started.
+<-><->
+      
+l.72 ...eplace $P(o_i|x_i)$ with $\phi(x_i)$ and $
+                                                  P(x_i|x_{i+1})$ with $\phi...
+
+Not a real error.
+
+! Preview: Snippet 23 ended.(589824+196608x3452467).
+<-><->
+      
+l.72 ..._i)$ with $\phi(x_i)$ and $P(x_i|x_{i+1})$
+                                                   with $\phi(x_i, x_{i+1})$...
+
+Not a real error.
+
+[23]
+! Preview: Snippet 24 started.
+<-><->
+      
+l.72 ...th $\phi(x_i)$ and $P(x_i|x_{i+1})$ with $
+                                                  \phi(x_i, x_{i+1})$. So it...
+
+Not a real error.
+
+! Preview: Snippet 24 ended.(589824+196608x3431434).
+<-><->
+      
+l.72 ...$P(x_i|x_{i+1})$ with $\phi(x_i, x_{i+1})$
+                                                  . So it suffices to solve ...
+
+Not a real error.
+
+[24]
+! Preview: Snippet 25 started.
+<-><->
+      
+l.74 We want to solve for $
+                           P(x_k|\o)$. The key is the following manipulation:
+Not a real error.
+
+! Preview: Snippet 25 ended.(589824+196608x2637397).
+<-><->
+      
+l.74 We want to solve for $P(x_k|\o)$
+                                     . The key is the following manipulation:
+Not a real error.
+
+[25]
+! Preview: Snippet 26 started.
+<-><->
+      
+l.78 &\propto P(\o|x_k)p(x_k)}
+                               \\
+Not a real error.
+
+! Preview: Snippet 26 ended.(3070328+0x16893357).
+<-><->
+      
+l.78 &\propto P(\o|x_k)p(x_k)}
+                               \\
+Not a real error.
+
+[26]
+! Misplaced alignment tab character &.
+<recently read> &
+                 
+l.79 &
+      = P(\o_{1:k}|x_k)P(\o_{k+1:n}|x_k)P(x_k) \\
+I can't figure out why you would want to use a tab mark
+here. If you just want an ampersand, the remedy is
+simple: Just type `I\&' now. But if some right brace
+up above has ended a previous alignment prematurely,
+you're probably due for more error messages, and you
+might try typing `S' now just to see what is salvageable.
+
+
+! LaTeX Error: \mathbf allowed only in math mode.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.79 &= P(\o
+            _{1:k}|x_k)P(\o_{k+1:n}|x_k)P(x_k) \\
+You're in trouble here.  Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+! Missing $ inserted.
+<inserted text> 
+                $
+l.79 &= P(\o_
+             {1:k}|x_k)P(\o_{k+1:n}|x_k)P(x_k) \\
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+! Extra }, or forgotten $.
+<recently read> }
+                 
+l.80 }
+      
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+! Missing $ inserted.
+<inserted text> 
+                $
+l.81 
+     
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+! Preview: Snippet 27 started.
+<-><->
+      
+l.87 }
+      
+Not a real error.
+
+! Preview: Snippet 27 ended.(3977970+0x19147732).
+<-><->
+      
+l.87 }
+      
+Not a real error.
+
+[27]
+! Preview: Snippet 28 started.
+<-><->
+      
+l.94 }
+      
+Not a real error.
+
+! Preview: Snippet 28 ended.(3070328+0x22938817).
+<-><->
+      
+l.94 }
+      
+Not a real error.
+
+[28]
+! Preview: Snippet 29 started.
+<-><->
+      
+l.96 ...e just need to figure out how to compute $
+                                                  P(\o_{1:k}|x_k)$ and $P(x_...
+
+Not a real error.
+
+! Preview: Snippet 29 ended.(589824+196608x3407452).
+<-><->
+      
+l.96 ...igure out how to compute $P(\o_{1:k}|x_k)$
+                                                   and $P(x_k|o_{k+1:n})$
+Not a real error.
+
+[29]
+! Preview: Snippet 30 started.
+<-><->
+      
+l.96 ...out how to compute $P(\o_{1:k}|x_k)$ and $
+                                                  P(x_k|o_{k+1:n})$
+Not a real error.
+
+! Preview: Snippet 30 ended.(589824+196608x4106524).
+<-><->
+      
+l.96 ...e $P(\o_{1:k}|x_k)$ and $P(x_k|o_{k+1:n})$
+                                                  
+Not a real error.
+
+[30]
+! Preview: Snippet 31 started.
+<-><->
+      
+l.98 \subsection
+                {Message Passing and Loopy Belief Propagation}
+Not a real error.
+
+! Preview: Snippet 31 ended.(664101+183500x25559040).
+<-><->
+      
+l.98 ...sage Passing and Loopy Belief Propagation}
+                                                  
+Not a real error.
+
+[31
+
+]
+! Preview: Snippet 32 started.
+<-><->
+      
+l.100 \subsection
+                 {Efficient Inference in Dense Gaussian CRFS}
+Not a real error.
+
+! Preview: Snippet 32 ended.(664101+0x25559040).
+<-><->
+      
+l.100 ...ficient Inference in Dense Gaussian CRFS}
+                                                  
+Not a real error.
+
+[32
+
+]
+! Preview: Snippet 33 started.
+<-><->
+      
+l.102 \section
+              {Linear and Nonlinear Bayesian Models}
+Not a real error.
+
+! Preview: Snippet 33 ended.(796922+220200x25559040).
+<-><->
+      
+l.102 ...ion{Linear and Nonlinear Bayesian Models}
+                                                  
+Not a real error.
+
+[33
+
+]
+! Preview: Snippet 34 started.
+<-><->
+      
+l.104 \subsection
+                 {Bayesian Linear Regression}
+Not a real error.
+
+! Preview: Snippet 34 ended.(635633+183500x25559040).
+<-><->
+      
+l.104 \subsection{Bayesian Linear Regression}
+                                             
+Not a real error.
+
+[34
+
+]
+! Preview: Snippet 35 started.
+<-><->
+      
+l.106 \subsubsection
+                    {Evidence Approximation}
+Not a real error.
+
+! Preview: Snippet 35 ended.(553418+152916x25559040).
+<-><->
+      
+l.106 \subsubsection{Evidence Approximation}
+                                            
+Not a real error.
+
+[35
+
+]
+! Preview: Snippet 36 started.
+<-><->
+      
+l.108 \subsection
+                 {Bayesian Logistic Regression}
+Not a real error.
+
+! Preview: Snippet 36 ended.(635633+183500x25559040).
+<-><->
+      
+l.108 \subsection{Bayesian Logistic Regression}
+                                               
+Not a real error.
+
+[36
+
+]
+! Preview: Snippet 37 started.
+<-><->
+      
+l.110 \subsubsection
+                    {Laplace Approximation}
+Not a real error.
+
+! Preview: Snippet 37 ended.(553418+152916x25559040).
+<-><->
+      
+l.110 \subsubsection{Laplace Approximation}
+                                           
+Not a real error.
+
+[37
+
+]
+! Preview: Snippet 38 started.
+<-><->
+      
+l.112 \subsection
+                 {Spline and Wavelet Bases}
+Not a real error.
+
+! Preview: Snippet 38 ended.(664101+183500x25559040).
+<-><->
+      
+l.112 \subsection{Spline and Wavelet Bases}
+                                           
+Not a real error.
+
+[38
+
+]
+! Preview: Snippet 39 started.
+<-><->
+      
+l.114 \subsection
+                 {Bayesian Neural Networks}
+Not a real error.
+
+! Preview: Snippet 39 ended.(664101+183500x25559040).
+<-><->
+      
+l.114 \subsection{Bayesian Neural Networks}
+                                           
+Not a real error.
+
+[39
+
+]
+! Preview: Snippet 40 started.
+<-><->
+      
+l.115 \section
+              {Approximate Inference}
+Not a real error.
+
+! Preview: Snippet 40 ended.(796922+220200x25559040).
+<-><->
+      
+l.115 \section{Approximate Inference}
+                                     
+Not a real error.
+
+[40
+
+]
+! Preview: Snippet 41 started.
+<-><->
+      
+l.117 \subsection
+                 {Expectation Maximization}
+Not a real error.
+
+! Preview: Snippet 41 ended.(635633+183500x25559040).
+<-><->
+      
+l.117 \subsection{Expectation Maximization}
+                                           
+Not a real error.
+
+[41
+
+]
+! Preview: Snippet 42 started.
+<-><->
+      
+l.119 \subsection
+                 {Variational Inference}
+Not a real error.
+
+! Preview: Snippet 42 ended.(664101+0x25559040).
+<-><->
+      
+l.119 \subsection{Variational Inference}
+                                        
+Not a real error.
+
+[42
+
+]
+! Preview: Snippet 43 started.
+<-><->
+      
+l.121 \section
+              {Sampling Algorithms}
+Not a real error.
+
+! Preview: Snippet 43 ended.(796922+220200x25559040).
+<-><->
+      
+l.121 \section{Sampling Algorithms}
+                                   
+Not a real error.
+
+[43
+
+]
+! Preview: Snippet 44 started.
+<-><->
+      
+l.123 \subsection
+                 {Importance Sampling}
+Not a real error.
+
+! Preview: Snippet 44 ended.(664101+183500x25559040).
+<-><->
+      
+l.123 \subsection{Importance Sampling}
+                                      
+Not a real error.
+
+[44
+
+]
+! Preview: Snippet 45 started.
+<-><->
+      
+l.125 \subsection
+                 {Monte Carlo Markov Chain}
+Not a real error.
+
+! Preview: Snippet 45 ended.(664101+0x25559040).
+<-><->
+      
+l.125 \subsection{Monte Carlo Markov Chain}
+                                           
+Not a real error.
+
+[45
+
+]
+! Preview: Snippet 46 started.
+<-><->
+      
+l.127 \subsubsection
+                    {Metropolis Hastings}
+Not a real error.
+
+! Preview: Snippet 46 ended.(553418+152916x25559040).
+<-><->
+      
+l.127 \subsubsection{Metropolis Hastings}
+                                         
+Not a real error.
+
+[46
+
+]
+! Preview: Snippet 47 started.
+<-><->
+      
+l.129 \subsubsection
+                    {Reversible Jump MCMC}
+Not a real error.
+
+! Preview: Snippet 47 ended.(553418+152916x25559040).
+<-><->
+      
+l.129 \subsubsection{Reversible Jump MCMC}
+                                          
+Not a real error.
+
+[47
+
+]
+! Preview: Snippet 48 started.
+<-><->
+      
+l.131 \subsection
+                 {Gibbs Sampling}
+Not a real error.
+
+! Preview: Snippet 48 ended.(664101+183500x25559040).
+<-><->
+      
+l.131 \subsection{Gibbs Sampling}
+                                 
+Not a real error.
+
+[48
+
+]
+! Preview: Snippet 49 started.
+<-><->
+      
+l.133 \section
+              {Optimization}
+Not a real error.
+
+! Preview: Snippet 49 ended.(762760+220200x25559040).
+<-><->
+      
+l.133 \section{Optimization}
+                            
+Not a real error.
+
+[49
+
+]
+! Preview: Snippet 50 started.
+<-><->
+      
+l.135 \subsection
+                 {Lagrange Multipliers}
+Not a real error.
+
+! Preview: Snippet 50 ended.(664101+183500x25559040).
+<-><->
+      
+l.135 \subsection{Lagrange Multipliers}
+                                       
+Not a real error.
+
+[50
+
+]
+! Preview: Snippet 51 started.
+<-><->
+      
+l.137 \subsection
+                 {Lagrangian Duality}
+Not a real error.
+
+! Preview: Snippet 51 ended.(664101+183500x25559040).
+<-><->
+      
+l.137 \subsection{Lagrangian Duality}
+                                     
+Not a real error.
+
+[51
+
+]
+! Preview: Snippet 52 started.
+<-><->
+      
+l.139 \subsection
+                 {KKT Conditions}
+Not a real error.
+
+! Preview: Snippet 52 ended.(664101+0x25559040).
+<-><->
+      
+l.139 \subsection{KKT Conditions}
+                                 
+Not a real error.
+
+[52
+
+]
+! Preview: Snippet 53 started.
+<-><->
+      
+l.141 \subsection
+                 {SGD Variants}
+Not a real error.
+
+! Preview: Snippet 53 ended.(635633+0x25559040).
+<-><->
+      
+l.141 \subsection{SGD Variants}
+                               
+Not a real error.
+
+[53
+
+]
+! Preview: Snippet 54 started.
+<-><->
+      
+l.143 \subsection
+                 {BADMM Algorithm}
+Not a real error.
+
+! Preview: Snippet 54 ended.(664101+183500x25559040).
+<-><->
+      
+l.143 \subsection{BADMM Algorithm}
+                                  
+Not a real error.
+
+[54
+
+]
+! Preview: Snippet 55 started.
+<-><->
+      
+l.145 \section
+              {Reinforcement Learning}
+Not a real error.
+
+! Preview: Snippet 55 ended.(796922+220200x25559040).
+<-><->
+      
+l.145 \section{Reinforcement Learning}
+                                      
+Not a real error.
+
+[55
+
+]
+! Preview: Snippet 56 started.
+<-><->
+      
+l.147 \subsection
+                 {Optimal Control}
+Not a real error.
+
+! Preview: Snippet 56 ended.(664101+183500x25559040).
+<-><->
+      
+l.147 \subsection{Optimal Control}
+                                  
+Not a real error.
+
+[56
+
+]
+! Preview: Snippet 57 started.
+<-><->
+      
+l.149 \subsubsection
+                    {LQR}
+Not a real error.
+
+! Preview: Snippet 57 ended.(529695+152916x25559040).
+<-><->
+      
+l.149 \subsubsection{LQR}
+                         
+Not a real error.
+
+[57
+
+]
+! Preview: Snippet 58 started.
+<-><->
+      
+l.151 \subsubsection
+                    {MPC and ILQR}
+Not a real error.
+
+! Preview: Snippet 58 ended.(553418+152916x25559040).
+<-><->
+      
+l.151 \subsubsection{MPC and ILQR}
+                                  
+Not a real error.
+
+[58
+
+]
+! Preview: Snippet 59 started.
+<-><->
+      
+l.153 \subsubsection
+                    {Stochastic Optimal Control}
+Not a real error.
+
+! Preview: Snippet 59 ended.(553418+152916x25559040).
+<-><->
+      
+l.153 \subsubsection{Stochastic Optimal Control}
+                                                
+Not a real error.
+
+[59
+
+]
+! Preview: Snippet 60 started.
+<-><->
+      
+l.155 \subsection
+                 {Policy Gradients}
+Not a real error.
+
+! Preview: Snippet 60 ended.(664101+183500x25559040).
+<-><->
+      
+l.155 \subsection{Policy Gradients}
+                                   
+Not a real error.
+
+[60
+
+]
+! Preview: Snippet 61 started.
+<-><->
+      
+l.157 \subsection
+                 {Natural Policy Gradients}
+Not a real error.
+
+! Preview: Snippet 61 ended.(664101+183500x25559040).
+<-><->
+      
+l.157 \subsection{Natural Policy Gradients}
+                                           
+Not a real error.
+
+[61
+
+]
+! Preview: Snippet 62 started.
+<-><->
+      
+l.159 \subsection
+                 {Trust Region Policy Optimization}
+Not a real error.
+
+! Preview: Snippet 62 ended.(664101+183500x25559040).
+<-><->
+      
+l.159 ...section{Trust Region Policy Optimization}
+                                                  
+Not a real error.
+
+[62
+
+]
+! Preview: Snippet 63 started.
+<-><->
+      
+l.161 \subsection
+                 {Guided Policy Search}
+Not a real error.
+
+! Preview: Snippet 63 ended.(664101+183500x25559040).
+<-><->
+      
+l.161 \subsection{Guided Policy Search}
+                                       
+Not a real error.
+
+[63
+
+]
+! Preview: Snippet 64 started.
+<-><->
+      
+l.163 \subsection
+                 {End to End Deep Visuomotor Policies}
+Not a real error.
+
+! Preview: Snippet 64 ended.(664101+183500x25559040).
+<-><->
+      
+l.163 ...tion{End to End Deep Visuomotor Policies}
+                                                  
+Not a real error.
+
+[64
+
+]
+! Preview: Snippet 65 started.
+<-><->
+      
+l.165 \section
+              {Neural Networks}
+Not a real error.
+
+! Preview: Snippet 65 ended.(796922+0x25559040).
+<-><->
+      
+l.165 \section{Neural Networks}
+                               
+Not a real error.
+
+[65
+
+]
+! Preview: Snippet 66 started.
+<-><->
+      
+l.167 \subsection
+                 {Variational Autoencoders}
+Not a real error.
+
+! Preview: Snippet 66 ended.(664101+0x25559040).
+<-><->
+      
+l.167 \subsection{Variational Autoencoders}
+                                           
+Not a real error.
+
+[66
+
+]
+! Preview: Snippet 67 started.
+<-><->
+      
+l.169 \subsection
+                 {Architectures}
+Not a real error.
+
+! Preview: Snippet 67 ended.(664101+0x25559040).
+<-><->
+      
+l.169 \subsection{Architectures}
+                                
+Not a real error.
+
+[67
+
+]
+! Preview: Snippet 68 started.
+<-><->
+      
+l.171 \subsubsection
+                    {Neural Turing Machine}
+Not a real error.
+
+! Preview: Snippet 68 ended.(553418+152916x25559040).
+<-><->
+      
+l.171 \subsubsection{Neural Turing Machine}
+                                           
+Not a real error.
+
+[68
+
+]
+! Preview: Snippet 69 started.
+<-><->
+      
+l.173 \subsubsection
+                    {Neural GPU}
+Not a real error.
+
+! Preview: Snippet 69 ended.(553418+0x25559040).
+<-><->
+      
+l.173 \subsubsection{Neural GPU}
+                                
+Not a real error.
+
+[69
+
+]
+! Preview: Snippet 70 started.
+<-><->
+      
+l.175 \subsubsection
+                    {Grid LSTM}
+Not a real error.
+
+! Preview: Snippet 70 ended.(553418+0x25559040).
+<-><->
+      
+l.175 \subsubsection{Grid LSTM}
+                               
+Not a real error.
+
+[70
+
+]
+! Preview: Snippet 71 started.
+<-><->
+      
+l.177 \section
+              {Miscellaneous}
+Not a real error.
+
+! Preview: Snippet 71 ended.(796922+0x25559040).
+<-><->
+      
+l.177 \section{Miscellaneous}
+                             
+Not a real error.
+
+[71
+
+]
+! Preview: Snippet 72 started.
+<-><->
+      
+l.179 \subsection
+                 {Matrix Differentials}
+Not a real error.
+
+! Preview: Snippet 72 ended.(664101+0x25559040).
+<-><->
+      
+l.179 \subsection{Matrix Differentials}
+                                       
+Not a real error.
+
+[72
+
+]
+! Preview: Snippet 73 started.
+<-><->
+      
+l.181 \subsection
+                 {Calculus of Variations}
+Not a real error.
+
+! Preview: Snippet 73 ended.(664101+0x25559040).
+<-><->
+      
+l.181 \subsection{Calculus of Variations}
+                                         
+Not a real error.
+
+[73
+
+]
+! Preview: Snippet 74 started.
+<-><->
+      
+l.183 \subsection
+                 {Echo State Networks}
+Not a real error.
+
+! Preview: Snippet 74 ended.(664101+0x25559040).
+<-><->
+      
+l.183 \subsection{Echo State Networks}
+                                      
+Not a real error.
+
+[74
+
+]
+! Preview: Snippet 75 started.
+<-><->
+      
+l.185 \subsection
+                 {Gumbel Trick}
+Not a real error.
+
+! Preview: Snippet 75 ended.(664101+0x25559040).
+<-><->
+      
+l.185 \subsection{Gumbel Trick}
+                               
+Not a real error.
+
+[75
+
+]
+! Preview: Snippet 76 started.
+<-><->
+      
+l.187 \subsection
+                 {Support Vector Machines}
+Not a real error.
+
+! Preview: Snippet 76 ended.(664101+183500x25559040).
+<-><->
+      
+l.187 \subsection{Support Vector Machines}
+                                          
+Not a real error.
+
+[76
+
+]
+! Preview: Snippet 77 started.
+<-><->
+      
+l.189 \subsection
+                 {Gaussian Processes}
+Not a real error.
+
+! Preview: Snippet 77 ended.(635633+0x25559040).
+<-><->
+      
+l.189 \subsection{Gaussian Processes}
+                                     
+Not a real error.
+
+[77
+
+]
+! Preview: Snippet 78 started.
+<-><->
+      
+l.191 \subsection
+                 {Independent Component Analysis}
+Not a real error.
+
+! Preview: Snippet 78 ended.(664101+183500x25559040).
+<-><->
+      
+l.191 \subsection{Independent Component Analysis}
+                                                 
+Not a real error.
+
+[78
+
+]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 193.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 193.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 193.
+Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 193.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 193.
  ) 
 Here is how much of TeX's memory you used:
- 7690 strings out of 494945
- 116296 string characters out of 6181032
- 229388 words of memory out of 5000000
- 10876 multiletter control sequences out of 15000+600000
- 28031 words of font info for 35 fonts, out of 8000000 for 9000
+ 976 strings out of 488031
+ 15362 string characters out of 6076579
+ 232957 words of memory out of 5000000
+ 10990 multiletter control sequences out of 15000+600000
+ 60379 words of font info for 57 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 31i,6n,38p,480b,362s stack positions out of 5000i,500n,10000p,200000b,80000s
-{/usr/share/texmf/fonts/enc/dvips/lm/lm-rm.enc}</usr/share/texmf/fonts/type1/
-public/lm/lmbx12.pfb>
-Output written on _region_.pdf (11 pages, 31776 bytes).
+ 30i,11n,29p,368b,362s stack positions out of 5000i,500n,10000p,200000b,80000s
+{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathsy.enc}{/usr/share/texmf/fonts/en
+c/dvips/lm/lm-rm.enc}{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathex.enc}{/usr/s
+hare/texmf/fonts/enc/dvips/lm/lm-mathit.enc}</usr/share/texmf/fonts/type1/publi
+c/lm/lmbx12.pfb></usr/share/texmf/fonts/type1/public/lm/lmex10.pfb></usr/share/
+texmf/fonts/type1/public/lm/lmmi12.pfb></usr/share/texmf/fonts/type1/public/lm/
+lmmi8.pfb></usr/share/texmf/fonts/type1/public/lm/lmr12.pfb></usr/share/texmf/f
+onts/type1/public/lm/lmr8.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy10.pf
+b>
+Output written on _region_.pdf (78 pages, 105047 bytes).
 PDF statistics:
- 61 PDF objects out of 1000 (max. 8388607)
- 46 compressed objects within 1 object stream
- 11 named destinations out of 1000 (max. 500000)
- 3585 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 368 PDF objects out of 1000 (max. 8388607)
+ 278 compressed objects within 3 object streams
+ 63 named destinations out of 1000 (max. 500000)
+ 6657 words of extra memory for PDF output out of 10000 (max. 10000000)
 

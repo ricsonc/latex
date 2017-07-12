@@ -1,19 +1,13 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016/Debian) (preloaded format=pdflatex 2017.7.11)  12 JUL 2017 01:59
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016/Debian) (preloaded format=pdflatex 2017.7.11)  12 JUL 2017 01:58
 entering extended mode
  restricted \write18 enabled.
+ file:line:error style messages enabled.
  %&-line parsing enabled.
-**&pdflatex prv_review.ini \nonstopmode\nofiles\PassOptionsToPackage{active,tig
-htpage,auctex}{preview}\AtBeginDocument{\ifx\ifPreview\undefined\RequirePackage
-[displaymath,floats,graphics,textmath,sections,footnotes]{preview}[2004/11/05]\
-fi} \input review.tex
-(./prv_review.ini
+**/home/ricson/code/latex/_region__flymake.tex
+(/home/ricson/code/latex/_region__flymake.tex
 LaTeX2e <2017/01/01> patch level 3
 Babel <3.9r> and hyphenation patterns for 3 language(s) loaded.
-(/usr/share/texlive/texmf-dist/tex/latex/carlisle/mylatex.ltx)
-(/usr/share/texlive/texmf-dist/tex/latex/tools/.tex File ignored))
-No auxiliary output files.
-
-(./review.tex (/usr/share/texlive/texmf-dist/tex/latex/base/article.cls
+ !name(review.tex) (/usr/share/texlive/texmf-dist/tex/latex/base/article.cls
 Document Class: article 2014/09/29 v1.4h Standard LaTeX document class
 (/usr/share/texlive/texmf-dist/tex/latex/base/size12.clo
 File: size12.clo 2014/09/29 v1.4h Standard LaTeX file (size option)
@@ -238,12 +232,8 @@ Package: ifxetex 2010/09/12 v0.6 Provides ifxetex conditional
 )
 (/usr/share/texlive/texmf-dist/tex/latex/oberdiek/auxhook.sty
 Package: auxhook 2016/05/16 v1.4 Hooks for auxiliary files (HO)
-
-
-Package auxhook Warning: Cannot patch \document,
-(auxhook)                using \AtBeginDocument instead.
-
-) (/usr/share/texlive/texmf-dist/tex/latex/oberdiek/kvoptions.sty
+)
+(/usr/share/texlive/texmf-dist/tex/latex/oberdiek/kvoptions.sty
 Package: kvoptions 2016/05/16 v3.12 Key value format for package options (HO)
 )
 \@linkdim=\dimen115
@@ -304,110 +294,172 @@ Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
 )
 \Hy@SectionHShift=\skip47
 )
-LaTeX Font Info:    Try loading font information for OT1+lmr on input line 17.
 
-(/usr/share/texmf/tex/latex/lm/ot1lmr.fd
+/home/ricson/code/latex/_region__flymake.tex:15: LaTeX Error: Command \list alr
+eady defined.
+               Or name \end... illegal, see p.192 of the manual.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.15 ...{\list}[1]{\begin{itemize}#1\end{itemize}}
+                                                  
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
+(./_region__flymake.aux)
+\openout1 = `_region__flymake.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 17.
+LaTeX Font Info:    ... okay on input line 17.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 17.
+LaTeX Font Info:    ... okay on input line 17.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 17.
+LaTeX Font Info:    ... okay on input line 17.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 17.
+LaTeX Font Info:    ... okay on input line 17.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 17.
+LaTeX Font Info:    ... okay on input line 17.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 17.
+LaTeX Font Info:    ... okay on input line 17.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 17.
+LaTeX Font Info:    ... okay on input line 17.
+LaTeX Font Info:    Try loading font information for OT1+lmr on input line 17.
+ (/usr/share/texmf/tex/latex/lm/ot1lmr.fd
 File: ot1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Font Info:    Try loading font information for OML+lmm on input line 17.
+(/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+\scratchcounter=\count112
+\scratchdimen=\dimen119
+\scratchbox=\box28
+\nofMPsegments=\count113
+\nofMParguments=\count114
+\everyMPshowfont=\toks21
+\MPscratchCnt=\count115
+\MPscratchDim=\dimen120
+\MPnumerator=\count116
+\makeMPintoPDFobject=\count117
+\everyMPtoPDFconversion=\toks22
+) (/usr/share/texlive/texmf-dist/tex/latex/oberdiek/epstopdf-base.sty
+Package: epstopdf-base 2016/05/15 v2.6 Base part for package epstopdf
 
-(/usr/share/texmf/tex/latex/lm/omllmm.fd
+(/usr/share/texlive/texmf-dist/tex/latex/oberdiek/grfext.sty
+Package: grfext 2016/05/16 v1.2 Manage graphics extensions (HO)
+)
+Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
+38.
+Package grfext Info: Graphics extension search list:
+(grfext)             [.png,.pdf,.jpg,.mps,.jpeg,.jbig2,.jb2,.PNG,.PDF,.JPG,.JPE
+G,.JBIG2,.JB2,.eps]
+(grfext)             \AppendGraphicsExtensions on input line 456.
+
+(/usr/share/texlive/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
+File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
+e
+))
+LaTeX Info: Redefining \microtypecontext on input line 17.
+Package microtype Info: Generating PDF output.
+Package microtype Info: Character protrusion enabled (level 2).
+Package microtype Info: Using default protrusion set `alltext'.
+Package microtype Info: No font expansion.
+Package microtype Info: No adjustment of tracking.
+Package microtype Info: No adjustment of interword spacing.
+Package microtype Info: No adjustment of character kerning.
+
+(/usr/share/texlive/texmf-dist/tex/latex/microtype/mt-cmr.cfg
+File: mt-cmr.cfg 2013/05/19 v2.2 microtype config. file: Computer Modern Roman 
+(RS)
+)
+\AtBeginShipoutBox=\box29
+Package hyperref Info: Link coloring OFF on input line 17.
+
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/nameref.sty
+Package: nameref 2016/05/21 v2.44 Cross-referencing by name of section
+
+(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/gettitlestring.sty
+Package: gettitlestring 2016/05/16 v1.5 Cleanup title references (HO)
+)
+\c@section@level=\count118
+)
+LaTeX Info: Redefining \ref on input line 17.
+LaTeX Info: Redefining \pageref on input line 17.
+LaTeX Info: Redefining \nameref on input line 17.
+\@outlinefile=\write3
+\openout3 = `_region__flymake.out'.
+
+
+ !name(review.tex) !offset(-3) 
+LaTeX Font Info:    Try loading font information for OML+lmm on input line 22.
+ (/usr/share/texmf/tex/latex/lm/omllmm.fd
 File: omllmm.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Font Info:    Try loading font information for OMS+lmsy on input line 17.
+LaTeX Font Info:    Try loading font information for OMS+lmsy on input line 22.
 
 
 (/usr/share/texmf/tex/latex/lm/omslmsy.fd
 File: omslmsy.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Font Info:    Try loading font information for OMX+lmex on input line 17.
+LaTeX Font Info:    Try loading font information for OMX+lmex on input line 22.
 
 
 (/usr/share/texmf/tex/latex/lm/omxlmex.fd
 File: omxlmex.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <12> on input line 17.
+(Font)              <14.4> on input line 22.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 17.
+(Font)              <10> on input line 22.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <6> on input line 17.
-LaTeX Font Info:    Try loading font information for U+msa on input line 17.
+(Font)              <7> on input line 22.
+LaTeX Font Info:    Try loading font information for U+msa on input line 22.
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 17.
+(/usr/share/texlive/texmf-dist/tex/latex/microtype/mt-msa.cfg
+File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
+)
+LaTeX Font Info:    Try loading font information for U+msb on input line 22.
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-LaTeX Font Info:    Try loading font information for OT1+lmtt on input line 17.
-
-
-(/usr/share/texmf/tex/latex/lm/ot1lmtt.fd
-File: ot1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
+(/usr/share/texlive/texmf-dist/tex/latex/microtype/mt-msb.cfg
+File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 )
-LaTeX Font Info:    Try loading font information for OT1+lmss on input line 17.
+(./_region__flymake.toc)
+\tf@toc=\write4
+\openout4 = `_region__flymake.toc'.
 
+ [1
 
-(/usr/share/texmf/tex/latex/lm/ot1lmss.fd
-File: ot1lmss.fd 2009/10/30 v1.6 Font defs for Latin Modern
-) )
-Beginning to dump on file prv_review.fmt
- (preloaded format=prv_review 2017.7.12)
-11969 strings of total length 173421
-214743 memory locations dumped; current usage is 273&211194
-10145 multiletter control sequences
-\font\nullfont=nullfont
-\font\OMX/cmex/m/n/10=cmex10
-\font\tenln=line10
-\font\tenlnw=linew10
-\font\tencirc=lcircle10
-\font\tencircw=lcirclew10
-\font\OT1/cmr/m/n/5=cmr5
-\font\OT1/cmr/m/n/7=cmr7
-\font\OT1/cmr/m/n/10=cmr10
-\font\OML/cmm/m/it/5=cmmi5
-\font\OML/cmm/m/it/7=cmmi7
-\font\OML/cmm/m/it/10=cmmi10
-\font\OMS/cmsy/m/n/5=cmsy5
-\font\OMS/cmsy/m/n/7=cmsy7
-\font\OMS/cmsy/m/n/10=cmsy10
-\font\OT1/cmr/m/n/12=cmr12
-\font\OT1/lmr/m/n/12=rm-lmr12
-\font\OT1/lmr/m/n/8=rm-lmr8
-\font\OT1/lmr/m/n/6=rm-lmr6
-\font\OML/lmm/m/it/12=lmmi12
-\font\OML/lmm/m/it/8=lmmi8
-\font\OML/lmm/m/it/6=lmmi6
-\font\OMS/lmsy/m/n/12=lmsy10 at 12.0pt
-\font\OMS/lmsy/m/n/8=lmsy8
-\font\OMS/lmsy/m/n/6=lmsy6
-\font\OMX/lmex/m/n/6=lmex10
-\font\U/msa/m/n/12=msam10 at 12.0pt
-\font\U/msa/m/n/8=msam10 at 8.0pt
-\font\U/msa/m/n/6=msam7 at 6.0pt
-\font\U/msb/m/n/12=msbm10 at 12.0pt
-\font\U/msb/m/n/8=msbm10 at 8.0pt
-\font\U/msb/m/n/6=msbm7 at 6.0pt
-\font\OT1/lmr/m/n/14.4=rm-lmr12 at 14.4pt
-\font\OT1/lmr/m/n/10=rm-lmr10
-\font\OT1/lmr/bx/n/12=rm-lmbx12
-\font\OT1/lmr/bx/it/12=rm-lmbxi10 at 12.0pt
-\font\OT1/lmr/m/it/12=rm-lmri12
-\font\OT1/lmtt/m/n/12=rm-lmtt12
-\font\OT1/lmss/m/n/12=rm-lmss12
-36514 words of font info for 38 preloaded fonts
-14 hyphenation exceptions
-Hyphenation trie of length 6081 has 183 ops out of 35111
-  2 for language 1
-  181 for language 0
-0 words of pdfTeX memory
-0 indirect objects
-No pages of output.
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 47.
+[2]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 47.
+ (./_region__flymake.aux)
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 47.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 47.
+Package rerunfilecheck Info: File `_region__flymake.out' has not changed.
+(rerunfilecheck)             Checksum: 16473A2762EA85E94C684E3780B2B7BF;554.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 47.
+ ) 
+Here is how much of TeX's memory you used:
+ 7543 strings out of 494945
+ 114464 string characters out of 6181032
+ 228901 words of memory out of 5000000
+ 10735 multiletter control sequences out of 15000+600000
+ 30977 words of font info for 36 fonts, out of 8000000 for 9000
+ 14 hyphenation exceptions out of 8191
+ 31i,6n,38p,291b,334s stack positions out of 5000i,500n,10000p,200000b,80000s
+
+pdfTeX warning: \pdfdraftmode enabled, not changing output pdf
+
 PDF statistics:
- 0 PDF objects out of 1000 (max. 8388607)
- 0 named destinations out of 1000 (max. 500000)
- 1 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 35 PDF objects out of 1000 (max. 8388607)
+ 14 named destinations out of 1000 (max. 500000)
+ 4097 words of extra memory for PDF output out of 10000 (max. 10000000)
 
