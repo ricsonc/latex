@@ -12,7 +12,7 @@
 
 \newcommand{\eq}[1]{\begin{align*}#1\end{align*}}
 \newcommand{\enum}[1]{\begin{enumerate}#1\end{enumerate}}
-\renewcommand{\list}[1]{\begin{itemize}#1\end{itemize}}
+\newcommand{\list}[1]{\begin{itemize}#1\end{itemize}}
 
 \begin{document}
 \maketitle
