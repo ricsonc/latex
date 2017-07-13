@@ -47,7 +47,7 @@
 
 \section{Probabilistic Graphical Models}
 
-\subsection{Viterbi and Forward Backward Algorithm}
+\subsection{Forward Backward Algorithm}
 
 \renewcommand{\o}{\mathbf{o}}
 \newcommand{\x}{\mathbf{x}}
@@ -70,45 +70,133 @@ Now if you squint really closely, you're realize that these two equations are ac
 
 We want to solve for $P(x_k|\o)$. The key is the following manipulation:
 
-%actually we went a bit crazy here..fix!
-
 \eq{
   P(x_k|\o) &= \frac{P(\o|x_k)p(x_k)}{P(\o)} \\
   &\propto P(\o|x_k)p(x_k) \\
   &= P(\o_{1:k}|x_k)P(\o_{k+1:n}|x_k)P(x_k) \\
 }
 
-Let's take that second term and apply Bayes' Theorem again
+Let's take that first term and apply Bayes' Theorem again
 
 \eq{
-  P(\o_{k+1:n}|x_k) &= \frac{P(x_k | \o_{k+1:n}) P(\o_{k+1:n})}{P(x_k)} \\
-  &\propto \frac{P(x_k | \o_{k+1:n})}{P(x_k)}
+  P(\o_{1:k}|x_k) &= \frac{P(x_k | \o_{1:k}) P(\o_{1:k})}{P(x_k)} \\
+  &\propto \frac{P(x_k | \o_{1:k})}{P(x_k)}
 }
 
 And substitute it back in...
 
 \eq{
-  P(\o_{1:k}|x_k)P(\o_{k+1:n}|x_k)P(x_k) &= P(\o_{1:k}|x_k)\frac{P(x_k | \o_{k+1:n})}{P(x_k)}P(x_k)\\
-  &= P(\o_{1:k}|x_k)P(x_k | \o_{k+1:n})
+  P(\o_{1:k}|x_k)P(\o_{k+1:n}|x_k)P(x_k) &= \frac{P(x_k|\o_{1:k})}{P(x_k)}P(\o_{k+1:n}|x_k)P(x_k) \\
+  &= P(x_k|\o_{1:k})P(\o_{k+1:n}|x_k)
 }
 
-So now we just need to figure out how to compute $P(\o_{1:k}|x_k)$ and $P(x_k|o_{k+1:n})$. We can do this inductively. To do this, we specify that each $x_i$ is a categorical variables in one of $m$ classes indexed by $j$. In the base case, we are given $P(o_1 | x_1)$. Since $x_k$ is between $o_{1:k-1}$ and $o_k$ it renders $o_k$ independent from the rest, conditioned on $x_k$. We will take advantage of this.
+So now we just need to figure out how to compute $P(x_k|\o_{1:k})$ and $P(o_{k+1:n}|x_k)$. We can do this inductively. To do this, we specify that each $x_i$ is a categorical variables in one of $m$ classes indexed by $j$. In addition, we need $\pi$, the initial distribution of $x_1$ and $T$ being $P(x_{k+1|k})$ and also $Q$ being $P(o_i|x_k)$. 
+
+Our base case $P(x_1|o_1)$ can be solved with Bayes' Theorem
 
 \eq{
-  P(o_{1:k}|x_k) &= P(o_{1:k-1}|x_k)P(o_k|x_k) \\
-  & = P(o_k|x_k) \sum_j P(o_{1:k-1}|x_{k-1} = j)p(x_{k-1} = j|x_k)
+  P(x_1|o_1) &= \frac{P(o_1|x_1)P(x_1)}{P(x_1)} \\
+  &\propto P(o_1|x_1)P(x_1) \\
+  &= Q\pi
 }
 
-Notice that we can retrieve $P(o_{1:k-1}|x_{k-1})$ from a recursive case, so we have solved the problem.
+Then we can simply normalize $Q\pi$ to be a probability vector. Now we will show the inductive step.
 
-Computing $P(x_k|o_{k+1:n})$ is very similar. We start with the base case of $P(x_{n-1}|o_n)$. This can be computed simply by ''rolling out'' $x_n$ and then $o_n$
-%wait i don't know how to do this
+\eq{
+  P(x_k|\o_{1:k}) &= P(x_k|o_k,\o_{1:k-1}) \\
+  &= \frac{P(o_k|x_k,\o_{1:k-1})P(x_k|\o_{1:k-1})}{P(o_k|\o_{1:k-1})} \\
+  &\propto P(o_k|x_k,\o_{1:k-1})P(x_k|\o_{1:k-1}) \\
+  &= P(o_k|x_k)P(x_k|\o_{1:k-1}) \\
+  &= P(o_k|x_k) \sum_j P(x_k|x_{k-1} = j)P(x_{k-1}=j|\o_{1:k-1}) \\
+}
 
-Question: what if we need to know $P(x_n)$? Well we won't, because if you look at our final equation $P(\o_{1:k}|x_k)P(x_k | \o_{k+1:n})$, if we have $k = n$, then the first term will contain everything we need and the second term will just be 1. 
+All of these quantities are clearly obtainable. We must simply normalize over values of $x_k$ in order to get a proper probability distribution.
 
-Normalization is needed, because we did a lot of trickery with only dealing with $\propto$
+In the backward case, we start off with the base case $P(o_n|x_{n-1})$
+
+\eq{
+  P(o_n|x_{n-1}) &= \sum_j P(o_n|x_n = j)P(x_n=j|x_{n-1})
+}
+
+And for the inductive case we have
+
+\eq{
+  P(o_{k+1:n}|x_k) &= \sum_j P(o_{k+1:n}|x_{k+1}=j)P(x_{k+1}=j|x_k) \\
+  &= \sum_j P(\o_{k+2:n}|x_{k+1}=j)P(o_{k+1}|x_{k+1})P(x_{k+1}=j|x_k) \\
+}
+
+Again, all of these quantities are computable, one via induction, so we are finished here. For CRFs, since factors are not necessarily probabilities, we can carry out an extra normalization step at the end.
 
 \subsection{Message Passing and Loopy Belief Propagation}
+
+One question is how to apply a forward backward like algorithm when we are dealing with graphics more complicated than a chain. For example, let us imagine a graph which starts as a chain and at some point splits into two branches. Let the superscript $^p$ denote the parents of node $k$ including $k$ itself, and let the superscript $^c$ denote the children of node $k$. Then the equation from the linear case still applies.
+
+\eq{
+  P(x_k|\o) \propto P(x_k|\o^p)P(\o^c|x_k)
+}
+
+Now for the branching graph, there are two cases. Either node $k$ is before the fork, or after the fork. First we'll consider when it is before. Note that we can compute $P(x_k|\o^p)$ as usual. You can also imagine that we can compute $P(\o_{i+1:n}|x_i)$ fine for all nodes on the branches, using the same algorithm from before. The trouble comes when we reach the intersection node, which we will label with $^*$. Let $^b$ be used to denote nodes after the branch happens, with $b'$ and $b''$ being used to denote each of the two branches.
+
+\eq{
+  P(\o^b|x_*) &= P(\o^{b'}|x_*)P(\o^{b''}|x_*) \\
+}
+
+That was surprisingly easy -- we already know how to solve each of these factors. This completes the case.
+
+In the second case, when $x$ is along one of the branches, the challenge is computing $P(x_k|\o^p)$. Our recursive case breaks down on the node right after the junction. As before we have
+
+\eq{
+  P(x_k|\o^p) &\propto P(o_k|x_k)P(x_k|\o^p - o_k) \\
+  &= P(o_k|x_k)P(x_k|\o_{1:k-1}, \o^b'') \\
+  &= P(o_k|x_k)\sum_j P(x_k|x_{k-1} = j)P(x_{k-1} = j|\o_{1:k-1}, \o^b'') \\
+}
+
+Let's zoom in on solving $P(x_{k-1} = j|\o_{1:k-1}, \o^b'')$ by standard application of Bayes' Theorem.
+
+\eq{
+  P(x_{k-1} = j|\o_{1:k-1}, \o^b'') &\propto P(\o^b''|x_{k-1},\o_{1:k-1})P(x_{k-1}|\o_{1:k-1}) \\
+  &= P(\o^b''|x_{k-1} = j)P(x_{k-1} = j|\o_{1:k-1})
+}
+
+Notice that the first term is solved by the backward recursion, while the second term is given inductively. Let's plug this back into the original equation.
+
+\eq{
+  &P(o_k|x_k)\sum_j P(x_k|x_{k-1} = j)P(x_{k-1} = j|\o_{1:k-1}, \o^b'') \\
+  &= P(o_k|x_k)\sum_j P(x_k|x_{k-1} = j)P(\o^b''|x_{k-1} = j)P(x_{k-1} = j|\o_{1:k-1}) \\
+}
+
+So to sum it up, here's how we would compute marginal probabilities on this simple branch graph. First compute the backwards probabilities, using that special product case when at a junction. Then compute the forwards probabilities, and multiply by the probability of the other branch whenever necessary. Note that this works for general binary trees too -- just select an arbitrary root. Can we also support general trees? Yes, just replace the product in the backward step with a product over all the branches. In the forward computation, replace $P(\o^b''|x_{k-1} = j)$ with $\prod_j P(\o^{b_j}|x_{k-1} = j)$. I think this is known as the sum-product algorithm (not really sure).
+
+\renewcommand{\R}{\mathbf{R}}
+
+Let's talk about how discrete conditional probability distributions can be represented as matrices, since it will make things a lot clearer. We want $P(x \in \R^n|y \in \R^m)$ to be a matrix $P$ such that $P(x|y = y_0) = Py_0$, using the one-hot representation. This means that must be $n$ by $m$ in size, and $P_{ij} = P(x = i | y = j)$.
+
+Another very common manipulation we do with probability distributions is the following.
+
+\eq{
+  P(x|z) = \sum_j P(x|y=j)P(y=j|z)
+}
+
+Ideally, we want $P(x|z) = P_x P_y z$. Let's check if this is correct.
+
+\eq{
+  \left[ P_x P_y z \right]_i &= \left[P_x\right]_i P_y z \\
+  &= [P_x]_{i} \sum_j [P_y]_{:j} z_j \\
+  &= [P_x]_{i} P(y|z) \\
+  &= \sum_j [P_x]_{ij} P(y=j|z) \\
+  &= \sum_j P(x=i|y=j)P(y=j|z) \\
+  &= P(x=i|z)
+}
+
+Armed with this knowledge, let's go back and rewrite everything to look better.
+
+The forward pass:
+
+The backward pass:
+
+The forward pass on trees:
+
+The backward pass on trees:
 
 \subsection{Efficient Inference in Dense Gaussian CRFS}
 
