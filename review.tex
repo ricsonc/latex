@@ -12,7 +12,8 @@
 
 \newcommand{\eq}[1]{\begin{align*}#1\end{align*}}
 \newcommand{\enum}[1]{\begin{enumerate}#1\end{enumerate}}
-\renewcommand{\list}[1]{\begin{itemize}#1\end{itemize}}
+\newcommand{\itmz}[1]{\begin{itemize}#1\end{itemize}}
+%\newcommand{\raw}{\rightarrow}
 
 \begin{document}
 \maketitle
@@ -20,6 +21,7 @@
 \tableofcontents
 
 \newpage
+
 
 \section{Probability Theory}
 
@@ -46,6 +48,16 @@
 \subsection{Principle Component Analysis}
 
 \section{Probabilistic Graphical Models}
+
+\subsection{Forward Backward Algorithm}
+
+\subsection{Sum Product Algorithm}
+
+\subsection{Loopy Belief Propagation}
+
+\subsection{Efficient Inference in Dense CRFs}
+
+%rework the subsections
 
 \subsection{Forward Backward Algorithm}
 
@@ -122,7 +134,7 @@ And for the inductive case we have
 
 \eq{
   P(o_{k+1:n}|x_k) &= \sum_j P(o_{k+1:n}|x_{k+1}=j)P(x_{k+1}=j|x_k) \\
-  &= \sum_j P(\o_{k+2:n}|x_{k+1}=j)P(o_{k+1}|x_{k+1})P(x_{k+1}=j|x_k) \\
+  &= \sum_j P(\o_{k+2:n}|x_{k+1}=j)P(o_{k+1}|x_{k+1} = j)P(x_{k+1}=j|x_k) \\
 }
 
 Again, all of these quantities are computable, one via induction, so we are finished here. For CRFs, since factors are not necessarily probabilities, we can carry out an extra normalization step at the end.
@@ -147,27 +159,27 @@ In the second case, when $x$ is along one of the branches, the challenge is comp
 
 \eq{
   P(x_k|\o^p) &\propto P(o_k|x_k)P(x_k|\o^p - o_k) \\
-  &= P(o_k|x_k)P(x_k|\o_{1:k-1}, \o^b'') \\
-  &= P(o_k|x_k)\sum_j P(x_k|x_{k-1} = j)P(x_{k-1} = j|\o_{1:k-1}, \o^b'') \\
+  &= P(o_k|x_k)P(x_k|\o_{1:k-1}, \o^{b''}) \\
+  &= P(o_k|x_k)\sum_j P(x_k|x_{k-1} = j)P(x_{k-1} = j|\o_{1:k-1}, \o^{b''}) \\
 }
 
-Let's zoom in on solving $P(x_{k-1} = j|\o_{1:k-1}, \o^b'')$ by standard application of Bayes' Theorem.
+Let's zoom in on solving $P(x_{k-1} = j|\o_{1:k-1}, \o^{b''})$ by standard application of Bayes' Theorem.
 
 \eq{
-  P(x_{k-1} = j|\o_{1:k-1}, \o^b'') &\propto P(\o^b''|x_{k-1},\o_{1:k-1})P(x_{k-1}|\o_{1:k-1}) \\
-  &= P(\o^b''|x_{k-1} = j)P(x_{k-1} = j|\o_{1:k-1})
+  P(x_{k-1} = j|\o_{1:k-1}, \o^{b''}) &\propto P(\o^{b''}|x_{k-1},\o_{1:k-1})P(x_{k-1}|\o_{1:k-1}) \\
+  &= P(\o^{b''}|x_{k-1} = j)P(x_{k-1} = j|\o_{1:k-1})
 }
 
 Notice that the first term is solved by the backward recursion, while the second term is given inductively. Let's plug this back into the original equation.
 
 \eq{
-  &P(o_k|x_k)\sum_j P(x_k|x_{k-1} = j)P(x_{k-1} = j|\o_{1:k-1}, \o^b'') \\
-  &= P(o_k|x_k)\sum_j P(x_k|x_{k-1} = j)P(\o^b''|x_{k-1} = j)P(x_{k-1} = j|\o_{1:k-1}) \\
+  &P(o_k|x_k)\sum_j P(x_k|x_{k-1} = j)P(x_{k-1} = j|\o_{1:k-1}, \o^{b''}) \\
+  &= P(o_k|x_k)\sum_j P(x_k|x_{k-1} = j)P(\o^{b''}|x_{k-1} = j)P(x_{k-1} = j|\o_{1:k-1}) \\
 }
 
-So to sum it up, here's how we would compute marginal probabilities on this simple branch graph. First compute the backwards probabilities, using that special product case when at a junction. Then compute the forwards probabilities, and multiply by the probability of the other branch whenever necessary. Note that this works for general binary trees too -- just select an arbitrary root. Can we also support general trees? Yes, just replace the product in the backward step with a product over all the branches. In the forward computation, replace $P(\o^b''|x_{k-1} = j)$ with $\prod_j P(\o^{b_j}|x_{k-1} = j)$. I think this is known as the sum-product algorithm (not really sure).
+So to sum it up, here's how we would compute marginal probabilities on this simple branch graph. First compute the backwards probabilities, using that special product case when at a junction. Then compute the forwards probabilities, and multiply by the probability of the other branch whenever necessary. Note that this works for general binary trees too -- just select an arbitrary root. Can we also support general trees? Yes, just replace the product in the backward step with a product over all the branches. In the forward computation, replace $P(\o^{b''}|x_{k-1} = j)$ with $\prod_j P(\o^{b_j}|x_{k-1} = j)$. I think this is known as the sum-product algorithm (not really sure).
 
-\renewcommand{\R}{\mathbf{R}}
+\newcommand{\R}{\mathbf{R}}
 
 Let's talk about how discrete conditional probability distributions can be represented as matrices, since it will make things a lot clearer. We want $P(x \in \R^n|y \in \R^m)$ to be a matrix $P$ such that $P(x|y = y_0) = Py_0$, using the one-hot representation. This means that must be $n$ by $m$ in size, and $P_{ij} = P(x = i | y = j)$.
 
@@ -188,15 +200,112 @@ Ideally, we want $P(x|z) = P_x P_y z$. Let's check if this is correct.
   &= P(x=i|z)
 }
 
-Armed with this knowledge, let's go back and rewrite everything to look better.
+Armed with this knowledge, let's go back and rewrite everything to look better. First let's give each node in the graph two vectors $f$ and $b$, which are the forward and backward probabilities respectively. 
 
 The forward pass:
 
+\eq{
+  f_0 &= Q\pi \\
+  f_k &= Q T f_{k-1}
+}
+
 The backward pass:
+
+Let $q_t$ denote the $x_t$th row of $Q$. 
+
+\eq{
+  b_n &= \vec 1^T \\
+  b_k &= (q_t \odot b_{k+1})T
+}
 
 The forward pass on trees:
 
 The backward pass on trees:
+
+\subsection{Message Passing [Bishop]}
+
+\newcommand{\msx}{\mu (s \rightarrow x)}
+\newcommand{\mxs}{\mu (x \rightarrow s)}
+
+Some notation:
+\itmz{
+  \item $x$ is the node we are trying to find the marginal distribution of
+  \item $\x$ is the set of variables
+  \item $f_s$ is a factor of $x$
+  \item $N(x)$ is the neighborhood of $x$
+  \item $X_s$ is the set of nodes which is beyond $f_s$
+  \item $F_s(x, X_s)$ is the product of factors in the direction of $f_s$, given $x$
+  \item $\msx$ is a message from factor $s$ to node $x$
+  \item $\mxs$ is a message from variable $x$ to factor $s$
+}
+
+\eq{
+  p(x) &= \sum_{\x \setminus x} p(\x) \\
+  &= \prod_{f_s \in N(x)} \sum_{X_s} F_s(x, X_s) \\
+}
+
+Now if we define $\msx = \sum_{X_s} F_s(x, X_s)$ then we can have
+
+\eq{
+  p(x) &= \prod_{f_s \in N(x)} \msx
+}
+ 
+But how do we compute $F_s(x, X_s)$? Well, we could extract $f_s$ from the mess. Besides $x$, $f_s$ is connected to some other neighbors (lets say $m$ of them), rooted at variable nodes, which carve out subgraphs $G_j$. 
+
+Let's overload even more notation
+\itmz{
+\item $x_1, ... x_m$ are the neighbors of $f_s$ which are not $x$
+\item $G_j$ is the $j$th subgraph rooted at $x_j$
+\item $G_j$ has variable nodes (excluding $x_j$) labeled $X_j$
+\item $G_j(x_j, X_j)$ is the product of the factor nodes contained in $G_j$ given the variables $x_j$ and $X_j$
+}
+
+\eq{
+  F_s(x, X_s) &= f_s(x, x_1, ... x_m) \prod_j G_j(x_j, X_j) \\
+}
+
+So the message we end up sending is something like
+
+\newcommand{\xxm}{x, x_1, \ldots, x_m}
+\newcommand{\xoxm}{x_1, \ldots, x_m}
+
+\eq{
+  \msx &= \sum_{X_s} F_s(x, X_s) \\
+  &= \sum_{X_s} f_s(\xxm) \prod_j G_j(x_j, X_j) \\
+  &= \sum_{\xoxm} f_s(\xxm) \sum_{X_s \setminus \xoxm} \prod_j G_j(x_j, X_j) \\
+  &= \sum_{\xoxm} f_s(\xxm) \prod_j \sum_{X_j} G_j(x_j, X_j) \\
+}
+
+If we define $\mu(x_j \rightarrow s) = \sum_{X_j} G_j(x_j, X_j)$ then we end up with.
+
+\eq{
+  \msx &= \sum_{\xoxm} f_s(\xxm) \prod_j \mu(x_j \rightarrow s)
+}
+
+But what is $G_j(x_j, X_j)$?
+
+\eq{
+  G_j(x_j, X_j) &= \prod_{s' \in N(j), s' \neq s} F_{s'}(x_j, X_j)
+}
+
+Therefore we end up with
+
+\eq{
+  \mu(x_j \rightarrow s) &= \sum_{X_j} G_j(x_j, X_j) \\
+  &= \sum_{X_j} \prod_{s' \in N(j), s' \neq s} F_{s'}(x_j, X_j) \\
+  &= \prod_{s' \in N(j), s' \neq s} \sum_{X_j} F_{s'}(x_j, X_j) \\
+  &= \prod_{s' \in N(j), s' \neq s} \mu(s' \rightarrow x_j)
+}
+
+So it's recursive. But then, what's the base case? If we unroll the recursion, we will eventually reach the leaves of the tree.
+If the leaf is a factor, we will have $\mu(l \rightarrow x) = 0$.
+If the leaf is a variable, we will have $\mu(l \rightarrow s) = 1$
+
+% ok we need to work on our notation here
+% derive this with no references please
+\iffalse
+some details: message sending is a function of node doing the sending!
+\fi
 
 \subsection{Efficient Inference in Dense Gaussian CRFS}
 
