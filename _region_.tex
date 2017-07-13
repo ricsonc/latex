@@ -74,9 +74,9 @@ Now if you squint really closely, you're realize that these two equations are ac
 We want to solve for $P(x_k|\o)$. The key is the following manipulation:
 
 \eq{
-P(x_k|\o) &= \frac{P(\o|x_k)p(x_k)}{P(\o)} \\
-&\propto P(\o|x_k)p(x_k)} \\
-&= P(\o_{1:k}|x_k)P(\o_{k+1:n}|x_k)P(x_k) \\
+  P(x_k|\o) &= \frac{P(\o|x_k)p(x_k)}{P(\o)} \\
+  &\propto P(\o|x_k)p(x_k) \\
+  &= P(\o_{1:k}|x_k)P(\o_{k+1:n}|x_k)P(x_k) \\
 }
 
 Let's take that second term and apply Bayes' Theorem again
@@ -93,7 +93,20 @@ And substitute it back in...
   &= P(\o_{1:k}|x_k)P(x_k | \o_{k+1:n})
 }
 
-So now we just need to figure out how to compute $P(\o_{1:k}|x_k)$ and $P(x_k|o_{k+1:n})$
+So now we just need to figure out how to compute $P(\o_{1:k}|x_k)$ and $P(x_k|o_{k+1:n})$. We can do this inductively. To do this, we specify that each $x_i$ is a categorical variables in one of $m$ classes indexed by $j$. In the base case, we are given $P(o_1 | x_1)$. Since $x_k$ is between $o_{1:k-1}$ and $o_k$ it renders $o_k$ independent from the rest, conditioned on $x_k$. We will take advantage of this.
+
+\eq{
+  P(o_{1:k}|x_k) &= P(o_{1:k-1}|x_k)P(o_k|x_k) \\
+  & = P(o_k|x_k) \sum_j P(o_{1:k-1}|x_{k-1} = j)p(x_{k-1} = j|x_k)
+}
+
+Notice that we can retrieve $P(o_{1:k-1}|x_{k-1})$ from a recursive case, so we have solved the problem.
+
+Computing $P(x_k|o_{k+1:n})$ is very similar. We start with the base case that $P(x_{n-1}|o_n)$. I don't know how to do this...help
+
+Question: what if we need to know $P(x_n)$? Well we won't, because if you look at our final equation $P(\o_{1:k}|x_k)P(x_k | \o_{k+1:n})$, if we have $k = n$, then the first term will contain everything we need and the second term will just be 1. 
+
+Normalization is needed, because we did a lot of trickery with only dealing with $\propto$
 
 \subsection{Message Passing and Loopy Belief Propagation}
 
@@ -192,4 +205,4 @@ So now we just need to figure out how to compute $P(\o_{1:k}|x_k)$ and $P(x_k|o_
 
 \end{document}
 
-\message{ !name(review.tex) !offset(-195) }
+\message{ !name(review.tex) !offset(-208) }
