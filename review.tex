@@ -9,11 +9,13 @@
 \usepackage[expansion=false]{microtype}
 \usepackage{lmodern}
 \usepackage{hyperref}
+\usepackage{algpseudocode}
 
 \newcommand{\eq}[1]{\begin{align*}#1\end{align*}}
 \newcommand{\enum}[1]{\begin{enumerate}#1\end{enumerate}}
 \newcommand{\itmz}[1]{\begin{itemize}#1\end{itemize}}
-%\newcommand{\raw}{\rightarrow}
+\newcommand{\alg}[1]{\begin{algorithmic}#1\end{algorithmic}}
+\newcommand{\ra}{\rightarrow}
 
 \begin{document}
 \maketitle
@@ -48,16 +50,6 @@
 \subsection{Principle Component Analysis}
 
 \section{Probabilistic Graphical Models}
-
-\subsection{Forward Backward Algorithm}
-
-\subsection{Sum Product Algorithm}
-
-\subsection{Loopy Belief Propagation}
-
-\subsection{Efficient Inference in Dense CRFs}
-
-%rework the subsections
 
 \subsection{Forward Backward Algorithm}
 
@@ -138,176 +130,101 @@ And for the inductive case we have
 }
 
 Again, all of these quantities are computable, one via induction, so we are finished here. For CRFs, since factors are not necessarily probabilities, we can carry out an extra normalization step at the end.
+\subsection{Message Passing}
 
-\subsection{Message Passing and Loopy Belief Propagation}
-
-One question is how to apply a forward backward like algorithm when we are dealing with graphics more complicated than a chain. For example, let us imagine a graph which starts as a chain and at some point splits into two branches. Let the superscript $^p$ denote the parents of node $k$ including $k$ itself, and let the superscript $^c$ denote the children of node $k$. Then the equation from the linear case still applies.
-
-\eq{
-  P(x_k|\o) \propto P(x_k|\o^p)P(\o^c|x_k)
-}
-
-Now for the branching graph, there are two cases. Either node $k$ is before the fork, or after the fork. First we'll consider when it is before. Note that we can compute $P(x_k|\o^p)$ as usual. You can also imagine that we can compute $P(\o_{i+1:n}|x_i)$ fine for all nodes on the branches, using the same algorithm from before. The trouble comes when we reach the intersection node, which we will label with $^*$. Let $^b$ be used to denote nodes after the branch happens, with $b'$ and $b''$ being used to denote each of the two branches.
-
-\eq{
-  P(\o^b|x_*) &= P(\o^{b'}|x_*)P(\o^{b''}|x_*) \\
-}
-
-That was surprisingly easy -- we already know how to solve each of these factors. This completes the case.
-
-In the second case, when $x$ is along one of the branches, the challenge is computing $P(x_k|\o^p)$. Our recursive case breaks down on the node right after the junction. As before we have
-
-\eq{
-  P(x_k|\o^p) &\propto P(o_k|x_k)P(x_k|\o^p - o_k) \\
-  &= P(o_k|x_k)P(x_k|\o_{1:k-1}, \o^{b''}) \\
-  &= P(o_k|x_k)\sum_j P(x_k|x_{k-1} = j)P(x_{k-1} = j|\o_{1:k-1}, \o^{b''}) \\
-}
-
-Let's zoom in on solving $P(x_{k-1} = j|\o_{1:k-1}, \o^{b''})$ by standard application of Bayes' Theorem.
-
-\eq{
-  P(x_{k-1} = j|\o_{1:k-1}, \o^{b''}) &\propto P(\o^{b''}|x_{k-1},\o_{1:k-1})P(x_{k-1}|\o_{1:k-1}) \\
-  &= P(\o^{b''}|x_{k-1} = j)P(x_{k-1} = j|\o_{1:k-1})
-}
-
-Notice that the first term is solved by the backward recursion, while the second term is given inductively. Let's plug this back into the original equation.
-
-\eq{
-  &P(o_k|x_k)\sum_j P(x_k|x_{k-1} = j)P(x_{k-1} = j|\o_{1:k-1}, \o^{b''}) \\
-  &= P(o_k|x_k)\sum_j P(x_k|x_{k-1} = j)P(\o^{b''}|x_{k-1} = j)P(x_{k-1} = j|\o_{1:k-1}) \\
-}
-
-So to sum it up, here's how we would compute marginal probabilities on this simple branch graph. First compute the backwards probabilities, using that special product case when at a junction. Then compute the forwards probabilities, and multiply by the probability of the other branch whenever necessary. Note that this works for general binary trees too -- just select an arbitrary root. Can we also support general trees? Yes, just replace the product in the backward step with a product over all the branches. In the forward computation, replace $P(\o^{b''}|x_{k-1} = j)$ with $\prod_j P(\o^{b_j}|x_{k-1} = j)$. I think this is known as the sum-product algorithm (not really sure).
-
-\newcommand{\R}{\mathbf{R}}
-
-Let's talk about how discrete conditional probability distributions can be represented as matrices, since it will make things a lot clearer. We want $P(x \in \R^n|y \in \R^m)$ to be a matrix $P$ such that $P(x|y = y_0) = Py_0$, using the one-hot representation. This means that must be $n$ by $m$ in size, and $P_{ij} = P(x = i | y = j)$.
-
-Another very common manipulation we do with probability distributions is the following.
-
-\eq{
-  P(x|z) = \sum_j P(x|y=j)P(y=j|z)
-}
-
-Ideally, we want $P(x|z) = P_x P_y z$. Let's check if this is correct.
-
-\eq{
-  \left[ P_x P_y z \right]_i &= \left[P_x\right]_i P_y z \\
-  &= [P_x]_{i} \sum_j [P_y]_{:j} z_j \\
-  &= [P_x]_{i} P(y|z) \\
-  &= \sum_j [P_x]_{ij} P(y=j|z) \\
-  &= \sum_j P(x=i|y=j)P(y=j|z) \\
-  &= P(x=i|z)
-}
-
-Armed with this knowledge, let's go back and rewrite everything to look better. First let's give each node in the graph two vectors $f$ and $b$, which are the forward and backward probabilities respectively. 
-
-The forward pass:
-
-\eq{
-  f_0 &= Q\pi \\
-  f_k &= Q T f_{k-1}
-}
-
-The backward pass:
-
-Let $q_t$ denote the $x_t$th row of $Q$. 
-
-\eq{
-  b_n &= \vec 1^T \\
-  b_k &= (q_t \odot b_{k+1})T
-}
-
-The forward pass on trees:
-
-The backward pass on trees:
-
-\subsection{Message Passing [Bishop]}
+\newcommand{\msg}[2]{\mu (#1 \rightarrow #2)}
+\renewcommand{\ne}[2]{N(#1) \setminus #2}
 
 \newcommand{\msx}{\mu (s \rightarrow x)}
 \newcommand{\mxs}{\mu (x \rightarrow s)}
 
 Some notation:
 \itmz{
-  \item $x$ is the node we are trying to find the marginal distribution of
-  \item $\x$ is the set of variables
-  \item $f_s$ is a factor of $x$
-  \item $N(x)$ is the neighborhood of $x$
-  \item $X_s$ is the set of nodes which is beyond $f_s$
-  \item $F_s(x, X_s)$ is the product of factors in the direction of $f_s$, given $x$
-  \item $\msx$ is a message from factor $s$ to node $x$
-  \item $\mxs$ is a message from variable $x$ to factor $s$
+  \item $x$ is the variable node for which we want the marginal distribution
+  \item $\x$ is the total set of variables in the graphic
+  \item $f_s$ refers to a factor which is a neighbor of $x$
+  \item $x_i'$ refers to the neighbors of $f_s$ excluding $x$.
+  \item $f'_k$ refers to a factor which is a neighbor of $x'$
+  \item $X_s$ refers to the set of variables $x$ which are below $f_s$
+  \item $X_j$ refers to the set of variables $x$ which are below $x_j$ exclusive.
+  \item $\msg{s}{x}$ refers to a message from $s$ to $x$.
 }
+
+Furthermore, use $F_s(x_j, X_s)$ to denote the product of the factors in the subgraph rooted at $f_s$. Similarly, $G_j(x_j, X_j)$ is used to denote the product of factors in the subgraph rooted at $x_j$. 
+
+We want to solve for the distribution $p(x)$.
 
 \eq{
   p(x) &= \sum_{\x \setminus x} p(\x) \\
-  &= \prod_{f_s \in N(x)} \sum_{X_s} F_s(x, X_s) \\
+  &= \prod_{s \in N(x)} \sum_{X_s} F_s(x, X_s) \\
 }
 
-Now if we define $\msx = \sum_{X_s} F_s(x, X_s)$ then we can have
+Now note that $\sum_{X_s} F_s(x, X_s)$ is a quantity each factor node $s$ could compute by itself, so it is a good candidate for being a message. Let's say that
 
 \eq{
-  p(x) &= \prod_{f_s \in N(x)} \msx
+  \msg{s}{x} &= \sum_{X_s} F_s(x, X_s)
+  \intertext{or more generally that}
+  \msg{s}{x_i} &= \sum_{X_s} F_s(x_i, X_s)
 }
- 
-But how do we compute $F_s(x, X_s)$? Well, we could extract $f_s$ from the mess. Besides $x$, $f_s$ is connected to some other neighbors (lets say $m$ of them), rooted at variable nodes, which carve out subgraphs $G_j$. 
 
-Let's overload even more notation
-\itmz{
-\item $x_1, ... x_m$ are the neighbors of $f_s$ which are not $x$
-\item $G_j$ is the $j$th subgraph rooted at $x_j$
-\item $G_j$ has variable nodes (excluding $x_j$) labeled $X_j$
-\item $G_j(x_j, X_j)$ is the product of the factor nodes contained in $G_j$ given the variables $x_j$ and $X_j$
+Then we can substitute this back into the equation fork
+\eq{
+  p(x) &= \prod_{s \in N(x)} \msg{x}{s}
 }
+
+It remainds to derive an algorithm for computing $\sum_{X_s} F_s(x, X_s)$ efficiently. First let us derive an expansion for $F_s$.
 
 \eq{
-  F_s(x, X_s) &= f_s(x, x_1, ... x_m) \prod_j G_j(x_j, X_j) \\
+  F_s(x, X_s) &= f_s(x, \ne{s}{x}) \prod_{j \in \ne{s}{x}} G_j(x_j, X_j) \\
 }
 
-So the message we end up sending is something like
-
-\newcommand{\xxm}{x, x_1, \ldots, x_m}
-\newcommand{\xoxm}{x_1, \ldots, x_m}
+Let $X_s'$ denote $X_s \setminus N(s)$. 
 
 \eq{
-  \msx &= \sum_{X_s} F_s(x, X_s) \\
-  &= \sum_{X_s} f_s(\xxm) \prod_j G_j(x_j, X_j) \\
-  &= \sum_{\xoxm} f_s(\xxm) \sum_{X_s \setminus \xoxm} \prod_j G_j(x_j, X_j) \\
-  &= \sum_{\xoxm} f_s(\xxm) \prod_j \sum_{X_j} G_j(x_j, X_j) \\
+  \msg{s}{x} &= \sum_{X_s} f_s(x, \ne{s}{x}) \prod_{j \in \ne{s}{x}} G_j(x_j, X_j) \\
+  &= \sum_{\ne{s}{x}} \sum_{X_s'} f_s(x, \ne{s}{x}) \prod_{j \in \ne{s}{x}} G_j(x_j, X_j) \\
+  &= \sum_{\ne{s}{x}} f_s(x, \ne{s}{x}) \sum_{X_s'} \prod_{j \in \ne{s}{x}} G_j(x_j, X_j) \\
+  &= \sum_{\ne{s}{x}} f_s(x, \ne{s}{x}) \prod_{j \in \ne{s}{x}} \sum_{X_j} G_j(x_j, X_j) \\
 }
 
-If we define $\mu(x_j \rightarrow s) = \sum_{X_j} G_j(x_j, X_j)$ then we end up with.
+Just like we noticed that the sum of $F_s$ might be a good candidate for being a message, the sum of $G_j$ is a good candidate, because it can be computed by variable $j$ with no knowledge of anything else.
+
+Let $\msg{j}{s} = \sum_{X_j} G_j(x_j, X_j)$. Then our equation from beforehand becomes
 
 \eq{
-  \msx &= \sum_{\xoxm} f_s(\xxm) \prod_j \mu(x_j \rightarrow s)
+  \msg{s}{x} &= \sum_{\ne{s}{x}} f_s(x, \ne{s}{x}) \prod_{j \in \ne{s}{x}} \msg{j}{s} \\
 }
 
-But what is $G_j(x_j, X_j)$?
+So in order for factor $s$ to send variable $x$ the message, it must collect the messages from it's neighbors excepting $x$, take the product, and then marginalize over all variables except $x$.
+
+But what are the messages from it's neighbors? How do we compute $G_j(x_j, X_j)$? Notice that $G_j$ is simply the product of all factors below it, which is the product of the factors in each subtree.
 
 \eq{
-  G_j(x_j, X_j) &= \prod_{s' \in N(j), s' \neq s} F_{s'}(x_j, X_j)
+  G_j(x_j, X_j) &= \prod_k F_k(x_j, X_k)
 }
 
-Therefore we end up with
+So now we can compute our message: 
 
 \eq{
-  \mu(x_j \rightarrow s) &= \sum_{X_j} G_j(x_j, X_j) \\
-  &= \sum_{X_j} \prod_{s' \in N(j), s' \neq s} F_{s'}(x_j, X_j) \\
-  &= \prod_{s' \in N(j), s' \neq s} \sum_{X_j} F_{s'}(x_j, X_j) \\
-  &= \prod_{s' \in N(j), s' \neq s} \mu(s' \rightarrow x_j)
+  \msg{j}{s} &= \sum_{X_j} G_j(x_j, X_j) \\
+  &= \sum_{X_j} \prod_{k \in \ne{j}{s}} F_k(x_j, X_k) \\
+  &= \prod_{k \in \ne{j}{s}} \sum_{X_k} F_k(x_j, X_k) \\
+  &= \prod_{k \in \ne{j}{s}} \msg{k}{j}
 }
 
-So it's recursive. But then, what's the base case? If we unroll the recursion, we will eventually reach the leaves of the tree.
-If the leaf is a factor, we will have $\mu(l \rightarrow x) = 0$.
-If the leaf is a variable, we will have $\mu(l \rightarrow s) = 1$
+So in order for a variable $x_j$ to send factor $f_s$ a message, it must collect the messages from it's child factors, then take the product of them all. Now the whole algorithm is clear. Starting from the leaves, we propagate messages upwards according to these rules until we reach node $x$. At $x$, we simply take the product of all incoming messages and read off the marginal probabilities.
 
-% ok we need to work on our notation here
-% derive this with no references please
-\iffalse
-some details: message sending is a function of node doing the sending!
-\fi
+There is just one issue -- the matter of the base cases. When the leaf is a variable, we can see that the product of the incoming messages (there are none) is always 1. Then according to the formula, the value is simply $f(x_l)$.
 
-\subsection{Efficient Inference in Dense Gaussian CRFS}
+When the leaf is a factor, the outgoing message is simply the product of all incoming messages, which is always 1. Then the message is also 1.
+
+Another detail is whether there is a more efficient strategy to computing the marginal probabilities of all the nodes (not just one) instead of having to repeat this process once for every single node in the graph, which adds on a factor $n$ complexity.
+
+All that is required to compute the marginal of a given node is that the surrounding factors have sent their message to that factor. Therefore, we can simply run the algorithm above to find the marginal for the root, and then have every variable and factor send messages downwards, starting from the root. This enables every variable node to compute its marginal.
+
+Another small detail is that we actually send $k$ messages at a time, one for each value of each variable $x_i$. 
+
+How can we generalize this algorithm to general graphs, possibly with cycles? Well it turns out that if we initialize all the messages to 1, and then iteratively run this algorithm to simultaneously update all messages, you eventually get the right answer. Maybe. 
 
 \section{Linear and Nonlinear Bayesian Models}
 
@@ -327,6 +244,10 @@ some details: message sending is a function of node doing the sending!
 \subsection{Expectation Maximization}
 
 \subsection{Variational Inference}
+
+\subsubsection{Efficient Inference in Fully Connected Gaussian CRFS}
+
+A very popular class of CRFs are dense gaussian crfs, used for image processing. In this case, variables are arranged in an n by n grid, with given unary potentials and pairwise potentials between every pair of points in the grid. 
 
 \section{Sampling Algorithms}
 
