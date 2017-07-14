@@ -1,4 +1,4 @@
-\title{Statistics Review}
+\title{Notes}
 \author{Ricson}
 \date{\today}
 \documentclass[12pt]{article}
@@ -11,11 +11,52 @@
 \usepackage{hyperref}
 \usepackage{algpseudocode}
 
-\newcommand{\eq}[1]{\begin{align*}#1\end{align*}}
-\newcommand{\enum}[1]{\begin{enumerate}#1\end{enumerate}}
-\newcommand{\itmz}[1]{\begin{itemize}#1\end{itemize}}
-\newcommand{\alg}[1]{\begin{algorithmic}#1\end{algorithmic}}
-\newcommand{\ra}{\rightarrow}
+% let the macro madness begin
+
+\newcommand{\nec}[1]{\newcommand{#1}}
+\newcommand{\rec}[1]{\renewcommand{#1}}
+
+%environments 
+\nec{\eq}[1]{\begin{align*}#1\end{align*}}
+\nec{\enum}[1]{\begin{enumerate}#1\end{enumerate}}
+\nec{\itmz}[1]{\begin{itemize}#1\end{itemize}}
+\nec{\alg}[1]{\begin{algorithmic}#1\end{algorithmic}}
+
+%symbols
+\nec{\ra}{\rightarrow}
+\nec{\la}{\leftarrow}
+
+\nec{\x}{\mathbf{x}}
+\nec{\y}{\mathbf{y}}
+\rec{\o}{\mathbf{o}}
+\nec{\RR}{\mathbb{R}}
+
+\nec{\haf}{\frac{1}{2}}
+\nec{\nhaf}{-\haf}
+\nec{\nmz}{\frac{1}{Z}}
+
+\nec{\const}{\text{const}}
+
+%calculus
+\nec{\grad}{\nabla}
+\nec{\jac}{\mathbf{J}}
+\nec{\hess}{\mathbf{H}}
+\nec{\parf}[2]{\frac{\partial #1}{\partial #2}}
+\nec{\parfsq}[3]{\frac{\partial^2 #1}{\partial #2 \partial #3}}
+
+%linear algebra
+\nec{\qf}[2]{#1^T #2 #1}
+\nec{\qfo}[3]{\qf{(#1-#3)}{#2}}
+
+%probability
+\nec{\uvnml}[3]{\frac{1}{\sqrt{2 \pi #3^2}} \exp{\left(-\frac{(#1-#2)^2}{2 #3^2}\right)}}
+\nec{\uvnmlp}[3]{\frac{\lambda}{\sqrt{2 \pi}} \exp{\left(-\frac{#3(#1-#2)^2}{2}\right)}}
+\nec{\mvnml}[3]{(2 \pi)^{-\frac{D}{2}} |#3|^{\nhaf} \exp{\left( \nhaf \qfo{#1}{#3^{-1}}{#2} \right)}}
+\nec{\mvnmlp}[3]{(2 \pi)^{-\frac{D}{2}} |#3|^{\haf} \exp{\left( \nhaf \qfo{#1}{#3}{#2} \right)}}
+
+%message passing stuff
+\nec{\msg}[2]{\mu (#1 \rightarrow #2)}
+\rec{\ne}[2]{N(#1) \setminus #2}
 
 \begin{document}
 \maketitle
@@ -29,7 +70,70 @@
 
 \subsection{Conjugate Priors}
 
-\subsection{Basic manipulations of Multivariate Gaussians}
+A prior distribution is conjugate to a conditional distribution (also known as the likelihood), when it makes Bayes' Theorem work out nicely.
+
+\eq{
+  p(x|y) \propto p(y|x)p(x)
+}
+
+When applying Bayes' Theorem, we want $p(x)$ and $p(x|y)$ to come from the same family of distributions, so that we can apply this update procedure as many times as we want. This requires $p(x)$ to be a conjugate prior to $p(y|x)$.
+
+For example, let's consider the multinomial distribution parameterized by $\vec p$.
+
+\eq{
+  p(\y|\x) &= \binom{n}{y_1, y_2, \ldots y_k} \prod_i x_i^{y_i}
+}
+
+The conjugate prior to this distribution is the dirichlet distribution, which is paramerized by $\vec \alpha$
+
+\eq{
+  p(\x) &= \frac{1}{Z} \prod_i x_i^{\alpha_i-1}
+}
+
+Now let's see what happens when we multiply them together
+
+\eq{
+  p(\x|\y) &= \frac{1}{Z} \prod_i x_i^{\alpha_i-1} x_i^{y_i} \\
+  &= \frac{1}{Z} \prod_i x_i^{\alpha_i+y_i-1}
+}
+
+So we've basically updated $\vec \alpha' \leftarrow \vec \alpha+\y$.
+
+Let's attempt to find the conjugate distribution for the normal distribution in the case of known covariance.
+
+\eq{
+  P(y|x) &= \uvnml{y}{x}{\sigma} 
+}
+
+Ideally, we want a distribution for $x$ so that when we multiply by this term, we end up with a distribution in the same family. It is easy to see that we should ignore the normalization term, and focus on the quadratic term in the exponent. Let's try a gaussian in $x$.
+
+\eq{
+  p(x) &= \uvnml{x}{\mu}{\sigma_0} \\
+  p(x|y) &= p(y|x)p(x) \\
+  &= \uvnml{y}{x}{\sigma}  \uvnml{x}{\mu}{\sigma_0} \\
+  &= \nmz \exp\left(\nhaf \left( \frac{(y-x)^2}{\sigma^2} + \frac{(x-\mu)^2}{\sigma_0^2} \right)\right)
+}
+
+We can simply the guts of this expression. At this point, notice that we only need the quadratic and linear terms of $x$. 
+
+\eq{
+  \frac{(y-x)^2}{\sigma^2} + \frac{(x-\mu)^2}{\sigma_0^2} &= \frac{\sigma_0^2 (y-x)^2 + \sigma^2 (x-\mu)^2 }{\sigma^2 \sigma_0^2} \\
+  &= \frac{\sigma_0^2 + \sigma^2}{\sigma^2 \sigma_0^2}x^2 - \frac{2(\sigma^2 \mu + \sigma_0^2 y)}{\sigma^2 \sigma_0^2} x + \const \\
+  &= \frac{\sigma_0^2 + \sigma^2}{\sigma^2 \sigma_0^2}
+  \left( x^2 - \frac{\sigma^2 \sigma_0^2}{\sigma_0^2 + \sigma^2} \frac{2(\sigma^2 \mu + \sigma_0^2 y)}{\sigma^2 \sigma_0^2}x + \const \right) \\
+  &= \frac{\sigma_0^2 + \sigma^2}{\sigma^2 \sigma_0^2}
+  \left( x^2 - 2\frac{\sigma^2 \mu + \sigma_0^2 y}{\sigma_0^2 + \sigma^2} x + \const \right) \\
+}
+
+Therefore $p(x)$ is a gaussian with precision $\frac{\sigma_0^2 + \sigma^2}{\sigma^2 \sigma_0^2}$ and mean $\frac{\sigma^2 \mu + \sigma_0^2 y}{\sigma_0^2 + \sigma^2}$. Notice that the mean is a weighted average between the prior and the likelihood.
+
+% what happens when the covariance is unknown?
+
+% multi sample case
+
+% multi dimensional case
+
+\subsection{Manipulations of Multivariate Gaussians}
 
 \subsection{Extremal Value Distributions}
 
@@ -52,9 +156,6 @@
 \section{Probabilistic Graphical Models}
 
 \subsection{Forward Backward Algorithm}
-
-\renewcommand{\o}{\mathbf{o}}
-\newcommand{\x}{\mathbf{x}}
 
 The key to deriving the forward backward algorithm for the linear-chain CRF is to realize that there is no fundamental difference between HMM and CRF.
 The likelihood of a linear-chain CRF is defined to be the product of all the potentials. But before we get mixed up in math here: $o_i$ denotes observation and $x_i$ denotes the hidden state.
@@ -131,12 +232,6 @@ And for the inductive case we have
 
 Again, all of these quantities are computable, one via induction, so we are finished here. For CRFs, since factors are not necessarily probabilities, we can carry out an extra normalization step at the end.
 \subsection{Message Passing}
-
-\newcommand{\msg}[2]{\mu (#1 \rightarrow #2)}
-\renewcommand{\ne}[2]{N(#1) \setminus #2}
-
-\newcommand{\msx}{\mu (s \rightarrow x)}
-\newcommand{\mxs}{\mu (x \rightarrow s)}
 
 Some notation:
 \itmz{
@@ -309,6 +404,37 @@ A very popular class of CRFs are dense gaussian crfs, used for image processing.
 
 \subsection{Matrix Differentials}
 
+First let's define a few functions to play around with.
+
+\itmz{
+\item $f : \RR^n \ra \RR$
+\item $g : \RR^n \ra \RR^m$
+}
+
+Now for some definitions, using what I believe is known as the numerator notation for matrix calculus (as opposed to denominator).
+
+\itmz{
+\item $\grad f$ is a column-vector in $\RR^n$ 
+\item $\jac f$ is a row-vector in $\RR^n$
+\item $\hess f$ is a matrix of size $n$ by $n$
+\item $\jac g$ is a matrix of size $m$ by $n$
+}
+
+\itmz{
+\item $[\grad f]_i$ is $\parf{f}{x_i}$
+\item $\jac f$ is $(\grad f)^T$
+\item $[\hess f]_{ij}$ is $\parfsq{f}{x_i}{x_j}$
+\item $[\jac g]_{ij}$ is $\parf{f_i}{x_j}$
+}
+
+In order to differentiate expressions, we will compute differentials instead. How do we go from computing differentials to differentiating?
+
+If $d(f(X)) = AdX$ then $\parf{f}{X} = A$. Actually we can get a bit more lax than that. 
+
+
+
+
+
 \subsection{Calculus of Variations}
 
 \subsection{Echo State Networks}
@@ -320,5 +446,21 @@ A very popular class of CRFs are dense gaussian crfs, used for image processing.
 \subsection{Gaussian Processes}
 
 \subsection{Independent Component Analysis}
+
+In ICA, we have some random variables $s$ and some square mixing matrix $M$, and the observed variables are $x = Ms$. We want to find $x$. In order to do this, we assume $s$ is drawn from the logistic distribution, which is the distribution with the cumulative distribution function $\sigma(x)$. Furthermore, we assume each of the source variables is independent. We want to learn the unmixing matrix $U = M^{-1}$. 
+
+Let's try to solve this with maximum likelihood.
+
+\eq{
+  p(s) &= p(Ux) \left| U \right| \\
+  &= |U| \prod_{u \in U} \sigma'(u^Tx) \\
+  \log p(s) &= \log |U| + \sum_{u \in U} \log \sigma'(u^T x)
+}
+
+Now at this point you just run gradient descent to get the answer. It is surprisingly easy.
+
+Another ICA algorithm involves kurtosis, which is a measure of nongaussianity. Kurtosis is the expected value of $x^4$. One may ask why we do not use skewness, which is the expectation of $x^3$. I'm not sure myself, although I have read vague and unsubstantiated claims to the effect that kurtosis somehow encompasses skewness through something called a one-bit-matching theorem.
+
+The algorithm performs kurtosis maximization in order to find the directions along which the data is projected into the least gaussian shape possible, but that's all I know about it.
 
 \end{document}
