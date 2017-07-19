@@ -10,6 +10,9 @@
 \usepackage{lmodern}
 \usepackage{hyperref}
 \usepackage{algpseudocode}
+\usepackage{todonotes}
+\usepackage{tikz}
+\usepackage{tikz-cd}
 
 % let the macro madness begin
 
@@ -21,6 +24,11 @@
 \nec{\enum}[1]{\begin{enumerate}#1\end{enumerate}}
 \nec{\itmz}[1]{\begin{itemize}#1\end{itemize}}
 \nec{\alg}[1]{\begin{algorithmic}#1\end{algorithmic}}
+\nec{\paren}[1]{\left( #1 \right)}
+\nec{\sparen}[1]{\left[ #1 \right]}
+\nec{\bexp}[1]{\exp \paren{#1}}
+\nec{\nexp}[1]{\bexp{-\paren{#1}}}
+\nec{\nhexp}[1]{\bexp{\nhaf #1}}
 
 %symbols
 \nec{\ra}{\rightarrow}
@@ -36,6 +44,9 @@
 \nec{\nmz}{\frac{1}{Z}}
 
 \nec{\const}{\text{const}}
+\nec{\smx}{\text{softmax}}
+\nec{\samp}{\text{sample}}
+\nec{\argmax}{\text{argmax}}
 
 %calculus
 \nec{\grad}{\nabla}
@@ -47,12 +58,19 @@
 %linear algebra
 \nec{\qf}[2]{#1^T #2 #1}
 \nec{\qfo}[3]{\qf{(#1-#3)}{#2}}
+\nec{\minv}[1]{#1^{-1}}
+\nec{\mdet}[1]{\left| #1 \right|}
 
 %probability
 \nec{\uvnml}[3]{\frac{1}{\sqrt{2 \pi #3^2}} \exp{\left(-\frac{(#1-#2)^2}{2 #3^2}\right)}}
-\nec{\uvnmlp}[3]{\frac{\lambda}{\sqrt{2 \pi}} \exp{\left(-\frac{#3(#1-#2)^2}{2}\right)}}
+\nec{\uvnmlp}[3]{\sqrt{\frac{#3}{2\pi}} \exp{\left(-\frac{#3(#1-#2)^2}{2}\right)}}
 \nec{\mvnml}[3]{(2 \pi)^{-\frac{D}{2}} |#3|^{\nhaf} \exp{\left( \nhaf \qfo{#1}{#3^{-1}}{#2} \right)}}
 \nec{\mvnmlp}[3]{(2 \pi)^{-\frac{D}{2}} |#3|^{\haf} \exp{\left( \nhaf \qfo{#1}{#3}{#2} \right)}}
+\nec{\nml}[2]{\mathcal{N}(#1, #2)}
+\nec{\kl}[2]{\mathcal{D}_\text{KL}(#1||#2)}
+
+\nec{\gammadist}[3]{\frac{#3^{#2}}{\Gamma(#2)} #1^{#2-1} e^{-#3 #1}}
+\nec{\gam}[2]{\mathbf{\Gamma}(#1, #2)}
 
 %message passing stuff
 \nec{\msg}[2]{\mu (#1 \rightarrow #2)}
@@ -127,34 +145,163 @@ We can simply the guts of this expression. At this point, notice that we only ne
 
 Therefore $p(x)$ is a gaussian with precision $\frac{\sigma_0^2 + \sigma^2}{\sigma^2 \sigma_0^2}$ and mean $\frac{\sigma^2 \mu + \sigma_0^2 y}{\sigma_0^2 + \sigma^2}$. Notice that the mean is a weighted average between the prior and the likelihood.
 
-% what happens when the covariance is unknown?
+In the above case, we assumed that the covariance was fixed and known. What happens when it is unknown? Our distribution becomes something like
 
-% multi sample case
+\eq{
+  P(y|x,\sigma) &= \uvnml{y}{x}{\sigma} 
+}
 
-% multi dimensional case
+Meanwhile, we are looking for a joint conjugate prior $P(x, \sigma)$. What if we let $x$ be normal like before, and also make $\sigma^2$ a normal random variable? Then
+
+\eq{
+  p(x,\sigma|y) &\propto p(y|x,\sigma) p(x,\sigma) \\
+  &= \uvnml{y}{x}{\sigma} \uvnml{x}{\mu}{\sigma_0} \uvnml{\sigma}{\mu_\sigma}{\sigma_\sigma} \\
+  &= \nmz \exp \left(-\left(\frac{(y-x)^2}{2\sigma^2} + \frac{(x-\mu)^2}{2\sigma_0^2} + \frac{(\sigma-\mu_\sigma)^2}{2\sigma_\sigma^2} \right)\right)
+}
+
+Just by looking at the sum of fractions inside the exponential, we see that we will not be able to split the terms up into a quadratic expression in $x$ and a quadratic expression in $\sigma$. This indicates that the resulting joint distribution is not gaussian like we want it to be. Therefore this distribution is not conjugate.
+
+Instead, let us split $p(x, \sigma)$ up into $p(x|\lambda)p(\lambda)$ with the following distributions.
+
+\eq{
+  p(\lambda) &\sim \gam{\alpha}{\beta} \\
+  p(x|\lambda) &\sim \nml{\mu}{(k\lambda)^{-1}}
+}
+
+Now we can carry out the same computation. Hopefully we will find that the result is something in the form of $p(x|\lambda')p(\lambda')$
+
+\eq{
+  p(x,\lambda|y) &\propto p(y|x,\lambda) p(x,\lambda) \\
+  &= \uvnmlp{y}{x}{\lambda} \uvnmlp{x}{\mu}{(k\lambda)} \gammadist{\lambda}{\alpha}{\beta} \\
+  &= \nmz \lambda^{\alpha} e^{-\beta \lambda} \exp{(\nhaf \ \cdot)}
+}
+
+We gain one $\lambda$ term from the the normalization terms, but need to spend half of it, so we end up only gaining extra $\haf$ for our gamma distribution.
+
+\eq{
+  \alpha' &= \alpha+\haf
+}
+
+Inside the exponential, ignoring the $\nhaf$ we have:
+
+\eq{
+  & \lambda (y-x)^2 +k \lambda (x-\mu)^2 \\
+  &= \lambda y^2 + \lambda x^2 -2y\lambda x + k\lambda x^2 + k\lambda \mu^2 - 2k\lambda \mu x \\
+  &= \paren{(1+k)\lambda}x^2 - 2 \paren{(k \mu +  y)\lambda} x + \lambda \paren{y^2+k\mu^2} \\
+}
+
+It may seem like we're done here, but we actually have to complete the square.
+
+\eq{
+  &= (1+k)\lambda \paren{x^2 - 2 \frac{k\mu+y}{1+k} x} + \lambda \paren{y^2+k\mu^2} \\
+  &= (1+k)\lambda \paren{x^2 - 2 \frac{k\mu+y}{1+k} x + \paren{\frac{k\mu+y}{1+k}}^2} + (1+k)\lambda \paren{y^2+k\mu^2} - \lambda \paren{\frac{k\mu+y}{1+k}}^2\\
+  &= (1+k)\lambda \paren{x - \frac{k\mu+y}{1+k}}^2 + \lambda \paren{y^2+k\mu^2 - \paren{\frac{(k\mu+y)^2}{1+k}}} \\
+  &= (1+k)\lambda \paren{x - \frac{k\mu+y}{1+k}}^2 + \lambda \paren{y^2+k\mu^2 - \frac{(k\mu+y)^2}{1+k}} \\
+  &= (1+k)\lambda \paren{x - \frac{k\mu+y}{1+k}}^2 + \lambda \paren{\frac{y^2+ky^2+k\mu^2+k^2\mu^2-(k\mu+y)^2}{1+k}} \\
+  &= (1+k)\lambda \paren{x - \frac{k\mu+y}{1+k}}^2 + \lambda \paren{
+    \frac{y^2+ky^2+k\mu^2+k^2\mu^2-k^2\mu^2-y^2+2k\mu y}{1+k}
+  } \\
+  &= (1+k)\lambda \paren{x - \frac{k\mu+y}{1+k}}^2 + \lambda \paren{
+    \frac{ky^2+k\mu^2+2k\mu y}{1+k}
+  } \\
+  &= (1+k)\lambda \paren{x - \frac{k\mu+y}{1+k}}^2 + \lambda \paren{
+    \frac{k}{1+k} \paren{y^2+\mu^2+2\mu y}
+  } \\
+  &= (1+k)\lambda \paren{x - \frac{k\mu+y}{1+k}}^2 + \lambda \paren{
+    \frac{k}{1+k} \paren{y+\mu}^2
+  } \\
+}
+
+By inspection, we can get the update rules for $\beta, \mu, k$
+
+\eq{
+  \beta' &= \beta + \haf \frac{k}{1+k} \paren{y+\mu}^2 \\
+  \mu' &= \frac{k \mu + y}{k+1} \\
+  k' &= k+1
+}
+
+So far, we've actually been cheating a bit by only using single sample updates when really, we usually update with an entire dataset.
+
+\eq{
+  P(\y|x,\lambda) &= \prod_{y \in \y} \uvnmlp{y}{x}{\lambda} \\
+  &= \paren{\frac{\lambda}{2 \pi}}^{\frac{n}{2}} \nexp{\lambda \sum_i (y_i-x)^2} \\
+  %\log P(\y|x,\lambda) &= \frac{n}{2} \log \frac{\lambda}{2 \pi} - \lambda \sum_i (y_i-x)^2
+}
+
+\eq{
+  p(x,\lambda|\y) &\propto p(\y|x,\lambda) p(x,\lambda) \\
+  &= \paren{\frac{\lambda}{2 \pi}}^{\frac{n}{2}} \nexp{\lambda \sum_i (y_i-x)^2}
+  \uvnmlp{x}{\mu}{(k\lambda)} \gammadist{\lambda}{\alpha}{\beta} \\
+  &= \nmz \lambda^{\alpha+\frac{n+1}{2}} e^{-\beta \lambda} \exp{(\nhaf \ \cdot)}
+}
+
+Inside the exponential, ignoring the $\nhaf$ we have:
+
+\eq{
+  0 &= 0 
+}
+
+\todo{multivariate normal case of conjugate priors (wishart)}
 
 \subsection{Manipulations of Multivariate Gaussians}
+.
+\subsection{Information Theory}
 
-\subsection{Extremal Value Distributions}
+Information is intuited as the number of bits it takes to represent an event. The entropy of a probability distribution is the expected information of a single event. 
 
-\section{Information Theory}
+\eq{
+  H[f] &= -E[\log f(x)] & \text{normal entropy}\\
+  H[p;q] &= -E_p[\log q(x)] & \text{cross-entropy}\\
+  H[x,y] &= -E[\log f(x,y)] & \text{joint-entropy} \\
+}
 
-\subsection{Basics}
+Another useful, if rarely used concept is mutual information
 
-\subsection{KL Divergence}
+\eq{
+  I(x;y) &= H(x) - H(x|y) & \text{and the other way around by symmetry}
+}
 
-\subsection{Fisher Information Matrix}
+KL-divergence is defined below. It is not symmetric but it is always positive. 
+
+\eq{
+  \kl{p}{q} &= -E_p \sparen{\log \frac{p(x)}{q(x)}}
+}
+
+Note that with respect to $q$, KL-divergence and cross-entropy are equivalent up to a constant factor. In fact:
+
+\eq{
+  \kl{p}{q} &= H[p] + H[p;q]
+}
+
+The fisher information matrix $F(\theta)$ is defined as
+
+\eq{
+  F_{ij}(\theta) &= E_q \sparen{\parf{\log q(x)}{\theta_i} \parf{\log q(x)}{\theta_j}}
+}
+
+for some parameterized probability distribution $q$. 
+
+There are many confusing interpretations of the fisher information matrix.
+
+In my opinion, it is best seen as the hessian of the KL-divergence.
+
+\eq{
+  \kl{p}{q_\theta} &= -E_p[\log \frac{p(x)}{q(x)}] \\
+  &= -E_p[\log p(x) - \log q(x)] \\
+  \hess_\theta \kl{p}{q_\theta} &= -\hess_\theta E_p[\log p(x) -\log q_\theta(x)] \\
+  &= \hess_\theta E_p[\log q_\theta(x)] \\
+  &= E_p[\hess_\theta \log q_\theta(x)] \\
+  &= E_q \sparen{ \parf{\log q(x)}{\theta_i} \parf{\log q(x)}{\theta_j}}
+}
 
 \section{Linear Algebra}
-
 \subsection{Identities}
-
+.
 \subsection{Singular Value Decomposition}
-
+.
 \subsection{Principle Component Analysis}
-
+.
 \section{Probabilistic Graphical Models}
-
 \subsection{Forward Backward Algorithm}
 
 The key to deriving the forward backward algorithm for the linear-chain CRF is to realize that there is no fundamental difference between HMM and CRF.
@@ -231,6 +378,9 @@ And for the inductive case we have
 }
 
 Again, all of these quantities are computable, one via induction, so we are finished here. For CRFs, since factors are not necessarily probabilities, we can carry out an extra normalization step at the end.
+
+\todo{check that this is equiv to MP}
+
 \subsection{Message Passing}
 
 Some notation:
@@ -324,82 +474,85 @@ How can we generalize this algorithm to general graphs, possibly with cycles? We
 \section{Linear and Nonlinear Bayesian Models}
 
 \subsection{Bayesian Linear Regression}
-
+.
 \subsubsection{Evidence Approximation}
-
+.
 \subsection{Bayesian Logistic Regression}
-
+.
 \subsubsection{Laplace Approximation}
-
+.
 \subsection{Spline and Wavelet Bases}
-
+.
 \subsection{Bayesian Neural Networks}
+
 \section{Approximate Inference}
 
 \subsection{Expectation Maximization}
-
+.
 \subsection{Variational Inference}
-
+.
 \subsubsection{Efficient Inference in Fully Connected Gaussian CRFS}
 
 A very popular class of CRFs are dense gaussian crfs, used for image processing. In this case, variables are arranged in an n by n grid, with given unary potentials and pairwise potentials between every pair of points in the grid. 
 
+\todo{finish after variation section is done}
+
 \section{Sampling Algorithms}
 
 \subsection{Importance Sampling}
-
+.
 \subsection{Monte Carlo Markov Chain}
-
+.
 \subsubsection{Metropolis Hastings}
-
+.
 \subsubsection{Reversible Jump MCMC}
-
+.
 \subsection{Gibbs Sampling}
-
+.
 \section{Optimization}
 
 \subsection{Lagrange Multipliers}
-
+.
 \subsection{Lagrangian Duality}
-
+.
 \subsection{KKT Conditions}
-
+.
 \subsection{SGD Variants}
-
+.
 \subsection{BADMM Algorithm}
-
+.
 \section{Reinforcement Learning}
 
 \subsection{Optimal Control}
 
 \subsubsection{LQR}
-
+.
 \subsubsection{MPC and ILQR}
-
+.
 \subsubsection{Stochastic Optimal Control}
-
+.
 \subsection{Policy Gradients}
-
+.
 \subsection{Natural Policy Gradients}
-
+.
 \subsection{Trust Region Policy Optimization}
-
+.
 \subsection{Guided Policy Search}
-
+.
 \subsection{End to End Deep Visuomotor Policies}
-
+.
 \section{Neural Networks}
 
 \subsection{Variational Autoencoders}
-
+.
 \subsection{Architectures}
 
 \subsubsection{Neural Turing Machine}
-
+.
 \subsubsection{Neural GPU}
-
+.
 \subsubsection{Grid LSTM}
-
+.
 \section{Miscellaneous}
 
 \subsection{Matrix Differentials}
@@ -429,22 +582,133 @@ Now for some definitions, using what I believe is known as the numerator notatio
 
 In order to differentiate expressions, we will compute differentials instead. How do we go from computing differentials to differentiating?
 
-If $d(f(X)) = AdX$ then $\parf{f}{X} = A$. Actually we can get a bit more lax than that. 
+If $d(f(X)) = AdX$ then $\parf{f}{X} = A$. Actually we can get a bit more lax than that, it turns out that $d(f(x)) = tr(AdX)$ implies $\parf{f}{X} = A$. 
 
+Differentials are linear operators. Things work as you expect when dealing with sums, constants, and transposes. However, there are a few tricky cases.
 
+The product rule works as usual, but order is very important, because multiplication does not commute anymore. As written below, the shapes should be compatible. 
+\eq{
+  d \paren{f(x)g(x)} &= df(x)g(x) + f(x)dg(x)
+}
 
+An example of the product rule in use.
 
+\eq{
+  d(x^Tx) &= (dx^T)x + x^T(dx) \\
+  &= (dx)^Tx + x^T(dx) \\
+  &= x^T(dx) + x^T(dx) \\
+  &= 2x^T(dx)
+}
+
+The same warning about order applies to chainrule as well.
+\eq{
+  y &= g(x) \\
+  d(f(g(x))) &= d_y(f(y)) d_x(g(x)) 
+}
+
+And the example:
+
+\eq{
+  d((x^Tx)^5) &= 5(x^Tx)^4 d(x^Tx) \\
+  &= 10(x^Tx)^4 x^T(dx)
+}
+
+One very useful tool is the trace operator, written $tr$ which simply takes the sum of all the elements on the diagonal of the matrix. Trace is a linear operator and comes with all the corresponding convenient properties. 
+
+Some other useful properties of trace.
+
+\eq{
+  tr(ABC) &= tr(CBA) & \text{cyclic permutation} \\
+  tr(XX^T) &= ||X||^2 & \text{the frobenius norm}  \\
+  tr(A) &= tr(A^T) \\
+}
+
+Example of using traces:
+
+\eq{
+  d(||Z-xx^T||^2) &= d tr(\paren{Z-xx^T}\paren{Z-xx^T}^T) \\
+  &= d tr(ZZ^T + (xx^T)(xx^T)^T - Z(xx^T)^T - xx^TZ^T) \\
+  &= d tr(ZZ^T + xx^Txx^T - Zxx^T - xx^TZ^T) \\
+  &= d tr(ZZ^T) + d tr(xx^Txx^T) - d tr(Zxx^T) - d tr(xx^TZ^T) \\
+  &= d tr(x^Txx^Tx) - d tr(Zxx^T) - d tr(Zxx^T) \\
+  &= d (x^Tx)^2 - 2 d tr(Zxx^T) \\
+  &= 4x^Tx x^T (dx) - 2 d tr(x^T Z x) \\
+  &= 4x^Tx x^T (dx) - 2 d(x^T Z x) \\
+  &= 4x^Tx x^T (dx) - 4 x^T Z dx & \text{assuming $Z$ is symmetric}\\
+}
+
+There are two special cases of differentials -- inverses, and log determinants. I won't prove these claims.
+
+\eq{
+  d(X^{-1}) &= -\minv{X}(dX)\minv{X} \\
+  d(\log \mdet{X}) &= tr(\minv{X} dX)
+}
 
 \subsection{Calculus of Variations}
 
+In this section, we will introduce calculus of variations and use it to show that the normal distribution is the probability distribution with variance 1 which has the highest entropy.
+
+\todo{write this}
+
 \subsection{Echo State Networks}
 
-\subsection{Gumbel Trick}
+Echo state machines are relic of the past, from when RNNs could not be trained effectively. The main component of an ESN is a reservoir of neurons which are sparsely connected together. The input connects to the reservoir and the reservoir connects to the output. In addition, it is possible for output neurons to feed back into the reservoir, although this can cause stability issues.
+
+Therefore, naive operation of the ESN may be expressed by the following expression, where $o$ is used to denote output neurons, $x$ is input neurons, and $h$ is the reservoir state.
+
+\eq{
+  h_t &= Ax + Bh_{t-1} \\
+  o_t &= Ch_t
+}
+
+However, in order to give an ESN sufficiently long term memory, the reservoir should be damped with a damping factor $\lambda$. The modified equations for updating the reservoir with damping are
+
+\eq{
+  \hat{h_t} &= Ax + Bh_{t-1} \\
+  h_t &= (1-\lambda)h_{t-1} + \lambda \hat{h_t}
+}
+
+The reservoir is initialized with random weights. There are guidelines on weight initialization, which we will not cover. Interestingly, reservoir weights are not trained at all.
+
+Instead, only output weights $C$ are trained using standard backpropagation so that the outputs $o$ match the target sequence $y$. 
+
+\subsection{Gumbel Softmax Trick}
+
+Sampling from a gaussian distribution is differentiable using the reparameterization trick. In order to sample from $\nml{f(x)}{\sigma}$, where $f$ is an arbitrary function, we can simply sample from $\nml{0}{\sigma}$ and then add that noise value onto $f(x)$. Then when we backpropagate, the gradients run through $f(x)$ as well.
+
+However, this doesn't seem to work for sampling from multinomial distributions. The gumbel softmax trick is a way to backpropagate from sampling from these distributions. 
+
+The gumbel trick to sample from multinomial distributions goes like this. Given the vector $x$ whose components sum to 1, we compute $\log(x)$, and then we add noise from some distribution so that the chance that the $j$th component is largest is $p_j$. So sampling from $x$ is a matter of adding noise and taking $\argmax$. As it happens, the distribution which works is known as the gumbel distribution.
+
+You might notice that Gumbel's trick still doesn't solve our problem, because the argmax we used kills the gradients. 
+
+Commonly, when reparameterization does not work, we resort to straight-through estimators, where we replace the gradient of some non-differentiable function f(x) with a proxy g'(x). For example, $g(x) = x$ is a good approximation to the $\samp(x)$ function. Therefore, when we backpropagate, the gradient is multiplied by 1.
+
+This approach is fairly effective, but it suffers from some deficiencies, namely high variance, since we are sampling.
+
+In the gumbel softmax trick, we sample from $x$ by doing $\samp(\smx(\log(x)+g))$ where $g$ is something known as gumbel noise. Then when we backpropagate, replace the derivative of $\samp$ with $1$ as usual. Why does this have any lower variance than before? We might expect it to have higher variance, since we are both sampling and also adding noise. However, note that the sampling algorithm from before, which was just $\samp(x)$ is equivalent to $\samp(\argmax(\log(x)+g))$. By replacing $\smx$ with $\argmax$, we are clearly reducing variance, at the cost of some bias.
+
+To gain finer control over the balance between bias and variance, we can replace the $\smx$ function with $\smx_\tau(x) = \smx\paren{x/\tau}$. When $\tau = 1$, this is equivalent to softmax. When $\tau = 0$, this approaches $\argmax$. Finally, when $\tau \rightarrow \infty$, this approaches the uniform distribution.
+
+The gumbel softmax paper found good results by starting $\tau$ at a high value, perhaps 10, and then annealing it to a low value, like 0.1. It also made the suggestion that $\tau$ could even be a learned parameter. 
+
+Now what is Gumbel's distribution and where did it come from? The best way to explain it is that a gumbel distribution is like the normal distribution but replacing the sum with the max. Just as the sum of sufficiently many iid random variables will converge to the normal, taking the max of sufficiently many iid random variables will converge to the gumbel distribution -- well almost. We need the additional assumption that the distributions have an exponentially decaying tail, which is true for many distributions, including everything in the exponential family.
+
+The distribution itself has the following CDF and PDF:
+
+\eq{
+  F(x) &= \bexp{-\bexp{-x}} \\
+  f(x) &= \nexp{x+e^{-x}}
+}
+
+The final piece of this puzzle is to prove that the gumbel trick actually works.
+
+\todo{proof}
 
 \subsection{Support Vector Machines}
-
+.
 \subsection{Gaussian Processes}
-
+.
 \subsection{Independent Component Analysis}
 
 In ICA, we have some random variables $s$ and some square mixing matrix $M$, and the observed variables are $x = Ms$. We want to find $x$. In order to do this, we assume $s$ is drawn from the logistic distribution, which is the distribution with the cumulative distribution function $\sigma(x)$. Furthermore, we assume each of the source variables is independent. We want to learn the unmixing matrix $U = M^{-1}$. 
@@ -462,5 +726,35 @@ Now at this point you just run gradient descent to get the answer. It is surpris
 Another ICA algorithm involves kurtosis, which is a measure of nongaussianity. Kurtosis is the expected value of $x^4$. One may ask why we do not use skewness, which is the expectation of $x^3$. I'm not sure myself, although I have read vague and unsubstantiated claims to the effect that kurtosis somehow encompasses skewness through something called a one-bit-matching theorem.
 
 The algorithm performs kurtosis maximization in order to find the directions along which the data is projected into the least gaussian shape possible, but that's all I know about it.
+
+\section{Category Theory}
+
+\subsection{Pentagrams}
+
+% draw a pentagram
+\begin{tikzcd}[column sep=1.0em, row sep=18.0]
+  {}&{}&\Omega
+  \ar[rddddd, two heads, "\beta" near start]  
+  \ar[rrdd, hook, "\mathcal{C}"]
+  &{}&{}
+  \\\\
+  \Lambda
+  \ar[rrrr, two heads, "\delta" near end]
+  \ar[uurr, hook, "\mathcal{H}"]  
+  &{}&{}&{}&
+  \Gamma
+  \ar[lllddd, two heads, "\rho" near start]
+  \ar[dddl, hook, "\mathcal{G}"]
+  \\\\\\
+  {}&
+  \Xi
+  \ar[uuuuur, two heads, "\alpha" near end]
+  \ar[luuu, hook, "\mathcal{Z}"]
+  &{}&
+  \Psi
+  \ar[llluuu, two heads, "\chi" near end]  
+  \ar[ll, hook, "\mathcal{Q}"]
+  &{}
+\end{tikzcd}
 
 \end{document}
