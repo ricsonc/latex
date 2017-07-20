@@ -10,7 +10,6 @@
 \usepackage{lmodern}
 \usepackage{hyperref}
 \usepackage{algpseudocode}
-\usepackage{todonotes}
 \usepackage{tikz}
 \usepackage{tikz-cd}
 
@@ -48,12 +47,15 @@
 \nec{\samp}{\text{sample}}
 \nec{\argmax}{\text{argmax}}
 
+\nec{\inv}[1]{\frac{1}{#1}}
+
 %calculus
 \nec{\grad}{\nabla}
 \nec{\jac}{\mathbf{J}}
 \nec{\hess}{\mathbf{H}}
 \nec{\parf}[2]{\frac{\partial #1}{\partial #2}}
 \nec{\parfsq}[3]{\frac{\partial^2 #1}{\partial #2 \partial #3}}
+\nec{\st}{\text{subject to }}
 
 %linear algebra
 \nec{\qf}[2]{#1^T #2 #1}
@@ -83,7 +85,15 @@
 
 \newpage
 
+\section{Todo}
 
+\itmz{
+  \item finish section on conjugate priors
+  \item write section on RL (or at least COMA)
+  \item write section on various NN architectures
+  \item variational calculus
+  \item optimization
+}
 \section{Probability Theory}
 
 \subsection{Conjugate Priors}
@@ -238,10 +248,57 @@ So far, we've actually been cheating a bit by only using single sample updates w
 Inside the exponential, ignoring the $\nhaf$ we have:
 
 \eq{
-  0 &= 0 
+  & \lambda \sum_i (y_i-x)^2 +k \lambda (x-\mu)^2 \\
+  &= \lambda \sum_i y_i^2 + \lambda n x^2 -2\paren{\sum_i y_i}\lambda x + k\lambda x^2 + k\lambda \mu^2 - 2k\lambda \mu x \\
+  &= \paren{(n+k)\lambda}x^2 - 2 \lambda \paren{k \mu + \paren{\sum_i y_i}} x + \lambda \paren{\paren{\sum_i y_i^2}+k\mu^2} \\
 }
 
-\todo{multivariate normal case of conjugate priors (wishart)}
+For convenience, lets define some shorthand terms:
+
+\eq{
+  S_y &= \sum_i y_i \\
+  S_{y^2} &= \sum_i y^2_i
+}
+
+As before, we want to complete the square
+
+\eq{
+  &(n+k)\lambda x^2 - 2 \lambda \paren{k \mu + S_y} x + \lambda \paren{S_{y^2}+k\mu^2} \\
+  &= (n+k)\lambda \paren{x^2 - 2 \frac{k \mu + S_y}{(n+k)} x} + \lambda \paren{S_{y^2}+k\mu^2} \\
+  &= (n+k)\lambda \paren{x^2 - 2 \frac{k \mu + S_y}{(n+k)} x + \paren{\frac{k \mu + S_y}{(n+k)}}^2}
+  + \lambda \paren{S_{y^2}+k\mu^2} - (n+k)\lambda \paren{\frac{k \mu + S_y}{n+k}}^2\\
+  &= (n+k)\lambda \paren{x - \frac{k \mu + S_y}{(n+k)}}^2
+  + \lambda \paren{S_{y^2}+k\mu^2} - \lambda \frac{(k \mu + S_y)^2}{n+k}\\
+  &= (n+k)\lambda \paren{x - \frac{k \mu + S_y}{(n+k)}}^2
+  + \lambda \paren{S_{y^2}+k\mu^2 - \frac{(k \mu + S_y)^2}{n+k}}\\
+  &= 0
+}
+
+Again, we derive the update rules from inspection:
+
+\eq{
+  \beta' &= \beta + \haf \paren{S_{y^2}+k\mu^2 - \frac{(k \mu + S_y)^2}{n+k}} \\
+  \mu' &= \frac{k\mu + S_y}{n+k} \\
+  k' &= k+n
+}
+
+I found this alternate update rule for $\beta$ from some lecture notes online, so we will check that they are actually equivalent.
+
+\eq{
+  \beta &= \sum_i (y_i - \bar y)^2 + \frac{nk}{n+k}(\bar y - \mu)^2 \\
+  &= S_{y^2} - 2 \bar y S_y + n \bar y^2 + \frac{nk}{n+k}\mu^2 + \frac{nk}{n+k} \bar y^2 - 2 \frac{nk}{n+k}\mu \bar y \\
+  &= S_{y^2} + k\mu^2 - 2 \bar y S_y + n \bar y^2 - \frac{k^2}{n+k}\mu^2 + \frac{nk}{n+k} \bar y^2 - 2 \frac{nk}{n+k}\mu \bar y \\
+  &= S_{y^2} + k\mu^2 - 2 \inv n S_y^2 + \inv n S_y^2 - \frac{k^2}{n+k}\mu^2 + \frac{k}{n(n+k)}  S_y^2 - 2 \frac{k}{n+k}\mu S_y \\
+  &= S_{y^2} + k\mu^2 + \paren{\inv n-2 \inv n+\frac{k}{n(n+k)}}S_y^2 - 2\frac{k}{n+k}\mu S_y -\frac{k^2}{n+k}\mu^2 \\
+  &= S_{y^2} + k\mu^2 - \frac{1}{n+k}S_y^2 - 2\frac{k\mu}{n+k} S_y -\frac{k^2}{n+k}\mu^2 \\
+  &= S_{y^2} + k\mu^2 - \frac{\paren{k\mu + S_y}^2}{n+k}
+}
+
+The last thing to deal with is the multivariate gaussian distribution.
+
+\eq{
+  0 &= 0
+}
 
 \subsection{Manipulations of Multivariate Gaussians}
 .
@@ -379,8 +436,6 @@ And for the inductive case we have
 
 Again, all of these quantities are computable, one via induction, so we are finished here. For CRFs, since factors are not necessarily probabilities, we can carry out an extra normalization step at the end.
 
-\todo{check that this is equiv to MP}
-
 \subsection{Message Passing}
 
 Some notation:
@@ -493,9 +548,7 @@ How can we generalize this algorithm to general graphs, possibly with cycles? We
 .
 \subsubsection{Efficient Inference in Fully Connected Gaussian CRFS}
 
-A very popular class of CRFs are dense gaussian crfs, used for image processing. In this case, variables are arranged in an n by n grid, with given unary potentials and pairwise potentials between every pair of points in the grid. 
-
-\todo{finish after variation section is done}
+A very popular class of CRFs are dense gaussian crfs, used for image processing. In this case, variables are arranged in an n by n grid, with given unary potentials and pairwise potentials between every pair of points in the grid.
 
 \section{Sampling Algorithms}
 
@@ -512,7 +565,14 @@ A very popular class of CRFs are dense gaussian crfs, used for image processing.
 \section{Optimization}
 
 \subsection{Lagrange Multipliers}
-.
+
+We want to solve the problem
+
+\eq{
+  \min f(x) \\
+  \st g(x) = 0
+}
+
 \subsection{Lagrangian Duality}
 .
 \subsection{KKT Conditions}
@@ -540,6 +600,8 @@ A very popular class of CRFs are dense gaussian crfs, used for image processing.
 \subsection{Guided Policy Search}
 .
 \subsection{End to End Deep Visuomotor Policies}
+.
+\subsection{Counterfactual Multi-Agent Policy Gradients}
 .
 \section{Neural Networks}
 
@@ -648,8 +710,6 @@ There are two special cases of differentials -- inverses, and log determinants. 
 
 In this section, we will introduce calculus of variations and use it to show that the normal distribution is the probability distribution with variance 1 which has the highest entropy.
 
-\todo{write this}
-
 \subsection{Echo State Networks}
 
 Echo state machines are relic of the past, from when RNNs could not be trained effectively. The main component of an ESN is a reservoir of neurons which are sparsely connected together. The input connects to the reservoir and the reservoir connects to the output. In addition, it is possible for output neurons to feed back into the reservoir, although this can cause stability issues.
@@ -701,9 +761,40 @@ The distribution itself has the following CDF and PDF:
   f(x) &= \nexp{x+e^{-x}}
 }
 
-The final piece of this puzzle is to prove that the gumbel trick actually works.
+The final piece of this puzzle is to prove that the gumbel trick actually works. Being lazy, I will only bother proving it in the binary case. 
 
-\todo{proof}
+\eq{
+  &P(\log p_1 + g_1 > \log p_2 + g_2) \\
+  &= P \paren{\log \frac{p_1}{p_2} + g_1 > g_2} \\
+  &= \int f(x) P\paren{\log \frac{p_1}{p_2} + x > g_2} dx \\
+  &= \int f(x) F\paren{\log \frac{p_1}{p_2} + x} dx \\
+  &= \int \nexp{x+e^{-x}} \bexp{-\nexp{\log \frac{p_1}{p_2} + x}} dx \\
+  &= \int \nexp{x+e^{-x} + \nexp{x + \log \frac{p_2}{p_1}}} dx \\  
+  &= \int \nexp{x+e^{-x} + e^{-x} \bexp{\log \frac{p_2}{p_1}}} dx \\
+  &= \int \nexp{x + \paren{1+\frac{p_2}{p_1}}e^{-x}} dx \\
+  &= \int \nexp{x + ke^{-x}} dx \\
+  &= \frac{1}{k} \\
+  &= \frac{1}{\frac{p_1+p_2}{p_1}}\\
+  &= \frac{p_1}{p_1+p_2} \\
+  &= \frac{p_1}{p_1+p_2}
+}
+
+Proof of the integral which I skimmed over:
+
+\eq{
+  u &= e^{-x} \\
+  x &= -\log u \\
+  dx &= -\frac{1}{u} du \\
+  &\int \nexp{x + ke^{-x}} dx \\
+  &= \int \frac{1}{u} \nexp{-\log u + ku} du\\
+  &= \int \frac{1}{u} \bexp{\log u - ku} du\\
+  &= \int \frac{1}{u} u \nexp{ku} du\\
+  &= \int \exp(-ku) du \\
+  &= \frac{1}{k} exp(-ku) \bigm|_{-\infty}^{\infty} \\
+  &= \frac{1}{k}
+}
+
+This completes the proof.
 
 \subsection{Support Vector Machines}
 .
@@ -756,5 +847,15 @@ The algorithm performs kurtosis maximization in order to find the directions alo
   \ar[ll, hook, "\mathcal{Q}"]
   &{}
 \end{tikzcd}
+
+\subsection{Introduction}
+
+A category is a mathematical object composed of objects and morphisms. Each morphism is an arrow from one object to another. Any two morphisms can be composed to form a new one in the obvious way. There are several requirements that a category must adhere to.
+
+\itmz{
+\item The morphisms are closed under composition
+\item There is an identity morphism for each object
+\item Morphism composition is associative
+}
 
 \end{document}
