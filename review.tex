@@ -63,6 +63,9 @@
 \nec{\qfo}[3]{\qf{(#1-#3)}{#2}}
 \nec{\minv}[1]{#1^{-1}}
 \nec{\mdet}[1]{\left| #1 \right|}
+\nec{\tr}{\text{tr}}
+\nec{\sos}[1]{#1^T #1}
+\nec{\scov}[1]{#1 #1^T}
 
 %probability
 \nec{\uvnml}[3]{\frac{1}{\sqrt{2 \pi #3^2}} \exp{\left(-\frac{(#1-#2)^2}{2 #3^2}\right)}}
@@ -309,20 +312,82 @@ The last thing to deal with is the multivariate gaussian distribution. The likel
 We see that both the posterior and prior must have a quadratic term in $x$, and a polynomial term in the determinant of $\Lambda$. Mirroring the gaussian-gamma distribution, we try the following prior:
 
 \eq{
-  p(\Lambda) &\sim \mathcal{W}({\alpha}{\beta}) \\
-  p(x) &\sim \nml{\mu}{k L}
+  p(\Lambda) &\sim \mathcal{W}(V,m) \\
+  p(x) &\sim \nml{\mu}{k \Lambda}
 }
 
-The Wishart probability distribution $\mathcal{W}$ has density:
+The Wishart probability distribution $\mathcal{W}$ characterized as the probability density of $X^TX$ where $X$ is a matrix constructed by drawing $m$ samples from a normal distribution with zero mean and covariance $V$. However, it is possible to derive the wishart distribution simply by looking at the likelihood.
+
+Notice that we need a term polynomial in the determinant of $\Lambda$. Second, we want some function of $\Lambda$ in the exponent. This should match up with the term that results when we complete the square, so it must be a scalar value.
+
+Our strategy will be to multiply the likelihood by the gaussian factor in the prior, and then add on whatever terms are necessary to complete the job, deriving the wishart density along the way.
 
 \eq{
-  p(\Lambda) &= \frac{1}{Z} |\Lambda|^\alpha \bexp{-\beta |\Lambda|}
+  p(x|\y) &\propto p(\y|x)p(x) \\
+  &= p(\y|x)p(x|\mu, k\Lambda)p(L) \\
+  &= (2 \pi)^{-\frac{ND}{2}} |\Lambda|^{\frac{N}{2}} \bexp{\nhaf \sum_i \qfo{y_i}{\Lambda}{x}}
+  \mvnmlp{x}{\mu}{k \Lambda} p(L)\\
+  &= \nmz |\Lambda|^{\frac{N+1}{2}} \bexp{\nhaf \sum_i \qfo{y_i}{\Lambda}{x}}
+  \bexp{\nhaf \qfo{x}{k\Lambda}{\mu} }p(L) \\
 }
 
-Given both of these, we can now compute the posterior:
+Lets explore the terms inside the exponential:
 
 \eq{
-  0 &= 0
+  &\sum_i \qfo{y_i}{\Lambda}{x} + \qfo{x}{k \Lambda}{\mu} \\
+  &= (n+k)\qf{x}{\Lambda} + \sum_i \qf{y_i}{\Lambda} + k\qf{\mu}{\Lambda}
+  - 2k\mu^T \Lambda x - 2 x^T \Lambda \sum_i y_i \\
+}
+
+Now we can complete the terms with respect to $x$. Given that $A = (n+k)\Lambda$ and $b = 2k\Lambda \mu$, this comes out to
+
+\eq{
+  &\qfo{x}{A}{\minv A b} - \qf{b}{A} + \sum_i \qf{y_i}{\Lambda} - 2k\qf{\mu}{\Lambda} \\
+  &= \qfo{x}{(n+k)\Lambda}{\minv{((n+k)\Lambda)}b} - \qf{(2k\Lambda \mu)}{((n+k)\Lambda)} +
+  \sum_i \qf{y_i}{\Lambda} - 2k\qf{\mu}{\Lambda}\\
+}
+
+So the extra terms are
+\eq{
+  & \sum_i \qf{y_i}{\Lambda} - 2k\qf{\mu}{\Lambda} - \qf{(2k\Lambda \mu)}{((n+k)\Lambda)}\\
+  &= \sum_i \qf{y_i}{\Lambda} - 2k\qf{\mu}{\Lambda} - 4k^2(n+k) \qf{(\Lambda \mu)}{\Lambda} \\
+}
+
+Ideally, we want to combine these quadratic forms into one term, however, this is nontrivial, because we cannot simply add two forms:
+
+\eq{
+  \qf{x}{A} + \qf{y}{A} \neq \qf{(x+y)}{A}
+}
+
+However, we can play a neat trick by using traces:
+
+\eq{
+  \qf{x}{A} &= \tr ( \qf{x}{A}) \\
+  &= \tr (xx^T A)
+}
+
+Now we can add the forms.
+
+\eq{
+  \qf{x}{A} + \qf{y}{A} &= tr\paren{\paren{xx^T + yy^T} A}
+}
+
+Similarly, if we define $\Omega$
+
+\eq{
+  \Omega &= \sum_i \scov{y_i} + 2k \scov{\mu} - 4k^2(n+k) \scov{ (\Lambda \mu) } \\
+  &= \sum_i \scov{y_i} + 2k \scov{\mu} - 4k^2(n+k) \Lambda {\scov{\mu}} \Lambda \\
+}
+
+Then the extra terms come out to $\tr(\Omega \Lambda)$. Now we know that our prior $p(\Lambda)$ must have something to the effect of $\bexp{\nhaf tr(M\Lambda)}$ in it. Furthermore, $M$ must be a function of $V$, which is the only matrix parameter in the wishart distribution. We choose $M = \minv V$.
+
+Now we may derive the update rules
+
+\eq{
+  \mu' &= \mu \\
+  k' &= k \\
+  V' &= V \\
+  m' &= m
 }
 
 \subsection{Manipulations of Multivariate Gaussians}
@@ -397,10 +462,10 @@ Now let's try the vector/matrix formula, replacing division with multiplcation b
 
 \eq{
   & \qfo{x}{A}{\minv A b} - \qf{b}{A} \\
-  &= \qf{x}{A} + \qf{(\minv A b)}{A} - x^T A (\minv A b) - \qf{b}{A} \\
-  &= \qf{x}{A} + b^T A^{-1^T} A\minv A b - x^Tb - \qf{b}{A} \\
-  &= \qf{x}{A} + b^T A^{-1^T} b - x^T b - \qf{b}{\minv A} \\
-  &= \qf{x}{A} - b^T x \\
+  &= \qf{x}{A} + \qf{(\minv A b)}{A} - 2x^T A (\minv A b) - \qf{b}{A} \\
+  &= \qf{x}{A} + b^T A^{-1^T} A\minv A b - 2x^Tb - \qf{b}{A} \\
+  &= \qf{x}{A} + b^T A^{-1^T} b - 2x^T b - \qf{b}{\minv A} \\
+  &= \qf{x}{A} - 2b^T x \\
 }
 
 This completes the proof. Notice that we played a bit loosely with the matrix $A$, assuming that is was symmetric, which means the inverse is also symmetric. Symmetric matrices are usually a safe assumption for quadratic coefficients, because every non-symmetric quadratic form can be converted into a symmetric one. Proof.
