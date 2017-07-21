@@ -12,6 +12,7 @@
 \usepackage{algpseudocode}
 \usepackage{tikz}
 \usepackage{tikz-cd}
+\usepackage{color}
 
 % let the macro madness begin
 
@@ -77,6 +78,10 @@
 %message passing stuff
 \nec{\msg}[2]{\mu (#1 \rightarrow #2)}
 \rec{\ne}[2]{N(#1) \setminus #2}
+
+% convenience
+\nec{\todo}[1]{{\color{red} \textbf{todo: #1}}}
+
 
 \begin{document}
 \maketitle
@@ -294,7 +299,27 @@ I found this alternate update rule for $\beta$ from some lecture notes online, s
   &= S_{y^2} + k\mu^2 - \frac{\paren{k\mu + S_y}^2}{n+k}
 }
 
-The last thing to deal with is the multivariate gaussian distribution.
+The last thing to deal with is the multivariate gaussian distribution. The likelihood function is:
+
+\eq{
+  P(\y|x) &= \prod_i \mvnmlp{y_i}{x}{\Lambda} \\
+  &= (2 \pi)^{-\frac{ND}{2}} |\Lambda|^{\frac{N}{2}} \bexp{\nhaf \sum_i \qfo{y_i}{\Lambda}{x}}
+}
+
+We see that both the posterior and prior must have a quadratic term in $x$, and a polynomial term in the determinant of $\Lambda$. Mirroring the gaussian-gamma distribution, we try the following prior:
+
+\eq{
+  p(\Lambda) &\sim \mathcal{W}({\alpha}{\beta}) \\
+  p(x) &\sim \nml{\mu}{k L}
+}
+
+The Wishart probability distribution $\mathcal{W}$ has density:
+
+\eq{
+  p(\Lambda) &= \frac{1}{Z} |\Lambda|^\alpha \bexp{-\beta |\Lambda|}
+}
+
+Given both of these, we can now compute the posterior:
 
 \eq{
   0 &= 0
@@ -352,8 +377,36 @@ In my opinion, it is best seen as the hessian of the KL-divergence.
 }
 
 \section{Linear Algebra}
-\subsection{Identities}
+\subsection{Identities and Manipulations}
 .
+\subsubsection{Completing the Square}
+
+The scalar case:
+\eq{
+  x^2-2x &= x^2-2x+1-1 = (x-1)^2 -1
+}
+
+A more general form:
+\eq{
+  ax^2-2bx &= a\paren{x^2-2\frac{b}{a}x} \\
+  &= a\paren{x^2-2\frac{b}{a}x + \paren{\frac{b}{a}}^2} - a\paren{\frac{b}{a}}^2\\
+  &= a\paren{x - \frac{b}{a}}^2 - \frac{b^2}{a}\\
+}
+
+Now let's try the vector/matrix formula, replacing division with multiplcation by the inverse matrix. We will work backwards.
+
+\eq{
+  & \qfo{x}{A}{\minv A b} - \qf{b}{A} \\
+  &= \qf{x}{A} + \qf{(\minv A b)}{A} - x^T A (\minv A b) - \qf{b}{A} \\
+  &= \qf{x}{A} + b^T A^{-1^T} A\minv A b - x^Tb - \qf{b}{A} \\
+  &= \qf{x}{A} + b^T A^{-1^T} b - x^T b - \qf{b}{\minv A} \\
+  &= \qf{x}{A} - b^T x \\
+}
+
+This completes the proof. Notice that we played a bit loosely with the matrix $A$, assuming that is was symmetric, which means the inverse is also symmetric. Symmetric matrices are usually a safe assumption for quadratic coefficients, because every non-symmetric quadratic form can be converted into a symmetric one. Proof.
+
+\todo{proof!}
+
 \subsection{Singular Value Decomposition}
 .
 \subsection{Principle Component Analysis}
