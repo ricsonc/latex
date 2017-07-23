@@ -1,5 +1,5 @@
 \title{Notes}
-\author{Ricson}
+\author{Ricson Cheng}
 \date{\today}
 \documentclass[12pt]{article}
 
@@ -57,6 +57,7 @@
 \nec{\parf}[2]{\frac{\partial #1}{\partial #2}}
 \nec{\parfsq}[3]{\frac{\partial^2 #1}{\partial #2 \partial #3}}
 \nec{\st}{\text{subject to }}
+\nec{\lag}{\mathcal{L}}
 
 %linear algebra
 \nec{\qf}[2]{#1^T #2 #1}
@@ -74,9 +75,12 @@
 \nec{\mvnmlp}[3]{(2 \pi)^{-\frac{D}{2}} |#3|^{\haf} \exp{\left( \nhaf \qfo{#1}{#3}{#2} \right)}}
 \nec{\nml}[2]{\mathcal{N}(#1, #2)}
 \nec{\kl}[2]{\mathcal{D}_\text{KL}(#1||#2)}
+\nec{\cov}{\text{Cov}}
 
 \nec{\gammadist}[3]{\frac{#3^{#2}}{\Gamma(#2)} #1^{#2-1} e^{-#3 #1}}
 \nec{\gam}[2]{\mathbf{\Gamma}(#1, #2)}
+\nec{\avgsum}{\frac{1}{n}\sum}
+
 
 %message passing stuff
 \nec{\msg}[2]{\mu (#1 \rightarrow #2)}
@@ -84,7 +88,6 @@
 
 % convenience
 \nec{\todo}[1]{{\color{red} \textbf{todo: #1}}}
-
 
 \begin{document}
 \maketitle
@@ -96,9 +99,9 @@
 \section{Todo}
 
 \itmz{
-  \item finish section on conjugate priors
-  \item write section on RL (or at least COMA)
-  \item write section on various NN architectures
+  \item PCA 
+  \item RL or at least COMA
+  \item various NN architectures
   \item optimization    
   \item variational calculus
 }
@@ -243,7 +246,6 @@ So far, we've actually been cheating a bit by only using single sample updates w
 \eq{
   P(\y|x,\lambda) &= \prod_{y \in \y} \uvnmlp{y}{x}{\lambda} \\
   &= \paren{\frac{\lambda}{2 \pi}}^{\frac{n}{2}} \nexp{\lambda \sum_i (y_i-x)^2} \\
-  %\log P(\y|x,\lambda) &= \frac{n}{2} \log \frac{\lambda}{2 \pi} - \lambda \sum_i (y_i-x)^2
 }
 
 \eq{
@@ -339,18 +341,18 @@ Lets explore the terms inside the exponential:
   - 2k\mu^T \Lambda x - 2 x^T \Lambda \sum_i y_i \\
 }
 
-Now we can complete the terms with respect to $x$. Given that $A = (n+k)\Lambda$ and $b = 2k\Lambda \mu$, this comes out to
+Now we can complete the terms with respect to $x$. Given that $A = (n+k)\Lambda$ and $b = k\Lambda \mu + \Lambda S_y$, this comes out to
 
 \eq{
   &\qfo{x}{A}{\minv A b} - \qf{b}{A} + \sum_i \qf{y_i}{\Lambda} - 2k\qf{\mu}{\Lambda} \\
-  &= \qfo{x}{(n+k)\Lambda}{\minv{((n+k)\Lambda)}b} - \qf{(2k\Lambda \mu)}{((n+k)\Lambda)} +
+  &= \qfo{x}{(n+k)\Lambda}{\minv{((n+k)\Lambda)}b} - \qf{b}{((n+k)\Lambda)} +
   \sum_i \qf{y_i}{\Lambda} - 2k\qf{\mu}{\Lambda}\\
 }
 
 So the extra terms are
 \eq{
-  & \sum_i \qf{y_i}{\Lambda} - 2k\qf{\mu}{\Lambda} - \qf{(2k\Lambda \mu)}{((n+k)\Lambda)}\\
-  &= \sum_i \qf{y_i}{\Lambda} - 2k\qf{\mu}{\Lambda} - 4k^2(n+k) \qf{(\Lambda \mu)}{\Lambda} \\
+  & \sum_i \qf{y_i}{\Lambda} - 2k\qf{\mu}{\Lambda} - \qf{b}{((n+k)\Lambda)}\\
+  &= \sum_i \qf{y_i}{\Lambda} - 2k\qf{\mu}{\Lambda} - (n+k) \qf{b}{\Lambda} \\
 }
 
 Ideally, we want to combine these quadratic forms into one term, however, this is nontrivial, because we cannot simply add two forms:
@@ -375,20 +377,27 @@ Now we can add the forms.
 Similarly, if we define $\Omega$
 
 \eq{
-  \Omega &= \sum_i \scov{y_i} + 2k \scov{\mu} - 4k^2(n+k) \scov{ (\Lambda \mu) } \\
-  &= \sum_i \scov{y_i} + 2k \scov{\mu} - 4k^2(n+k) \Lambda {\scov{\mu}} \Lambda \\
+  \Omega &= \sum_i \scov{y_i} + 2k \scov{\mu} - (n+k) \scov{ b } \\
 }
 
-Then the extra terms come out to $\tr(\Omega \Lambda)$. Now we know that our prior $p(\Lambda)$ must have something to the effect of $\bexp{\nhaf tr(M\Lambda)}$ in it. Furthermore, $M$ must be a function of $V$, which is the only matrix parameter in the wishart distribution. We choose $M = \minv V$.
+Then the extra terms come out to $\tr(\Omega \Lambda)$. Now we know that our prior $p(\Lambda)$ must have something to the effect of $\bexp{\nhaf tr(M\Lambda)}$ in it. Furthermore, $M$ must be a function of $V$, which is the only matrix parameter in the wishart distribution. We choose $M = \minv V$. Therefore the full density function for the wishart is
+
+\eq{
+  p(\Lambda) &= \nmz |\Lambda|^{\frac{m}{2}} \bexp{\nhaf \tr (\minv V \Lambda)}
+}
 
 Now we may derive the update rules
 
 \eq{
-  \mu' &= \mu \\
-  k' &= k \\
-  V' &= V \\
-  m' &= m
+  \mu' &= \frac{1}{n+k} \minv \Lambda b \\
+  &= \frac{1}{n+k} \minv \Lambda \paren{k\Lambda \mu + \Lambda S_y} \\
+  &= \frac{k\mu + n \bar y}{n+k} \\
+  k' &= k+n \\
+  V' &= V + \Omega \\
+  m' &= m+n
 }
+
+I'm reasonably sure these are at least nearly correct, although I haven't bothered to check for myself.
 
 \subsection{Manipulations of Multivariate Gaussians}
 .
@@ -441,6 +450,14 @@ In my opinion, it is best seen as the hessian of the KL-divergence.
   &= E_q \sparen{ \parf{\log q(x)}{\theta_i} \parf{\log q(x)}{\theta_j}}
 }
 
+\subsubsection{Coding Theory}
+
+Say you manage to train a model to predict the next character some text, and your cross-entropy loss comes out to 1 bit per character. How can you utilize this to compress an 1000 character text file to a 1000 bits? Notice that there are only $256^{1000}$ possible ascii strings of length 1000. In addition, your model defines $p(x)$ for each such string $x$. Finally, we know that the sum of all $p(x)$ is 1. Therefore, it is possible to split the unit length line segment into $256^{1000}$ intervals, each with length $p(x)$.
+
+Notice that to find a single message/interval, it suffices to name a single point in that interval. Intuitively, intervals half as likely are twice as small and require on average, one more binary digit in order to indicate their position on the line segment. Now it remains to prove that an interval of size $p$ at most $- \lceil \lg p \rceil$ binary digits to specify. This is clearly true because $p > 0.5$ implies only one bit is needed, $p > 0.25$ implies only two bits are needed, etc, by pigenohole principle of sorts. This scheme is known as arithmetic coding.
+
+Using this naive scheme is not very efficient, because enumerating out $256^{1000}$ intervals could take a long time. However, it is actually possible to find the position of a given interval in much less time, which speeds encoding. The key is to split the unit interval up into $m$ intervals, for $m$ different symbols. Then, split each of these intervals up into $m$ subintervals, and so on. The $i$th layer of intervals corresponds to the $i$th symbol in the message we want to encode.
+
 \section{Linear Algebra}
 \subsection{Identities and Manipulations}
 .
@@ -472,10 +489,107 @@ This completes the proof. Notice that we played a bit loosely with the matrix $A
 
 \todo{proof!}
 
-\subsection{Singular Value Decomposition}
-.
+\subsection{Decompositions and Factorizations}
+
+A matrix decomposition or a matrix factorization is the process of finding a product of matrices which equal the matrix we are decomposing or factoring.
+
+\subsubsection{Singular Value Decomposition}
+
+\eq{
+  M &= U \Sigma V^T
+}
+
+Singular value decomposition is best understood as performing any linear transformation in three steps. In particular, pretend we are applying a transformation on some parallelogram.
+
+\enum{
+\item rotate the current shape
+\item rescale shape along its axes
+\item rotate the shape again to get a new parallelogram
+}
+
+Any linear transformation can be decomposed into these three steps. To be more formal, if $M$ is an $m$ by $n$ matrix, we can say the following:
+
+\enum{
+\item apply $V^T$, an $n$ by $n$ matrix, which is orthogonal (since we are rotating)
+\item apply $\Sigma$, an $m$ by $n$ matrix with only entries on the diagonal (since it does scaling)
+\item apply $U$, an $m$ by $m$ matrix, which is orthogonal
+}
+
+One may wonder why we need three steps. Is a single rotation followed by a scaling insufficient? Consider the task of constructing a kite-shape which is not axis-aligned.
+
+It is relatively easy to invert matrices once the SVD has been found:
+
+\eq{
+  \minv M &= V(U\Sigma)^{-1} \\
+  &= V\minv{\Sigma}U^T \\
+}
+
+If $n = m$, then $\Sigma$ can be inverted by inverting each number on the diagonal. Otherwise, $\Sigma$ is inverted by inverting the diagonal and then transposing.
+
+\subsubsection{Eigendecomposition}
+
+\eq{
+  M &= Q\Lambda \minv Q
+}
+
+Eigendecomposition factorizes a matrix into three other matrices, where $Q$ contains column-wise eigenvectors, and $\Lambda$ contains eigenvalues. The process of decomposition is not too difficult to see:
+
+\eq{
+  Mq_i &= \lambda_i q_i \\
+  MQ &= [ \lambda_1 q_i, \lambda_2 q_2, \cdots ] \\
+  &= Q\Lambda \\
+  M &= Q\Lambda \minv Q
+}
+
 \subsection{Principle Component Analysis}
-.
+
+The goal of PCA should find a new orthogonal basis for a set of data. It should be an ordered basis, such that the first basis has the highest possible variance, the second basis the second highest possible variance, and so on. Draw a picture if you don't understand why this is a great idea. 
+
+To make this more mathematically concrete, the covariance matrix is $\cov \propto XX^T$ if $X$ has datapoints as columns. We want the unit vectors $p_1, ... p_n$ which maximize $\qf{p_i}{C}$. We will solve this with lagrange multipliers.
+
+\eq{
+  \min \qf{p_i}{C} \\
+  \st \forall j < i: p_i^T p_j = 0 \\
+  p_i^T p_i = 0 \\
+}
+
+We can write the lagrangian:
+
+\eq{
+  \lag (p_i, \lambda) &= \qf{p_i}{C} + \lambda\sos{p_i} + \sum_j \lambda_i p_i^T p_j \\
+  \grad \lag &= 2Cp_i + 2\lambda p_i + \sum_j \lambda_j p_j \\
+}
+
+\eq{
+  0 &= 2C p_i + 2\lambda p_i + \sum_j \lambda_j p_j \\
+  &= 2 \paren{\sum_j \lambda_j p_j}^T C p_i + 2 \sum_j \lambda_j p_j^T p_i + \sos{\paren{\sum_j \lambda_j p_j}} \\
+  &= 2 \paren{\sum_j \lambda_j C p_j}^T p_i + \sos{\paren{\sum_j \lambda_j p_j}} 
+}
+
+To proceed further, we must assume that $p_j$ are eigenvectors. We will then show that by induction, $p_i$ is also an eigenvector, which makes our assumption reasonable. Finally, there is the base case that $p_1$ is an eigenvector (we will not show this).
+
+\eq{
+  &= 2 \paren{\sum_j \lambda'_j p_j}^T p_i + \sos{\paren{\sum_j \lambda_j p_j}} \\
+  &= \sos{\paren{\sum_j \lambda_j p_j}} \\
+  &\leq \sum_j \lambda_j^2 \sos{p_j}
+}
+
+It is now clear thatn $\lambda_j = 0$. Therefore our problem is reduced to
+
+\eq{
+  0 &= \grad \lag \\
+  &= 2Cp_i + 2\lambda p_i \\
+  C p_i &= -\lambda p_i 
+}
+
+So it is not apparent that $p_i$ is an eigenvector. Moreover, since we are trying to maximize our expression, $p_i$ is the eigenvector with the largest value that does not violate the orthogonality constraints. Therefore, it must be the largest eigenvector we have not picked yet.
+
+Note that symmetric matrices have orthogonal eigenvectors. 
+
+Next is the question of finding the eigenvectors and values of a matrix. 
+
+\todo{add in some SVD and ED}
+
 \section{Probabilistic Graphical Models}
 \subsection{Forward Backward Algorithm}
 
@@ -671,7 +785,43 @@ A very popular class of CRFs are dense gaussian crfs, used for image processing.
 \section{Sampling Algorithms}
 
 \subsection{Importance Sampling}
-.
+
+We often estimate $E_{x \sim p(x)}[f(x)]$
+with a single sample $f(x)$. The idea of importance sampling is to sample from another distribution with higher probability where $f(x)$ peaks, in order to reduce variance.
+
+\eq{
+  E_{x \sim p(x)}[f(x)] &= \int p(x) f(x) dx \\
+  &= \int q(x) \frac{f(x)p(x)}{q(x)} dx \\
+  &= E_q \sparen{\frac{f(x)p(x)}{q(x)}}
+}
+
+Often, computing the normalization constant for $p$ or $q$ can be difficult, so we only know what they are up to some constant. Call the unnormalized distributions $\tilde p$ and $\tilde q$. 
+
+We can estimate $E_{x \sim p(x)}[f(x)]$ in two phases: Compute the unnormalized expectation, compute the normalization factor, and then divide. Note that while each estimate is unbiased, the combined estimate is biased. This is known as self-normalized importance sampling
+
+\eq{
+  E_{x \sim p(x)}[f(x)] &= \nmz \int \tilde p(x) f(x) dx \\
+  Z &= \int \tilde p(x) dx \\
+  E_{x \sim p(x)}[f(x)] &\approx \frac{\sum_i \tilde p(x_i) f(x_i)}{\sum_i \tilde p(x_i)}
+}
+
+Interestingly, note that we sometimes use self-normalized importnce sampling even when the normalized probability distribution is known to us. This is because the variance of the estimate will decrease. For example, consider a random variable which is 0 most of the time and 1, with probability 0.01. Suppose our sample size is 2. If our sample is $\{0,0\}$ or $\{1,1\}$, then the estimate of the mean will be 0 and 1 respectively. Yet, if the sample is $\{0,1\}$, then self-normalizing makes our estimate $0.01$ instead of $0.5$.
+
+We can also combine both importance sampling with self-normalized sampling
+
+\todo{check this section}
+
+\eq{
+  E_{x \sim p(x)}[f(x)] &= \int p(x) f(x) dx \\
+  &= \int q(x) \frac{f(x)p(x)}{q(x)} dx \\  
+  &= \int q(x) \frac{f(x) Z_p^{-1} \tilde p(x)}{Z_q^{-1} \tilde q(x)} dx \\
+  &= \frac{Z_q}{Z_p} \int q(x) \frac{f(x) \tilde p(x)}{\tilde q(x)} dx \\
+  &= \frac{Z_q}{Z_p} E_q \sparen{\frac{f(x) \tilde p(x)}{\tilde q(x)}} \\
+  &= E_q \sparen{\frac{\tilde q(x)}{\tilde p(x)}} E_q \sparen{\frac{f(x) \tilde p(x)}{\tilde q(x)}} \\
+}
+
+Notice that this only requires the ability to compute the ratio of $p$ and $q$ up to some constant factor.
+
 \subsection{Monte Carlo Markov Chain}
 .
 \subsubsection{Metropolis Hastings}
@@ -724,7 +874,49 @@ We want to solve the problem
 \section{Neural Networks}
 
 \subsection{Variational Autoencoders}
-.
+
+Variational autoencoders are a tool for generative modeling. In other words, we want to find a model for how data is generated from some latent space or random noise $z$. We want to maximize the quantity $p(x)$.
+
+\eq{
+  p(x) &= \int p(z) p(x|z) dz
+}
+
+The conditional probability $p(x|z)$ is frequently in the form
+
+\eq{
+  x|z \sim \nml{f_\theta(z)}{g_\theta(z)}
+}
+
+where $f_\theta$ and $g_\theta$ are neural networks. Now consider trying to maximize $p(x)$ with stochastic gradient descent. We approximate the expectation with sampling:
+
+\eq{
+  \grad p(x) &\approx \avgsum_i \grad_\theta p_\theta(x|z_i)
+}
+
+Intuitively, the problem is that the normal distribution must be very narrow, especially in high dimensional spaces, in order to have a high probability. That same narrowness also ensures that the variance of a sample based approach is very high.
+
+The solution is to use some importance sampling based approach, where we sampling $z$ from an alternate distribution $q$. 
+
+\eq{
+  \grad p(x) &\approx \avgsum_i \grad_\theta \paren{p_\theta(x|z_i) \frac{p(z_i)}{q(z_i)}}
+}
+
+Indeed, it makes sense for $q$ to be different depending on $x$. 
+
+\eq{
+  \grad p(x) &\approx \avgsum_i \grad_\theta \paren{p_\theta(x|z_i) \frac{p(z_i)}{q(z_i|x)}}
+}
+
+More precisely, under the distribution $q$:
+
+\eq{
+  z | x &\sim \nml{\mu_\theta(x)}{\Sigma_\theta(x)}
+}
+
+Again, we parameterize the probability distribution with a neural network. Now the question remains: How can we train the encoder $q$ to approximate the true $p(z|x)$ in order to minimize variance?
+
+\todo{finish this}
+
 \subsection{Architectures}
 
 \subsubsection{Neural Turing Machine}
