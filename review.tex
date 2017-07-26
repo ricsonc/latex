@@ -37,6 +37,7 @@
 \nec{\x}{\mathbf{x}}
 \nec{\y}{\mathbf{y}}
 \rec{\o}{\mathbf{o}}
+\rec{\u}{\mathbf{u}}
 \nec{\RR}{\mathbb{R}}
 
 \nec{\haf}{\frac{1}{2}}
@@ -104,10 +105,10 @@
 
 \subsection{Next Items}
 \itmz{
-  \item RL or at least COMA
-  \item various NN architectures
-  \item optimization    
-  \item variational calculus
+\item optimization  
+\item SVM
+\item various NN architectures  
+\item variational calculus
 }
 
 \subsection{Incomplete}
@@ -741,7 +742,7 @@ Then we can substitute this back into the equation fork
   p(x) &= \prod_{s \in N(x)} \msg{x}{s}
 }
 
-It remainds to derive an algorithm for computing $\sum_{X_s} F_s(x, X_s)$ efficiently. First let us derive an expansion for $F_s$.
+It remains to derive an algorithm for computing $\sum_{X_s} F_s(x, X_s)$ efficiently. First let us derive an expansion for $F_s$.
 
 \eq{
   F_s(x, X_s) &= f_s(x, \ne{s}{x}) \prod_{j \in \ne{s}{x}} G_j(x_j, X_j) \\
@@ -880,6 +881,35 @@ We want to solve the problem
   \st g(x) = 0
 }
 
+We claim that at the optimal point, $\grad f(x)$ is parallel or antiparallel to $\grad g(x)$. Suppose this wasn't the case. Then we could decompose $\grad f(x)$ into a component parallel to $\grad g(x)$ and a component perpendicular to $\grad g(x)$. Call these components $d_1$ and $d_2$. 
+
+\eq{
+  x' &= x+\epsilon d_2\\
+  f(x') &= f(x) + \epsilon \grad f(x)^T d_2 \\
+}
+
+If $\grad f ^T d_2$ is positive, then we make $\epsilon$ negative, and vice versa. This means we have found some $f(x') > f(x)$. Yet at the same time, since $d_2$ is perpendicular to $\grad g$, we know that $g(x') = g(x) = 0$. This is a contradiction, therefore $\grad f$ and $\grad g$ are parallel. We write $\grad f(x) = \lambda \grad g(x)$.
+
+The lagrangian is defined as
+
+\eq{
+  \lag(x, \lambda) &= f(x) + \lambda g(x)
+}
+
+In order to solve our constrained optimization problem, we find $\grad_x \lag = 0$ and solve for both $\lambda$ and $x$. Example:
+
+\todo{uhh what?}
+
+\eq{
+  f(x) &= \qf{x}{A} \\
+  g(x) &= (x-2)^2 \\
+  \lag(x,\lambda) &= x^2 + \lambda (x-2)^2 \\
+  \grad \lag &= 2x + 2\lambda(x-2) \\
+  &= 2(1+\lambda)x - 2\lambda \\
+}
+
+% min x^T x, w^T x = 0
+
 \subsection{Lagrangian Duality}
 .
 \subsection{KKT Conditions}
@@ -898,6 +928,24 @@ We want to solve the problem
 .
 \subsubsection{Stochastic Optimal Control}
 .
+\subsection{Q-Learning}
+
+The bellman equations (I'm not sure if these are actually the bellman equations):
+
+\eq{
+Q(s,a) &= \sum_{s', r} P(s',r|s,a) \paren{r + \gamma V(s')} \\
+&= \sum_{s', r} P(s',r|s,a) \paren{r + \gamma \sum_{a'} \pi(a'|s')Q(s',a')} \\
+&= E_{s',r} \sparen{r + \gamma E_{a'} \sparen{ Q(s',a') } }
+}
+
+These expectations can be approximated by sampling, so we can define an error term $\delta$
+
+\eq{
+	\delta &= Q(s,a) - r - \gamma Q(s',a') 
+}
+
+Which should on average be 0. This is called the TD-error and we can train a neural network to minimize it.
+
 \subsection{Policy Gradients}
 
 The policy gradients algorithm tries to maximize the following expected reward under some policy $\pol$:
@@ -922,18 +970,108 @@ Where the gradient of the log probability can be rewritten by
   &= \sum_i \gradt \log \sum_u p(\tau_{i+1}|u) \pol(u | \tau_i)\\
 }
 
-\todo{what's wrong with this?}
+This has the disadvantage of requiring information about the dynamics of the universe, in addition to having to sum over all possible actions, which could be expensive, or intractable when $u$ is continuous.
 
+Instead, we will prove the policy gradient theorem, which says
+
+\eq{
+	\gradt E_{\pol}[R(\tau)] &= \sum_s \mu_\pi(s) \sum_a q_{\pol}(s,a) \gradt \pol(a|s,\theta)
+}
+
+To begin, note that the expected reward of a trajectory is the value of the start state. If there is a distribution of start states, we can still carry on without loss of generality by introducing a new special start state which just goes to the other start states. But first, we will consider the value of an arbitrary state.
+
+\eq{
+	\gradt V_{\pol}(s) &= \gradt \sum_{a} \pol(a|s) q_{\pol}(s, a) \\
+    &= \sum_{a} \gradt \pol(a|s) q_{\pol}(s, a)
+    + \pol(a|s) \gradt \paren{R(s, a) + \gamma \sum_{s'} P(s'|a, s) V_{\pol}(s')}\\
+    &= \sum_{a} \gradt \pol(a|s) q_{\pol}(s, a) 
+    + \gamma \pol(a|s) \paren{\sum_{s'} P(s'|a, s) \gradt V_{\pol}(s')}\\
+    &= \sum_{a} \gradt \pol(a|s) q_{\pol}(s, a) 
+    + \gamma \pol(a|s) \paren{\sum_{s'} P(s'|a, s) \paren{\sum_{a} \gradt \pol(a|s) q_{\pol}(s, a) + \gamma \pol(a'|s') \paren{\cdots}}}\\
+}
+
+Notice that this recursion can be unrolled forever, and since the $\gamma$ term sets up an exponential decay, we can just ignore the final terms in the expression. All that is left is to sum of all the terms $\gradt \pol(a|s) q_{\pol}(s, a)$. The first term has the constant multiplier 1, the next term has the constant multiplier $\gamma P(s'|s)$, the third term has the constant $\gamma^2 P(s''|s)$ and so on. Let $\mu_{\pol}(s';s)$ denote the expected discounted visitation counts of state $s'$, starting from $s$. This expression is pretty easy to make use of in practice, because it can be sampled for by rolling out the policy. Then we can write simply:
+
+\eq{
+	\gradt V_{\pol}(s) &= \sum_s \mu_{\pol}(s';s) \sum_a \gradt \pol(a|s') q_{\pol}(s',a)
+}
+
+Now let's focus on the start state, Let $\mu_{\pol}(s) = \mu_{\pol}(s;s_0)$.
+
+\eq{
+	\gradt E_{\pol}[R(\tau)] &= \sum_s \mu_{\pol}(s) \sum_a \gradt \pol(a|s) q_{\pol}(s,a) \\
+    &= \sum_s \mu_{\pol}(s) E_{a \sim \pol} \sparen{ \gradt \log (\pol(a|s)) q_{\pol}(s,a) } \\
+    &= E_{s,t \sim \pol} \sparen{ \gamma^t E_{a \sim \pol} \sparen{ \gradt \log (\pol(a|s)) q_{\pol}(s,a) }}
+}
+
+Note that we have managed to eliminate the sums into expectations (this was not previously possible), which means we can perform it by sampling.
+
+\subsection{Actor-Critic}
+
+The policy gradients method often struggles from the problem of high variance. Note that the gradient is in the direction of positive $q$, which means if all actions yield positive $q$, then the gradient will go all over the place. Of course, in expectation it is a small movement in one direction, but since we are computing the expectation by sampling, we get poor results. To counter this, one popular method is to select some baseline, and subtract it from $q$, so that the gradient is now
+
+\eq{
+	\gradt E_{\pol}[R(\tau)] &= \sum_s \mu_{\pol}(s) E_{a \sim \pol} \sparen{ \gradt \log (\pol(a|s)) \paren{q_{\pol}(s,a) - B_s }}
+}
+
+Note that the baseline can depend on the state, but it can obviously not depend on the action. One popular baseline is $V_{\pol}(s)$. One naive method of estimating the value baseline is to keep a moving average of the reward at each state, but this does not transfer to large state-spaces. Instead, a value network is often a preferred choice.
+
+The advantage function $A_{\pol}$ is defined:
+
+\eq{
+	A_{\pol}(s,a) &= Q_{\pol}(s,a) - V_{\pol}(s) \\
+	\gradt E_{\pol}[R(\tau)] &= \sum_s \mu_{\pol}(s) E_{a \sim \pol} \sparen{ \gradt \log (\pol(a|s)) A_{\pol} (s,a) }
+}
+
+This leads to the advantage actor-critic algorithm, where we use a q-network.
+
+\enum{
+	\item perform rollouts
+	\item update weights according to policy gradients using the advantage network
+    \item update the q-network, using traditional methods such as TD-error
+    \item repeat
+}
+
+Note that a Q-network is sufficient to compute the advantage, given the policy, since we can expand the advantage as
+
+\eq{
+	A_{\pol}(s,a) &= Q_{\pol}(s,a) - V_{\pol}(s) \\
+	&= Q_{\pol}(s,a) - \sum_{a'} \pol(a'|s) Q_{\pol}(s,a') \\
+}
+
+\subsection{Recurrent Policy Gradients}
+.
 \subsection{Natural Policy Gradients}
 .
+\subsection{Counterfactual Multi-Agent Policy Gradients}
+
+We want to play some cooperative multi-player game with imperfect information. How can the policy gradients framework be applied? One naive method might be Independent Actor Critic -- each player runs actor critic by itself, and comes up with its own policy. However, this doesn't work well because of the credit assignment problem. Since all agents are simultaneously updating their policies, an agent does not know whether or not the reward was due to their action or not.
+
+COMA is a variant of actor-critic which relies on a centralized critic. The idea is that the critic is privy to all the actions and the information of all the agents, and therefore can provide better feedback. 
+
+Recall the advantage function used in Independent Actor Critic:
+
+\eq{
+	A^a_{\pol}(\tau,u) &= Q^a_{\pol}(\tau,u) - \sum_{u'} \pol(u'|\tau) Q^a_{\pol}(\tau,u') 
+}
+
+The super-script $a$ is used to denote which agent is performing the action. Action has been renamed to $u$ in order to reduce overloading. Furthermore, since the setting has imperfect information, we use $\tau$ to denote the past and current trajectory through observation-state, as a single observation does not provide the markovian property anymore.
+
+In COMA, the idea is to freeze the actions of all the other agents, so their stochasticity is ignored. Instead of asking ''If I had taken another action, what would have happened?'', COMA asks ''If everyone had taken the same action, and only my action changed, what would have happened?''
+
+\eq{
+	A^a_{\pol}(s,u) &= Q_{\pol}(s,\u) - \sum_{u^a} \pol(u^a|\tau^a) Q_{\pol}(s,\u^{-a} \cdot u^a) 
+}
+
+The problem here is with the $Q$ network, which operates on the joint action space. This is exponential in the number of agents, which is problematic, because it means the network must have an exponential number of outputs. To solve this, we can redesign the Q-network to take as input the actions of $n-1$ agents, and then output the $Q$ values given the last agent. 
+
 \subsection{Trust Region Policy Optimization}
 .
 \subsection{Guided Policy Search}
 .
 \subsection{End to End Deep Visuomotor Policies}
 .
-\subsection{Counterfactual Multi-Agent Policy Gradients}
-.
+
 \section{Neural Networks}
 
 \subsection{Variational Autoencoders}
