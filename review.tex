@@ -103,15 +103,12 @@
 
 \section{Todo}
 
-\subsection{Next Items}
 \itmz{
-\item optimization  
 \item SVM
-\item various NN architectures  
-\item variational calculus
+\item more gaussian manips
+\item bayesian lr and lr
+\item variational methods and CRFs
 }
-
-\subsection{Incomplete}
   
 \section{Probability Theory}
 
@@ -898,22 +895,114 @@ The lagrangian is defined as
 
 In order to solve our constrained optimization problem, we find $\grad_x \lag = 0$ and solve for both $\lambda$ and $x$. Example:
 
-\todo{uhh what?}
-
 \eq{
+  \intertext{Our objective is}
   f(x) &= \qf{x}{A} \\
-  g(x) &= (x-2)^2 \\
-  \lag(x,\lambda) &= x^2 + \lambda (x-2)^2 \\
-  \grad \lag &= 2x + 2\lambda(x-2) \\
-  &= 2(1+\lambda)x - 2\lambda \\
+  g(x) &= w^T x - k \\
+  \intertext{Now we can write the lagrangian and take the gradient}
+  \lag(x,\lambda) &= \qf{x}{A} + \lambda (w^T x -k ) \\
+  \grad_x \lag &= 2Ax + \lambda w \\
+  \intertext{The following must hold when the gradient is 0}
+  x &= -\frac{\lambda}{2} \minv A w \\
+  \intertext{Now we can bring in the constraint}
+  w^T x -k &= -\frac{\lambda}{2} \qf{w}{\minv A} -k \\
+  \intertext{Now solve for $\lambda$ and then $x$}
+  \lambda &= \frac{-2k}{\qf{w}{\minv A}} \\
+  x &= \frac{-k \minv A w}{\qf{w}{\minv A}} \\
+  \intertext{Finally, plug it back into $f$}
+  f(x) &= \qf{\paren{\frac{-k \minv A w}{\qf{w}{\minv A}}}}{A} \\
+  &= \paren{\frac{k}{w^T \minv A w}}^2 w^T \minv A A \minv A w \\
+  &= \paren{\frac{k}{w^T \minv A w}}^2 w^T \minv A w \\
+  &= \frac{k^2}{\qf{w}{\minv A}}
 }
 
-% min x^T x, w^T x = 0
+As a sanity check, consider $A = I$ and $w = \vec 1$ and $k = 1$. Furthermore, consider this in two dimensions. So basically we are minimizing $x^2 + y^2$ on the line $y = x+1$. The best solution is at the point $(0.5, 0.5)$, when the cost is 0.5. The equations above work out exactly to this answer.
 
 \subsection{Lagrangian Duality}
-.
+
+Before we talk about lagrangian duality, we'll review linear programming duality, because I understand that better.
+
+Example linear program:
+
+\eq{
+  \min\ &3x + 4y + 5z \\
+  \st &3x + y > 4 \\
+  &z + 2y > 7 \\
+}
+
+Then we see that a lower bound to the optimal value is 4, and another lower bound is 14. In fact, we can try to get the highest lower bound by the following:
+
+\eq{
+  \max\ &4a + 7b\\
+  \st &3a < 3\\
+  &a + 2b < 4\\
+  &b < 5\\
+}
+
+Variables in the primal correspond to constraints in the dual and vice versa. There are several nice properties of this primal-dual pattern.
+
+First, the optimum of these two programs is the same. Second, variables which are non-zero correspond to constraints which are tight, this is known as complementary slackness. 
+
+Now we will move onto lagrangian duality.
+
+The primal takes the form
+
+\eq{
+  \min_x \max_{\lambda} \lag(x, \lambda)
+}
+
+Since $\lambda$ always makes the penalty as high as possible, this is pretty much equivalent to minimizing $f(x)$ with the constraint that $g(x) = 0$ (otherwise, the lagrangian would be infinite).
+
+The dual takes the form
+
+\eq{
+  \max_{\lambda} \min_x \lag(x, \lambda)
+}
+
+When seeing these nested $\max$ and $\min$ functions, the best way to think about it is to go left to right, and treating each successive optimization as a turn. So for example, in the primal, the $x$ player moves first, and then the $\lambda$ player moves second. This is counterintuitive because following the nesting, it seems like the $\lambda$ player actuall moves first, not second. However, since $x$ is not bound during the maximization of $\lambda$, $\max_\lambda \lag(x, \lambda)$ really involves the $\lambda$ player considering every move of $x$ and then choosing the best $\lambda$ to counter it.
+
+Here's a reason to expect the second player to always do better. Consider a zero-sum game-matrix containing row-player rewards  where each row and column contains both small and large numbers. Then no matter what the first player does, the second player will have a good response.
+
+Therefore we would expect the following to be true, and it does match up with our expectations from linear primality and duality.
+
+\eq{
+  \min_x \max_{\lambda} \lag(x, \lambda) \geq \max_{\lambda} \min_x \lag(x, \lambda)
+}
+
+This is basically saying that for every possible $x^*$ and every possible $\lambda^*$ we have
+
+\eq{
+  \max_\lambda \lag(x^*, \lambda) \geq \min_x \lag(x, \lambda^*)
+}
+
+In particular, it must hold true for the $x^*$ which makes the LHS the smallest and the $\lambda^*$ which makes the RHS the largest. The key is to notice that the $x^*$ which makes the LHS the smallest does not necessarily make the RHS the smallest, and from that we can prove the inequality.
+
+\eq{
+  \max_\lambda \lag(x^*, \lambda) \geq \lag(x^*, \lambda^*) \geq \min_x \lag(x, \lambda^*)
+}
+
+Strong duality usually holds, which means the primal and the dual have the same optimal value, so we can convert back and forth between the problems we want to solve.
+
 \subsection{KKT Conditions}
-.
+
+In lagrangian multipliers, we dealt with equality constraints in the form $g(x) = 0$. However, we can also deal with constraints such as $h(x) < 0$. We will use $\lambda$ for the mulitpliers on these inequality constraints and $\mu$ as the coefficients on the equality ones.
+
+The lagrangian has not changed much from before:
+
+\eq{
+  \lag(x, \lambda, \mu) &= f(x) + \mu g(x) + \lambda h(x)
+}
+
+Ignoring $g$, we claim that $\grad f = \lambda \grad h$, which is a claim we justified for lagrangian multipliers. A similar argument holds here. There are two main cases. Either the optimal point is inside the feasible region, or it is on the edge of the feasible region. If it is inside the feasible region, then we can set $\lambda = 0$. If it is on the edge, then the previous argument holds.
+
+Basically, we want to solve a problem with all the following constraints (these are known as the KKT Conditions). 
+
+\enum{
+\item $\grad_x \lag = 0$
+\item $\mu \geq 0$
+\item $\mu g = 0$
+}
+
 \subsection{SGD Variants}
 .
 \subsection{BADMM Algorithm}
@@ -1320,7 +1409,17 @@ Proof of the integral which I skimmed over:
 This completes the proof.
 
 \subsection{Support Vector Machines}
-.
+
+The task of a support vector machine is to find a separating hyperplane which maximizes the distance of any point from the plane. We can write the objective like this.
+
+\eq{
+  0 &= 0
+}
+
+\subsubsection{Soft Margin SVM}
+
+We can also apply support vector machines to non linearly separable datasets by allowing points to be within the margin, or even on the otherside of the hyperplane, with some penalty.
+
 \subsection{Gaussian Processes}
 .
 \subsection{Independent Component Analysis}
