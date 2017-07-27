@@ -1,4 +1,4 @@
-\title{Notes}
+\title{Learning}
 \author{Ricson Cheng}
 \date{\today}
 \documentclass[12pt]{article}
@@ -96,6 +96,8 @@
 
 \begin{document}
 \maketitle
+
+This document was not written to teach or introduce the subjects that it covers, and therefore the material may be presented out of order and assume prerequisite knowledge. Instead, it is just a personal collection of notes on some topics.
 
 \tableofcontents
 
@@ -490,9 +492,28 @@ Now let's try the vector/matrix formula, replacing division with multiplcation b
   &= \qf{x}{A} - 2b^T x \\
 }
 
-This completes the proof. Notice that we played a bit loosely with the matrix $A$, assuming that is was symmetric, which means the inverse is also symmetric. Symmetric matrices are usually a safe assumption for quadratic coefficients, because every non-symmetric quadratic form can be converted into a symmetric one. Proof.
+This completes the proof. Notice that we played a bit loosely with the matrix $A$, assuming that is was symmetric, which means the inverse is also symmetric. Symmetric matrices are usually a safe assumption for quadratic coefficients, because every non-symmetric quadratic form can be converted into a symmetric one.
 
-\todo{proof!}
+To be precise, we say that an anti-symmetric matrix is one such that $A = -A^T$. Then if we can decompose every matrix into the sum of a symmetric and anti-symmetric one, we have
+
+\eq{
+  \qf{x}{A} &= \qf{x}{A_s} + 2\qf{x}{A_a} \\
+  &= \qf{x}{A_s} + \qf{x}{A_a} + \qf{x}{A_a^T} \\
+  &= \qf{x}{A_s} + \qf{x}{A_a + A_a^T} \\
+  &= \qf{x}{A_s}
+}
+
+Where $A_s$ is the symmetric component and $A_a$ is half the anti-symmetric component.
+
+This decomposition is relatively simple:
+
+\eq{
+  A_s &= \frac{A + A^T}{2} \\
+  2A_a &= A-A_s \\
+  &= A-\frac{A+A^T}{2} \\
+  &= \frac{A-A^T}{2}
+}
+It shouldn't be too hard to verify that $A_s$ and $A_a$ are symmetric and antisymmetric respectively.
 
 \subsection{Decompositions and Factorizations}
 
@@ -554,20 +575,6 @@ Spectral theorem says that the matrix $Q$ from above can be orthonormal if $M$ i
   M &= Q\Lambda Q^T
 }
 
-But we won't prove spectral theorem. Instead, we will show that such an orthonormal $Q$ must be unique. In other words, there does not exist matrices $Q'$ and $L'$ such that $M = Q' \Lambda' Q'^T$. We will prove this by contradiction. 
-
-\eq{
-  M &= Q' \Lambda' Q'^T \\
-  &= (QQ^T)Q'\Lambda'Q'^T(QQ^T) \\
-  &= Q(Q^TQ')\Lambda'(Q'^TQ)Q^T \\
-  Q\Lambda Q &= Q(Q^TQ')\Lambda'(Q'^TQ)Q^T \\
-  \Lambda &= J\Lambda' J^T
-}
-
-where $J = Q^TQ'$. Note that $J$ is orthogonal but is not the identity matrix. However, since the only orthogonal diagonal matrix is the identity matrix, $J$ is not diagonal. But since $\Lambda'$ is diagonal, this means $\Lambda$ is not diagonal, which is a contradiction.
-
-\todo{check this}
-
 \subsection{Principle Component Analysis}
 
 The goal of PCA should find a new orthogonal basis for a set of data. It should be an ordered basis, such that the first basis has the highest possible variance, the second basis the second highest possible variance, and so on. Draw a picture if you don't understand why this is a great idea. 
@@ -623,7 +630,7 @@ Next is the question of finding the eigenvectors and values of a matrix. We will
   &= U \Sigma \Sigma^T U^T \\
 }
 
-Since $U$ is orthogonal, as per SVD, this means that $\Sigma \Sigma^T$ contains the eigenvalues of $\cov$ and $U$ contains the respective eigenvectors. Our job is done.
+Note that this looks remarkably like an eigendecomposition of the covariance matrix, which means $\Sigma \Sigma^T$ contains the eigenvalues of $\cov$ and $U$ contains the respective eigenvectors, which is exactly what we want. To be precise, the decompositions are equivalent only up to permutation of eigenvectors and values, but that is sufficient for us.
 
 \section{Probabilistic Graphical Models}
 \subsection{Forward Backward Algorithm}
