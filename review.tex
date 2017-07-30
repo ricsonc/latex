@@ -97,7 +97,7 @@
 \begin{document}
 \maketitle
 
-This document was not written to teach or introduce the subjects that it covers, and therefore the material may be presented out of order and assume prerequisite knowledge. Instead, it is just a personal collection of notes on some topics.
+This document was not written to teach or introduce the subjects that it covers. Instead, it is just a personal collection of notes. Therefore the material may be presented out of order and assume prerequisite knowledge. There are probably also a lot of mistakes, since many of the derivations were performed without checking against any reference materials.
 
 \tableofcontents
 
@@ -106,10 +106,10 @@ This document was not written to teach or introduce the subjects that it covers,
 \section{Todo}
 
 \itmz{
-\item SVM
 \item more gaussian manips
 \item bayesian lr and lr
 \item variational methods and CRFs
+\item kernel density estimators
 }
   
 \section{Probability Theory}
@@ -407,7 +407,13 @@ Now we may derive the update rules
 I'm reasonably sure these are at least nearly correct, although I haven't bothered to check for myself.
 
 \subsection{Manipulations of Multivariate Gaussians}
-.
+
+Despite these manipulations being pretty nasty to derive, they seem to be very useful, so it is good to know how they can be solved. 
+
+\subsubsection{Conditioning a gaussian on a subset of variables}
+
+\subsubsection{Conditioning one gaussian on another}
+
 \subsection{Information Theory}
 
 Information is intuited as the number of bits it takes to represent an event. The entropy of a probability distribution is the expected information of a single event. 
@@ -990,6 +996,47 @@ In particular, it must hold true for the $x^*$ which makes the LHS the smallest 
 
 Strong duality usually holds, which means the primal and the dual have the same optimal value, so we can convert back and forth between the problems we want to solve.
 
+In practice, if we have a problem in the form
+
+\eq{
+  \min &f(x) \\
+  \st\ &g(x) = 0
+}
+
+This is equivalent to
+\eq{
+  \min_x \max_\lambda f(x) + \lambda g(x)
+}
+
+But by duality we can rewrite this as
+
+\eq{
+  \max_\lambda \min_x f(x) + \lambda g(x)
+}
+
+Using our example problem from before this is
+
+\eq{
+  \max_\lambda \min_x \qf{x}{A} + \lambda (w^Tx -k)
+}
+
+From before, the minimization happens when $x = -\frac{\lambda}{2} \minv A w$. At this time, the lagrangian evaluates to
+
+\eq{
+  &\frac{\lambda^2}{4} \qf{w}{\minv A} - \frac{\lambda^2}{2} \qf{w}{\minv A} -\lambda k \\
+  &= -\frac{\lambda^2}{4} \qf{w}{\minv A} - \lambda k\\
+}
+
+To maximize this with respect to $\lambda$ we can take the gradient wrt $\lambda$.
+
+\eq{
+  - \grad_\lambda \frac{\lambda^2}{4} \qf{w}{\minv A} + \lambda k &= \lambda \haf \qf{w}{\minv A} + k
+  \intertext{We can set this quantity to 0}
+  \lambda &= \frac{-2k}{\qf{w}{\minv A}}
+}
+
+We can now see that this is the same value of $\lambda$ derived without using duality, and therefore we have arrived at the same solution.
+
 \subsection{KKT Conditions}
 
 In lagrangian multipliers, we dealt with equality constraints in the form $g(x) = 0$. However, we can also deal with constraints such as $h(x) < 0$. We will use $\lambda$ for the mulitpliers on these inequality constraints and $\mu$ as the coefficients on the equality ones.
@@ -1417,15 +1464,112 @@ This completes the proof.
 
 \subsection{Support Vector Machines}
 
-The task of a support vector machine is to find a separating hyperplane which maximizes the distance of any point from the plane. We can write the objective like this.
+The task of a support vector machine is to find a separating hyperplane which maximizes the distance of any point from the plane. How can we find the distance of a point $p$ from a plane parameterized by some normal vector $v$, such that all points $x$ on the plane satisfy $v^T(x-p_0) = 0$?. The distance of $p$ from the plane is the magnitude of the projection of $x-p_0$ onto $v$, which is $v^T(x-p_0$ whenever $v$ is a unit vector.
 
-\eq{
-  0 &= 0
+So the objective of SVM is to find some vector $v$ which maximizes the margin $\delta$ under the following constraints:
+
+\itmz{
+\item $v$ is a unit vector
+\item $v^T(x_i-p_0) > \delta$ for all positive samples
+\item $v^T(x_i-p_0) < -\delta$ for all negative samples
 }
 
-\subsubsection{Soft Margin SVM}
+Writing $y_i$ for the label, we can rewrite both of the margin constraints as $y_i v^T(x_i -p_0) > \delta$. But we can drop the constraint on $v$ being unit by scaling this inequality appropriately
 
-We can also apply support vector machines to non linearly separable datasets by allowing points to be within the margin, or even on the otherside of the hyperplane, with some penalty.
+\eq{
+  \frac{y_i v^T(x_i-p_0)}{||v||\delta} > 1
+}
+
+It is then apparent that we can replace the objective $\max \delta$ with $\min ||v||$.
+
+A more intuitive way to see this is to view magnitude of $v$ as a factor which stretches or shrinks space. When $v$ is large, space is compressed, so the margins are small and moving a small distance away from the separating hyperplane is sufficient to satisfy the constraints. On the other hand, when $v$ is small, space is stretched out, and the margins are much larger.
+
+A quick foray into geometry:
+The traditional parameterization of the points at a certain distance $\delta$ from a plane with normal vector $v$ is
+\eq{
+\paren{\frac{v}{||v||}}^T (x-p_0) = \delta
+}
+
+Notice that we are using $2n+1$ variables to specify a plane which should only need $n$. This is because we normalize $v$ for convenience of reasoning. However, we can reparameterize planes and the constraint as:
+
+\eq{
+v^T x = 1
+}
+This is true by setting $||v|| = \frac{1}{\delta}$
+
+\iffalse
+This can be derived by using the magnitude of $v$ to indicate the offset of the plane. By setting
+
+\eq{
+  ||v|| &= \frac{1-v^Tp_0}{\delta} \\
+  \delta &= \frac{1-v^Tp_0}{||v||}
+  \intertext{We can plug this back into the original expression to get}
+  \frac{1}{||v||}v^T(x-p_0) &= \frac{1-v^Tp_0}{||v||}\\
+  v^Tx - v^Tp_0 &= 1-v^Tp_0 \\
+  v^Tx &= 1
+}
+\fi
+
+Also, in this form, it is immediately clear that the objective of SVM is to minimize $||v||$ with the constraint $y_i v^T(x-p_0) > 1$. Since this is a quadratic program (the objective is quadratic and the constraints are linear), we know this can be effectively solved.
+
+The constraint can be further simplified by observing that $p_0$, which has $n$ degrees of freedom, can be replaced by $b = v^Tp_0$, so that our constraint can be written $y_i (v^Tx - b) > 1$. Now we can derive a more elegant solution using lagrangian duality. 
+
+\eq{
+  \lag(v, \lambda) &= \haf v^Tv + \sum_i \lambda_i (1-y_i (v^Tx_i - b)) \\
+  \intertext{Now we will do the inner minimization wrt $v$}
+  \grad_v \lag &= v - \sum_i \lambda_i y_i x_i \\
+  v &= \sum_i \lambda_i y_i x_i
+  \intertext{And the same for $b$}
+  \grad_b \lag &= \sum_i \lambda_i y_i \\
+  0 &= \sum_i \lambda_i y_i 
+  \intertext{Plug this back in to the lagrangian}
+  \lag(v, \lambda) &= \haf \paren{\sum_i \lambda_i y_i x_i}^T \paren{\sum_i \lambda_i y_i x_i} +
+  \sum_i \lambda_i \paren{1-y_i \paren{ \paren{\sum_j \lambda_j y_j x_j}^T x_i -b}} \\
+  &= \haf \sum_{i,j} \lambda_i \lambda_j y_i y_j x_i^T x_j +
+  \sum_i \lambda_i - b\sum_i y_i - \sum_{i,j} \lambda_i \lambda_j y_i y_j x_i^T x_j \\
+  &= \sum_i \lambda_i - b\sum_i y_i - \haf \sum_{i,j} \lambda_i \lambda_j y_i y_j x_i^T x_j 
+}
+
+Now our optimization problem is in the form
+\eq{
+  \max_\lambda & \sum_i \lambda_i - \haf \sum_{i,j} \lambda_i \lambda_j y_i y_j x_i^T x_j \\
+  \st\ &\sum_i \lambda_i y_i = 0\\
+  &\lambda_i \geq 0
+}
+
+This expression can now be optimized using your favorite convex optimization problem. One simple algorithm which works well is dual coordinate ascent. Simply select two $\lambda_i$ and $\lambda_j$ and line search greedily for a better solution. Repeat. When finished, we can recover an expression for $v$.
+
+We can recover $b$ by computing the expression $v^Tx_i$ for all positive samples. Since we know we have satisfied the constraint $v^Tx_i - b > 1$, and in fact, $min(v^Tx_i -b) = 1$ when the constraint is tight, therefore, $min(v^Tx_i)-1 = b$. 
+
+\subsubsection{Kernel}
+
+The most interesting thing about this dual form is that none of the vectors $x_i$ must be explicitly computed. Instead, it is sufficient that the dot product of $x_i^T x_j$ be computed. In fact, we can transform the inputs arbitrarily, and compute $K(x_i, x_j) = \phi(x_i)^T \phi(x_j)$ even if computing $\phi$ itself is computationally expensive. The traditional euclidean kernel is $K(x_i, x_j) = x_i^Tx_j$. We can also use the gaussian kernel
+
+\eq{
+  K_\sigma(x_i, x_j) &= \bexp{-\frac{||x_i-x_j||^2}{2\sigma^2}}
+}
+
+The $\phi$ corresponding to this kernel is infinite-dimensional, so it is luckily that we can avoid computing it. In general, the only restriction on $K$ is that it must be semi-definite positive.
+
+\subsubsection{Soft Margins}
+
+We can also apply support vector machines to non linearly separable datasets by allowing points to be within the margin, or even on the otherside of the hyperplane, with some penalty. With this slack, the constraints are now
+
+\eq{
+  y_i (v^Tx_i -b) &> 1-\epsilon_i \\
+  \epsilon_i \geq 0
+}
+
+We can add on a penalty term $C\sum_i \epsilon_i$ to the objective. This produces the lagrangian:
+
+\eq{
+  \lag(v, \lambda) &= \haf v^Tv + C\sum_i \epsilon_i +
+  \sum_i \lambda_i (1-\epsilon_i - y_i (v^Tx_i - b)) \\
+  &= \haf v^Tv + \sum_i (C-\lambda_i)\epsilon_i +
+  \sum_i \lambda_i (1- y_i (v^Tx_i - b)) \\  
+}
+
+When minimizing with respect to $\epsilon$, it is clear that as long as $C-\lambda_i > 0$, we will pick $\epsilon_i = 0$. On the other hand, if $C -\lambda_i < 0$, then $\epsilon \rightarrow \infty$ and the lagrangian approaches $- \infty$. Therefore, the maximizer over $\lambda$ in the dual problem will set $0 < \lambda_i < C$ as an additional constraint.
 
 \subsection{Gaussian Processes}
 .
@@ -1441,7 +1585,7 @@ Let's try to solve this with maximum likelihood.
   \log p(s) &= \log |U| + \sum_{u \in U} \log \sigma'(u^T x)
 }
 
-Now at this point you just run gradient descent to get the answer. It is surprisingly easy.
+Now at this point you just run gradient descent to get the answer. 
 
 Another ICA algorithm involves kurtosis, which is a measure of nongaussianity. Kurtosis is the expected value of $x^4$. One may ask why we do not use skewness, which is the expectation of $x^3$. I'm not sure myself, although I have read vague and unsubstantiated claims to the effect that kurtosis somehow encompasses skewness through something called a one-bit-matching theorem.
 
