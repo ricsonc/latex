@@ -70,6 +70,12 @@
 \nec{\sos}[1]{#1^T #1}
 \nec{\scov}[1]{#1 #1^T}
 
+\nec{\vt}[2]{\begin{bmatrix} #1 \\ #2 \end{bmatrix}}
+\nec{\mt}[4]{\begin{bmatrix} #1 & #2 \\ #3 & #4 \end{bmatrix}}
+\nec{\vtx}{\vt{x_a}{x_b}}
+\nec{\vtmu}{\vt{\mu_a}{\mu_b}}
+\nec{\mtlambda}{\mt{\Lambda_{aa}}{\Lambda_{ab}}{\Lambda_{ba}}{\Lambda_{bb}}}
+
 %probability
 \nec{\uvnml}[3]{\frac{1}{\sqrt{2 \pi #3^2}} \exp{\left(-\frac{(#1-#2)^2}{2 #3^2}\right)}}
 \nec{\uvnmlp}[3]{\sqrt{\frac{#3}{2\pi}} \exp{\left(-\frac{#3(#1-#2)^2}{2}\right)}}
@@ -97,7 +103,7 @@
 \begin{document}
 \maketitle
 
-This document was not written to teach or introduce the subjects that it covers. Instead, it is just a personal collection of notes. Therefore the material may be presented out of order and assume prerequisite knowledge. There are probably also a lot of mistakes, since many of the derivations were performed without checking against any reference materials.
+This document was not written to teach or introduce the subjects that it covers. Instead, it is just a personal collection of notes. Therefore the material may be presented out of order and assume prerequisite knowledge. 
 
 \tableofcontents
 
@@ -106,7 +112,7 @@ This document was not written to teach or introduce the subjects that it covers.
 \section{Todo}
 
 \itmz{
-\item more gaussian manips
+\item conditional gaussians
 \item bayesian lr and lr
 \item variational methods and CRFs
 \item kernel density estimators
@@ -412,11 +418,126 @@ Despite these manipulations being pretty nasty to derive, they seem to be very u
 
 \subsubsection{Conditioning a gaussian on a subset of variables}
 
+Given a multivariate gaussian distribution, we want to figure out the marginal distribution when we marginalize out a subset of the variables. We start with a gaussian random variable $x = \vt{x_a}{x_b}$, with mean $\mu = \vt{\mu_a}{\mu_b}$ and precision $\Lambda = \mt{\Lambda_{aa}}{\Lambda_{ab}}{\Lambda_{ba}}{\Lambda_{bb}}$. The probability distribution function is
+
+\eq{
+f(x) = (2\pi)^{-\frac{D}{2}} |\Lambda|^{\frac{1}{2}} \exp \left( -\frac{1}{2} (x-\mu)^T \Lambda (x-\mu) \right)
+}
+
+We can also expand it out as
+
+\eq{
+f \left(\vtx \right) = (2\pi)^{-\frac{D}{2}} \left| \mtlambda \right|^{\frac{1}{2}} \exp \left( -\frac{1}{2} \left( \vtx-\vtmu \right)^T \mtlambda \left(\vtx-\vtmu \right) \right)
+}
+
+What we are trying to find is $f(x_a)$. According to the law of total probability
+
+\eq{
+f(x_a) = \int f \left(\vtx \right) dx_b
+}
+
+To do this, first we're going to expand out all the terms in the exponential in $f$. We will also drop the $-\frac{1}{2}$ for now.
+
+\eq{
+  \left( \vtx-\vtmu \right)^T \mtlambda \left(\vtx-\vtmu \right)
+}
+
+If you expand this out, it becomes
+\eq{
+(x_a-\mu_a)^T \Lambda_{aa} (x_a-\mu_a) + (x_a-\mu_a)^T \Lambda_{ab} (x_b-\mu_b) + (x_b-\mu_b)^T \Lambda_{ba} (x_a-\mu_a) + (x_b-\mu_b)^T \Lambda_{bb} (x_b-\mu_b)
+}
+
+
+Now since we're integrating with respect to $x_b$, it helps to split up the terms into those which contain $x_b$ and those which don't.
+
+The terms that do:
+\eq{
+x_b^T \Lambda_{bb} x_b - 2 x_b^T \Lambda_{bb} \mu_b + 2 x_b^T \Lambda_{ba} (x_a-\mu_a)
+}
+
+The terms that don't:
+\eq{
+(x_a-\mu_a)^T \Lambda_{aa} (x_a-\mu_a) - 2 (x_a-\mu_a)^T \Lambda_{ab} \mu_b
+}
+
+Now for ease of writing, make $m = \Lambda_{bb}\mu_b - \Lambda_{ba} (x_a-\mu_a)$. Then the first set of terms is
+\eq{
+  x_b^T \Lambda_{bb} x_b - 2 x_b^T m
+  \intertext{We complete the square to obtain}
+  \paren{x_b - \Lambda_{bb}^{-1} m}^T \Lambda_{bb} \paren{x_b - \Lambda_{bb}^{-1} m} - m^T \Lambda_{bb}^{-1} m
+}
+
+So actually now we've managed to pull another term out of the terms we said depended on $x_b$, which doesn't contain $x_b$. Namely, $m^T \Lambda_{bb}^{-1} m$. Let's add this on to the second set of terms:
+
+\eq{
+(x_a-\mu_a)^T \Lambda_{aa} (x_a-\mu_a) - 2 (x_a-\mu_a)^T \Lambda_{ab} \mu_b - m^T \Lambda_{bb}^{-1} m
+}
+
+Let's call the completed square $B$ and the second set of terms $A$. Remember again that what we really want to solve is
+
+\eq{
+  f(x_a) &= \int f \left(\vtx \right) dx_b \\
+  &= \nmz \int \exp \left( -\frac{1}{2} (A+B) \right) dx_b\\
+  &= \nmz \exp \left(-\frac{1}{2} A \right) \int \exp \left( -\frac{1}{2} B \right) dx_b
+}
+
+Since $B$ is in a quadratic form in $x_b$, we know that the integral is over an unnormalized normal distribution, which evaluates to some constant so we are left with
+\eq{
+\nmz \exp \left(-\frac{1}{2} A \right)
+}
+
+Now what we're heavily suspecting is that $x_a$ is distributed normally. If this is the case, then we should be able to manipulate $A$ into the form $(x_a - \mu_*)^T \Lambda_* (x_a - \mu_*)$. To make things easier, we're not even going to bother completing the square. Notice that if we expand $(x_a - \mu_*)^T \Lambda_* (x_a - \mu_*)$ we end up with something like
+
+\eq{
+x_a^T \Lambda_* x_a - 2 x_a^T \Lambda_* \mu_* + C
+}
+
+Where $C$ are some constant terms we don't really care about. Now if we get $A$ into this form, we can simply read off the parameters $A_*$ and $\mu_*$ of our distribution, which is what we want.
+
+I'll reproduce $A$ again.
+\eq{
+(x_a-\mu_a)^T \Lambda_{aa} (x_a-\mu_a) - 2 (x_a-\mu_a)^T \Lambda_{ab} \mu_b - m^T \Lambda_{bb}^{-1} m
+}
+
+Now let's expand $m$ back to full size again.
+\eq{
+(x_a-\mu_a)^T \Lambda_{aa} (x_a-\mu_a) - 2 (x_a-\mu_a)^T \Lambda_{ab} \mu_b - \left( \Lambda_{bb}\mu_b - \Lambda_{ba} (x_a-\mu_a) \right)^T \Lambda_{bb}^{-1} \left( \Lambda_{bb}\mu_b - \Lambda_{ba} (x_a-\mu_a) \right)
+}
+
+
+To make our job easier, I'm going to play around one of the terms
+\eq{
+(x_a-\mu_a)^T \Lambda_{aa} (x_a-\mu_a) - 2 (x_a-\mu_a)^T \Lambda_{ab} \mu_b - \left( \Lambda_{bb}\mu_b - (x_a-\mu_a)^T \Lambda_{ba}^T \right)^T \Lambda_{bb}^{-1} \left( \Lambda_{bb}\mu_b - \Lambda_{ba} (x_a-\mu_a) \right)
+}
+
+Now, we're going to try grabbing out all the quadratic terms. You should find
+\eq{
+\Lambda_{aa} - \Lambda_{ba}^T \Lambda_{bb}^{-1} \Lambda_{ba}
+}
+
+Now $\Lambda_{ba}$ means something vaguely like the relationship between $x_b$ and $x_a$. Because the relationship between $x_b$ and $x_a$ should be the same as the relationship between $x_a$ and $x_b$, it's true that $\Lambda_{ba} = \Lambda_{ab}^T$. But now the quadratic term has coefficient
+\eq{
+\Lambda_{aa} - \Lambda_{ab} \Lambda_{bb}^{-1} \Lambda_{ba}
+}
+
+Therefore the precision matrix is $\Lambda_* = \Lambda_{aa} - \Lambda_{ab} \Lambda_{bb}^{-1} \Lambda_{ba}$. Note that this is equivalent to $\Sigma_{aa}^{-1}$
+
+And now for the linear terms
+\eq{
+\left( \Lambda_{aa} - \Lambda_{ab} \Lambda_{bb}^{-1} \Lambda_{ba} \right) \mu_a = \Lambda_* \mu_a
+}
+
+Reading off that equation from before, this means that $\mu_* = \mu_a$.
+
+To conclude, if we start off with a multivariate gaussian with the variables partitioned into groups $x_a$ and $x_b$, and we ignore all the variables in $x_b$, we end up with another multivariate gaussian with mean $\mu_a$ and covariance $\Sigma_{aa}$.
+
 \subsubsection{Conditioning one gaussian on another}
 
 \subsection{Information Theory}
 
 Information is intuited as the number of bits it takes to represent an event. The entropy of a probability distribution is the expected information of a single event. 
+
+\subsubsection{Entropy}
 
 \eq{
   H[f] &= -E[\log f(x)] & \text{normal entropy}\\
@@ -424,11 +545,75 @@ Information is intuited as the number of bits it takes to represent an event. Th
   H[x,y] &= -E[\log f(x,y)] & \text{joint-entropy} \\
 }
 
+In a discrete probability distribution, entropy does not scale if we move around or scale the discrete events. However, in a continuous distribution, this is not true.
+
+Let $x$ be some variable with known entropy, and suppose we apply a linear transformation to obtain $y = Ax$, so $x = \minv A y$.
+
+The probability distribution of $y$ is
+\eq{
+  f_y(y) &= f_x(A^{-1}y) \left| \frac{\partial A^{-1}y}{\partial y} \right| \\
+  &= f_x(A^{-1}y) |A^{-1}|
+}
+
+Now we can proceed to compute the entropy
+\eq{
+  H[y] &= - \int f_y(y) \log f_y(y) dy\\
+  &= - \int f_y(y) \log f_x(A^{-1}y) |A^{-1}| dy \\
+  &= - \int f_y(y) \left(\log (f_x(A^{-1}y)) + \log (|A^{-1}|)\right) dy \\
+  &= - \int f_y(y) \log (f_x(A^{-1}y)) dy - \int f_y(y) \log (|A^{-1}|) dy\\
+  &= - \int f_y(y) \log (f_x(A^{-1}y)) dy - \log |A^{-1}| \\
+  &= - \int f_x(A^{-1}y) |A^{-1}| \log (f_x(A^{-1}y)) dy  + \log |A| \\
+  &= - \int f_x(x)  |A^{-1}| \log f_x(x) |\frac{\partial y}{\partial x}| dx + \log |A| \\
+  &= - \int f_x(x)  |A^{-1}| \log f_x(x) |A| dx + \log |A| \\
+  &= - \int f_x(x) \log f_x(x) dx + \log |A| \\
+  &= H[x]+ \log |A|
+}
+
+There is some intuition to the $\log$ term -- if the amount of space to search is doubled and the density is spread twice as thinly, then we need one more bit to specify the location of some object.
+
+The entropy of the multivariate gaussian can be computed as:
+
+We are computing the entropy of the multivariate gaussian.
+\eq{
+  H[x] &= -\int (2\pi)^{-\frac{D}{2}}  | \Sigma |^{-\frac{1}{2}} \exp \left( -\frac{1}{2} (x-\mu)^T \Sigma^{-1} (x-\mu) \right)
+  \log \left( 
+    (2\pi)^{-\frac{D}{2}}  | \Sigma |^{-\frac{1}{2}} \exp \left( -\frac{1}{2} (x-\mu)^T \Sigma^{-1} (x-\mu) \right)
+  \right) dx\\
+  &=  -\log \left( (2\pi)^{-\frac{D}{2}}  | \Sigma |^{-\frac{1}{2}} \right) -\int (2\pi)^{-\frac{D}{2}}  | \Sigma |^{-\frac{1}{2}} \exp \left( -\frac{1}{2} (x-\mu)^T \Sigma^{-1} (x-\mu) \right)
+  \log \left( 
+    \exp \left( -\frac{1}{2} (x-\mu)^T \Sigma^{-1} (x-\mu) \right)
+  \right) dx\\
+  &=  \frac{D}{2} \log(2\pi) + \frac{1}{2} \log |\Sigma| - \int (2\pi)^{-\frac{D}{2}}  | \Sigma |^{-\frac{1}{2}} \exp \left( -\frac{1}{2} (x-\mu)^T \Sigma^{-1} (x-\mu) \right)
+  \left( -\frac{1}{2} (x-\mu)^T \Sigma^{-1} (x-\mu) \right) dx\\
+  &= \frac{D}{2} \log(2\pi) + \frac{1}{2} \log |\Sigma| + \frac{1}{2}E\left[ \frac{1}{2} (x-\mu)^T \Sigma^{-1} (x-\mu) \right]\\
+  &= \frac{D}{2} \log(2\pi) + \frac{1}{2} \log |\Sigma| + \frac{D}{2}
+}
+
+\subsubsection{Mutual Information}
+
 Another useful, if rarely used concept is mutual information
 
 \eq{
   I(x;y) &= H(x) - H(x|y) & \text{and the other way around by symmetry}
 }
+
+It can also be defined using KL-divergence.
+
+\eq{
+  I(x,y) &= \kl{p(x,y)}{p(x)p(y)} \\
+  &= \kl{p(x|y)}{p(x)}
+}
+
+These two definitions are equivalent:
+
+\eq{
+  I(x,y) &= E\left[\frac{p(x,y)}{p(x)p(y)} \right] \\
+  &= E\left[\frac{p(x|y)p(y)}{p(x)p(y)} \right] \\
+  &= E\left[\frac{p(x|y)}{p(x)} \right] \\
+  &= H(x)-H(x|y) 
+}
+
+\subsubsection{KL-Divergence}
 
 KL-divergence is defined below. It is not symmetric but it is always positive. 
 
@@ -441,6 +626,85 @@ Note that with respect to $q$, KL-divergence and cross-entropy are equivalent up
 \eq{
   \kl{p}{q} &= H[p] + H[p;q]
 }
+
+The KL-divergence between two gaussian distributions can be analytically derived.
+Start with distributions $p(x) = \mathcal{N}(x|\mu, \sigma^2)$ and $q(x) = \mathcal{N}(x|m, s^2)$.
+
+\eq{
+  D_{KL}(p||q) &= E_p\left[\log \frac{p(x)}{q(x)} \right] \\
+  &= E_p\left[\log \frac{
+      \frac{1}{\sqrt{2 \pi \sigma^2}} 
+      \exp \left( -\frac{(x-\mu)^2}{2\sigma^2} \right) }
+    {\frac{1}{\sqrt{2 \pi s^2}} 
+      \exp \left( -\frac{(x-m)^2}{2s^2} \right)}  
+  \right]\\
+  &= E_p\left[\log \left( \frac{
+        \sqrt{2 \pi s^2} }{
+        \sqrt{2 \pi \sigma^2}
+      }
+      \exp \left(\frac{(x-m)^2}{2s^2}-\frac{(x-\mu)^2}{2\sigma^2} \right) \right) \right]\\
+  &= E_p\left[\log\left(\frac{s}{\sigma}\right) + 
+    \left(\frac{(x-m)^2}{2s^2}-\frac{(x-\mu)^2}{2\sigma^2} \right) \right]\\
+  &= \log\left(\frac{s}{\sigma}\right)
+  + E_p\left[\frac{(x-m)^2}{2s^2}\right]-E_p\left[\frac{(x-\mu)^2}{2\sigma^2} \right]\\
+  &= \log\left(\frac{s}{\sigma}\right)
+  + \frac{E_p [(x-m)^2]}{2s^2}
+  - \frac{E_p[(x-\mu)^2]}{2\sigma^2}\\
+  &= \log\left(\frac{s}{\sigma}\right)
+  + \frac{E_p [(x-m)^2]}{2s^2}
+  - \frac{\text{Var}_p[x]}{2\sigma^2}\\
+  &= \log\left(\frac{s}{\sigma}\right) - \frac{1}{2}
+  + \frac{E_p [(x-m)^2]}{2s^2} \\
+  &= \log\left(\frac{s}{\sigma}\right) - \frac{1}{2}
+  + \frac{E_p [x^2]-E[2mx]+E[m^2]}{2s^2} \\
+  &= \log\left(\frac{s}{\sigma}\right) - \frac{1}{2}
+  + \frac{\mu^2 + \sigma^2 - 2m\mu + m^2}{2s^2} \\
+}
+
+Let's try the multivariate gaussian as well
+
+\eq{
+  p(x) &= (2\pi)^{-\frac{D}{2}} |\Sigma|^{-\frac{1}{2}} 
+  \exp \left(-\frac{1}{2} (x-\mu)^T \Sigma^{-1} (x-\mu) \right) \\
+  q(x) &= (2\pi)^{-\frac{D}{2}} |L|^{-\frac{1}{2}} 
+  \exp \left(-\frac{1}{2} (x-m)^T L^{-1} (x-m) \right) \\
+  \intertext{Then the KL divergence is}
+  D_{KL}(p||q) &= E_p\left[\log \frac{p(x)}{q(x)} \right] \\
+  &= E_p\left[\log \frac{
+      (2\pi)^{-\frac{D}{2}} |\Sigma|^{-\frac{1}{2}} 
+      \exp \left(-\frac{1}{2} (x-\mu)^T \Sigma^{-1} (x-\mu) \right)
+    }{
+      (2\pi)^{-\frac{D}{2}} |L|^{-\frac{1}{2}} 
+      \exp \left(-\frac{1}{2} (x-m)^T L^{-1} (x-m) \right)
+    }  
+  \right]\\
+  &= E_p \left[ \frac{1}{2} \log |L| - \frac{1}{2} \log |\Sigma| + 
+    \log \left(
+      \exp \left(
+        \frac{1}{2} \left( (x-m)^T L^{-1} (x-m) - (x-\mu)^T \Sigma^{-1} (x-\mu) \right)
+      \right) \right) \right]\\
+  &= E_p \left[ \frac{1}{2} \log |L| - \frac{1}{2} \log |\Sigma| + 
+    \frac{1}{2} \left( (x-m)^T L^{-1} (x-m) - (x-\mu)^T \Sigma^{-1} (x-\mu) \right)
+  \right]\\
+  &= \frac{1}{2} E_p \left[ \log |L| - \log |\Sigma| + 
+    (x-m)^T L^{-1} (x-m) - (x-\mu)^T \Sigma^{-1} (x-\mu)
+  \right]
+}
+
+We derive the expectation of a quadratic form in another section, but it gives us the following.
+\eq{
+  E[(x-m)^T L^{-1} (x-m)] &= tr(L^{-1} \Sigma) + (\mu-m)^T L^{-1} (\mu-m) \\
+  E[(x-\mu)^T \Sigma^{-1} (x-\mu)] &= tr(\Sigma^{-1} \Sigma) + \mu^T \Sigma^{-1} \mu \\
+  &= D
+}
+
+Now we can plug these back into where we left off.
+\eq{
+D_{KL}(p||q) &= \frac{1}{2} \left( \log |L| - \log |\Sigma| + 
+tr(L^{-1} \Sigma) + (\mu-m)^T L^{-1} (\mu-m) - D \right)
+}
+
+\subsubsection{Fisher Information}
 
 The fisher information matrix $F(\theta)$ is defined as
 
@@ -473,7 +737,7 @@ Using this naive scheme is not very efficient, because enumerating out $256^{100
 
 \section{Linear Algebra}
 \subsection{Identities and Manipulations}
-.
+
 \subsubsection{Completing the Square}
 
 The scalar case:
@@ -520,6 +784,10 @@ This decomposition is relatively simple:
   &= \frac{A-A^T}{2}
 }
 It shouldn't be too hard to verify that $A_s$ and $A_a$ are symmetric and antisymmetric respectively.
+
+\subsubsection{Partitioned Inverse}
+
+\todo{do this}
 
 \subsection{Decompositions and Factorizations}
 
@@ -637,6 +905,30 @@ Next is the question of finding the eigenvectors and values of a matrix. We will
 }
 
 Note that this looks remarkably like an eigendecomposition of the covariance matrix, which means $\Sigma \Sigma^T$ contains the eigenvalues of $\cov$ and $U$ contains the respective eigenvectors, which is exactly what we want. To be precise, the decompositions are equivalent only up to permutation of eigenvectors and values, but that is sufficient for us.
+
+\subsection{Expectation of Quadratic Forms}
+
+Suppose $x \sim \nml{\mu}{\Sigma}$, how can we compute the expectation $\qf{x}{A}$?
+
+\eq{
+  E[\qf{x}{A}] &= \tr \paren{E[\qf{x}{A}]} \\
+  &= \tr \paren{E[Axx^T]} \\
+  &= \tr \paren{AE[xx^T]} \\
+  \intertext{we claim $E[xx^T] = \Sigma + \mu\mu^T$}
+  &= \tr \paren{A(\Sigma+\mu \mu^T)} \\
+  &= \tr(A\Sigma) + tr(A\mu\mu^T) \\
+  &= \tr(A\Sigma) + \qf{\mu}{A} \\
+}
+
+Now it remains to prove that $E[xx^T] = \Sigma + \mu\mu^T$
+
+\eq{
+  E[xx^T]_{ij} &= E[x_i x_j] \\
+  &= E[(x_i-\mu_i)(x_j-\mu_j) - \mu_i \mu_j + x_i\mu_j + x_j \mu_i] \\
+  &= \Sigma_{ij} - \mu_i\mu_j + \mu_j E[x_i] + \mu_i E[x_j] \\
+  &= \Sigma_{ij} - \mu_i \mu_j + 2 \mu_i \mu_j \\
+  &= \Sigma_{ij} + \mu_i \mu_j
+}
 
 \section{Probabilistic Graphical Models}
 \subsection{Forward Backward Algorithm}
@@ -1281,7 +1573,7 @@ Naive strategy: Sample $z \sim q$. Compute the gradient of $\log p(x|z)$ in orde
 .
 \subsubsection{Grid LSTM}
 .
-\section{Miscellaneous}
+\section{Mathematical Background}
 
 \subsection{Matrix Differentials}
 
@@ -1374,7 +1666,83 @@ There are two special cases of differentials -- inverses, and log determinants. 
 
 \subsection{Calculus of Variations}
 
-In this section, we will introduce calculus of variations and use it to show that the normal distribution is the probability distribution with variance 1 which has the highest entropy.
+Normal calculus deals with scalar values and expressions. Multivariable and matrix calculus deals with vector and matrix values and expressions. Calculus of variances deals with values and expressions which are functions. This is very applicable because probability distributions are a very commonly used object which are functions, and we often want to maximize objectives defined on probability distributions.
+
+\todo{write this section!}
+
+\subsubsection{Maximum Entropy Distrbutions}
+
+As an exercise, let us prove that the gaussian distribution has maximum entropy under some constraints (zero mean and unit variance). 
+
+Formally, 
+\eq{
+  \max H[x] \\
+  \text{such that}
+  \int f(x) dx &= 1 \\
+  \int x f(x) dx &= 0 \\
+  \int x^2 f(x) dx &= 1 \\
+}
+
+Writing this as a lagrangian, we want to solve
+\eq{
+  L(x,\lambda) = &-\int f(x) \log f(x) dx + \\
+  &\left( \lambda_1 \int f(x) dx -1 \right) + \\
+  &\left( \lambda_2 \int xf(x) dx \right) + \\
+  &\left( \lambda_3 \int x^2 f(x) dx -1 \right) \\
+  \lambda &\neq 0\\
+  &\nabla_x L(x,\lambda) = 0
+}
+
+First we will take the functional derivative of each term in the lagrangian.
+\eq{
+  &-\lim_{\epsilon \rightarrow 0} \frac{\partial}{\partial \epsilon} \int (f(x) + \epsilon \eta(x)) \log(f(x) + \epsilon \eta(x)) dx \\
+  &= -\lim_{\epsilon \rightarrow 0} \int \eta(x) \log(f(x) + \epsilon \eta(x)) + (f(x) + \epsilon \eta(x) \frac{\partial}{\partial \epsilon} \log(f(x) + \epsilon \eta(x)) dx \\
+  &= -\lim_{\epsilon \rightarrow 0} \int \eta(x) \log(f(x) + \epsilon \eta(x)) + (f(x) + \epsilon \eta(x) \frac{\eta(x)}{f(x) + \epsilon \eta(x)} dx \\
+  &= -\lim_{\epsilon \rightarrow 0} \int \eta(x) \log(f(x) + \epsilon \eta(x)) + \eta(x) dx \\
+  &= -\lim_{\epsilon \rightarrow 0} \int \eta(x) \left( 1+ \log(f(x) + \epsilon \eta(x))\right)  dx \\
+  &= -\eta(x) \int 1+\log f(x) dx
+  \intertext{Therefore}
+  \frac{\partial H[x]}{\partial f(x)} &= -1-\log f(x)
+}
+
+Now for the normalization constraint:
+\eq{
+  &\lim_{\epsilon \rightarrow 0} \frac{\partial}{\partial \epsilon} \int f(x) + \epsilon \eta(x) dx\\
+  &= \lim_{\epsilon \rightarrow 0} \int \eta(x) dx
+  \intertext{Therefore the derivative is 1}
+}
+
+Next, we have the zero mean constraint:
+\eq{
+  &\lim_{\epsilon \rightarrow 0} \frac{\partial}{\partial \epsilon} \int x(f(x) + \epsilon \eta(x)) dx\\
+  &= \lim_{\epsilon \rightarrow 0} \frac{\partial}{\partial \epsilon} \int \epsilon x\eta(x)) dx\\
+  &= \lim_{\epsilon \rightarrow 0} \int x\eta(x) dx
+  \intertext{Therefore the derivative is $x$}
+}
+
+Finally for the unit variance constraint:
+Next, we have the zero mean constraint:
+\eq{
+  &\lim_{\epsilon \rightarrow 0} \frac{\partial}{\partial \epsilon} \int x^2(f(x) + \epsilon \eta(x)) dx\\
+  &= \lim_{\epsilon \rightarrow 0} \frac{\partial}{\partial \epsilon} \int \epsilon x^2\eta(x)) dx\\
+  &= \lim_{\epsilon \rightarrow 0} \int x^2\eta(x) dx
+  \intertext{Therefore the derivative is $x^2$}
+}
+
+We may now find the gradient of the lagrangian and set it to 0.
+\eq{
+  \frac{\partial L}{\partial x} &= -1-\log f(x) + \lambda_1(1) + \lambda_2x + \lambda_3x^2 = 0\\
+  \log f(x) &= -1+\lambda_1 + \lambda_2x + \lambda_3x^2 \\
+  f(x) &= \exp \left( -1+\lambda_1 + \lambda_2x + \lambda_3x^2 \right)
+}
+
+Now it remains to solve for the $\lambda$ terms. By inspection, $\lambda_2 = 0$. It turns out that $\lambda_3 = -\frac{1}{2}$ and $\lambda_1 = 1-\frac{\log 2 \pi}{2}$. Therefore our distribution is the standard gaussian.
+
+We can generalize this to prove that a gaussian has the maximum entropy for all means and variances. Note that the mean has no effect on entropy, and scaling by some constant $k$ will increase entropy by $\log k$ and the variance by $k^2$.
+
+If the standard gaussian has entropy $h$, then the gaussian with variance $\sigma^2$ will have scale factor $\sigma$ and hence entropy will be $h+\log k$. But if there is another non-gaussian distribution with entropy $h' > h+\log k$, then it can be scaled by $\sigma^{-1}$ to obtain a distribution with unit variance and entropy $h' - \log k > h$. Since this is impossible, we know there is no non-gaussian distribution of any variance and mean which has maximum entropy.
+
+\section{Miscellaneous}
 
 \subsection{Echo State Networks}
 
@@ -1590,6 +1958,24 @@ Now at this point you just run gradient descent to get the answer.
 Another ICA algorithm involves kurtosis, which is a measure of nongaussianity. Kurtosis is the expected value of $x^4$. One may ask why we do not use skewness, which is the expectation of $x^3$. I'm not sure myself, although I have read vague and unsubstantiated claims to the effect that kurtosis somehow encompasses skewness through something called a one-bit-matching theorem.
 
 The algorithm performs kurtosis maximization in order to find the directions along which the data is projected into the least gaussian shape possible, but that's all I know about it.
+
+\subsection{Class Imbalance}
+
+One simple way to correct class inbalance is by training a classifier with equal amounts of data from each class. For example, we might take only a subset of the larger class, or bootstrap by sampling multiple times from the smaller class.
+
+To be precise, suppose a classifier is trained on an artificially balanced dataset with $k$ classes. Therefore we have obtained some probability distribution $q(c|x)$. How can we recover the true distribution $p(c|x)$?
+
+First, we use Bayes' Theorem to obtain
+\eq{
+q(c|x) &= \frac{q(x|c)q(c)}{q(x} \propto q(x|c)q(c) \\
+p(c|x) &= \frac{p(x|c)p(c)}{p(x} \propto p(x|c)p(c) \\
+\intertext{Furthermore notice that $p(x|c) = q(x|c)$, due to the fact that within a single class, we did not manipulate the data}
+p(c|x) &\propto q(x|c)p(c) \\
+&= q(x|c)q(c) \frac{p(c)}{q(c)} \\
+&= q(c|x) \frac{p(c)}{q(c)}
+}
+
+Therefore the correct method of correcting for class redistribution is to multiply probabilities by the ratio $\frac{p(c)}{q(c)}$. Remember to renormalize afterwards.
 
 \section{Category Theory}
 
