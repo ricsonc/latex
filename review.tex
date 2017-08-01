@@ -89,7 +89,6 @@
 \nec{\gam}[2]{\mathbf{\Gamma}(#1, #2)}
 \nec{\avgsum}{\frac{1}{n}\sum}
 
-
 %message passing stuff
 \nec{\msg}[2]{\mu (#1 \rightarrow #2)}
 \rec{\ne}[2]{N(#1) \setminus #2}
@@ -114,7 +113,6 @@ This document was not written to teach or introduce the subjects that it covers.
 \itmz{
 \item conditional gaussians
 \item calculus of variations
-\item partitioned matrix inverse
 \item bayesian lr and lr
 \item variational methods and CRFs
 \item kernel density estimators
@@ -534,6 +532,25 @@ Reading off that equation from before, this means that $\mu_* = \mu_a$.
 To conclude, if we start off with a multivariate gaussian with the variables partitioned into groups $x_a$ and $x_b$, and we ignore all the variables in $x_b$, we end up with another multivariate gaussian with mean $\mu_a$ and covariance $\Sigma_{aa}$.
 
 \subsubsection{Conditioning one gaussian on another}
+
+The setup is
+
+\eq{
+  x &\sim \nml{\mu}{\Lambda^{-1}} \\
+  y|x &\sim \nml{Ax+b}{\minv L}
+}
+
+We want to find the distribution of $x|y$ and $y$
+
+\todo{write this section}
+
+Just for reference, the solutions are
+
+\eq{
+  y &\sim \nml{A\mu + b}{\minv L + A \minv \Lambda A^T} \\
+  y|x &\sim \nml{\Sigma\paren{A^T L(y-b) + \Lambda \mu}}{\Sigma} \\
+  \Sigma &= \minv{\paren{\Lambda A^T L A}}
+}
 
 \subsection{Information Theory}
 
@@ -1708,8 +1725,6 @@ There are two special cases of differentials -- inverses, and log determinants. 
 \subsection{Calculus of Variations}
 
 Normal calculus deals with scalar values and expressions. Multivariable and matrix calculus deals with vector and matrix values and expressions. Calculus of variances deals with values and expressions which are functions. This is very applicable because probability distributions are a very commonly used object which are functions, and we often want to maximize objectives defined on probability distributions.
-
-\todo{write this section!}
 
 \subsubsection{Maximum Entropy Distrbutions}
 
