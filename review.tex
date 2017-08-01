@@ -113,6 +113,8 @@ This document was not written to teach or introduce the subjects that it covers.
 
 \itmz{
 \item conditional gaussians
+\item calculus of variations
+\item partitioned matrix inverse
 \item bayesian lr and lr
 \item variational methods and CRFs
 \item kernel density estimators
@@ -436,7 +438,7 @@ What we are trying to find is $f(x_a)$. According to the law of total probabilit
 f(x_a) = \int f \left(\vtx \right) dx_b
 }
 
-To do this, first we're going to expand out all the terms in the exponential in $f$. We will also drop the $-\frac{1}{2}$ for now.
+To do this, first expand out all the terms in the exponential in $f$. We will also drop the $-\frac{1}{2}$ for now.
 
 \eq{
   \left( \vtx-\vtmu \right)^T \mtlambda \left(\vtx-\vtmu \right)
@@ -448,7 +450,7 @@ If you expand this out, it becomes
 }
 
 
-Now since we're integrating with respect to $x_b$, it helps to split up the terms into those which contain $x_b$ and those which don't.
+Since we're integrating with respect to $x_b$, it helps to split up the terms into those which contain $x_b$ and those which don't.
 
 The terms that do:
 \eq{
@@ -460,20 +462,20 @@ The terms that don't:
 (x_a-\mu_a)^T \Lambda_{aa} (x_a-\mu_a) - 2 (x_a-\mu_a)^T \Lambda_{ab} \mu_b
 }
 
-Now for ease of writing, make $m = \Lambda_{bb}\mu_b - \Lambda_{ba} (x_a-\mu_a)$. Then the first set of terms is
+Define $m = \Lambda_{bb}\mu_b - \Lambda_{ba} (x_a-\mu_a)$. Then the first set of terms is
 \eq{
   x_b^T \Lambda_{bb} x_b - 2 x_b^T m
   \intertext{We complete the square to obtain}
   \paren{x_b - \Lambda_{bb}^{-1} m}^T \Lambda_{bb} \paren{x_b - \Lambda_{bb}^{-1} m} - m^T \Lambda_{bb}^{-1} m
 }
 
-So actually now we've managed to pull another term out of the terms we said depended on $x_b$, which doesn't contain $x_b$. Namely, $m^T \Lambda_{bb}^{-1} m$. Let's add this on to the second set of terms:
+We've pulled out another term out of the terms we said depended on $x_b$, which doesn't contain $x_b$. Namely, $m^T \Lambda_{bb}^{-1} m$. Add this on to the second set of terms:
 
 \eq{
 (x_a-\mu_a)^T \Lambda_{aa} (x_a-\mu_a) - 2 (x_a-\mu_a)^T \Lambda_{ab} \mu_b - m^T \Lambda_{bb}^{-1} m
 }
 
-Let's call the completed square $B$ and the second set of terms $A$. Remember again that what we really want to solve is
+Let's call the completed square $B$ and the second set of terms $A$. What we really want to solve is
 
 \eq{
   f(x_a) &= \int f \left(\vtx \right) dx_b \\
@@ -486,7 +488,7 @@ Since $B$ is in a quadratic form in $x_b$, we know that the integral is over an 
 \nmz \exp \left(-\frac{1}{2} A \right)
 }
 
-Now what we're heavily suspecting is that $x_a$ is distributed normally. If this is the case, then we should be able to manipulate $A$ into the form $(x_a - \mu_*)^T \Lambda_* (x_a - \mu_*)$. To make things easier, we're not even going to bother completing the square. Notice that if we expand $(x_a - \mu_*)^T \Lambda_* (x_a - \mu_*)$ we end up with something like
+We might suspect that $x_a$ is distributed normally. If this is the case, then we should be able to manipulate $A$ into the form $(x_a - \mu_*)^T \Lambda_* (x_a - \mu_*)$. To make things easier, we're not even going to bother completing the square. Notice that if we expand $(x_a - \mu_*)^T \Lambda_* (x_a - \mu_*)$ we end up with something like
 
 \eq{
 x_a^T \Lambda_* x_a - 2 x_a^T \Lambda_* \mu_* + C
@@ -509,7 +511,7 @@ To make our job easier, I'm going to play around one of the terms
 \eq{
 (x_a-\mu_a)^T \Lambda_{aa} (x_a-\mu_a) - 2 (x_a-\mu_a)^T \Lambda_{ab} \mu_b - \left( \Lambda_{bb}\mu_b - (x_a-\mu_a)^T \Lambda_{ba}^T \right)^T \Lambda_{bb}^{-1} \left( \Lambda_{bb}\mu_b - \Lambda_{ba} (x_a-\mu_a) \right)
 }
-
+ 
 Now, we're going to try grabbing out all the quadratic terms. You should find
 \eq{
 \Lambda_{aa} - \Lambda_{ba}^T \Lambda_{bb}^{-1} \Lambda_{ba}
@@ -787,7 +789,46 @@ It shouldn't be too hard to verify that $A_s$ and $A_a$ are symmetric and antisy
 
 \subsubsection{Partitioned Inverse}
 
-\todo{do this}
+\eq{
+  \mt{A}{B}{C}{D}^{-1} &= \mt{\minv A+\minv A B M C \minv A}{-\minv A B M}{-MC \minv A}{M}
+  \intertext{where $M$ is defined by}
+  M &= \minv{\paren{D-C \minv A B}}
+}
+
+Let's use this to show the result from the section on partial margianalization of gaussians.
+
+\eq{
+  \Sigma_{aa} = \minv{\paren{\Lambda_{aa} - \Lambda_{ab} \Lambda_{bb}^{-1} \Lambda_{ba}}}
+}
+
+At first glance, it doesn't look like the RHS of this expression shows up anywhere in our identity. Particularly, since we are looking at $\Sigma_{aa}$, we would maybe expect the RHS to show up as the entry in the top left block of the RHS of the identity. Therefore, the LHS of the identity must be $\Lambda$, and the RHS must be $\Sigma^{-1}$.
+
+Therefore we have
+\itmz{
+\item $A = \Sigma_{aa}$
+\item $B = \Sigma_{ab}$
+\item $C = \Sigma_{ba}$
+\item $D = \Sigma_{bb}$
+}
+
+According to the identity, then 
+
+\eq{
+  &\minv{\paren{\Lambda_{aa} - \Lambda_{ab} \Lambda_{bb}^{-1} \Lambda_{ba}}} \\
+  &= \minv{\paren{
+      \paren{\minv{\Sigma_{aa}}+\minv{\Sigma_{aa}} \Sigma_{ab} M \Sigma_{ba} \minv{\Sigma_{aa}}} -
+      \paren{-\minv{\Sigma_{aa}} \Sigma_{ab} M}
+      \paren{M}^{-1}
+      \paren{-M \Sigma_{ba} \minv{\Sigma_{aa}}}}} \\
+  &= \minv{\paren{
+      \paren{\minv{\Sigma_{aa}}+\minv{\Sigma_{aa}} \Sigma_{ab} M \Sigma_{ba} \minv{\Sigma_{aa}}} -
+      \paren{\minv{\Sigma_{aa}} \Sigma_{ab} M \Sigma_{ba} \minv{\Sigma_{aa}}}
+    }} \\
+  &= {\Sigma_{aa}^{-1}}^{-1} \\
+  &= \Sigma_{aa}
+}
+
+This completes the proof.
 
 \subsection{Decompositions and Factorizations}
 
