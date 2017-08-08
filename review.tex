@@ -40,6 +40,7 @@
 \rec{\o}{\mathbf{o}}
 \rec{\u}{\mathbf{u}}
 \nec{\RR}{\mathbb{R}}
+\nec{\bfu}{\mathbf{u}}
 
 \nec{\haf}{\frac{1}{2}}
 \nec{\nhaf}{-\haf}
@@ -112,7 +113,8 @@ These are a collection of personal notes, and are not intended to teach or intro
 \section{Todo}
 
 \itmz{
-\item bayesian lr and lr
+\item optimal control
+\item bayesian lr and bayesian lr
 \item variational methods and CRFs
 \item kernel density estimators
 }
@@ -1522,7 +1524,70 @@ Basically, we want to solve a problem with all the following constraints (these 
 \subsection{Optimal Control}
 
 \subsubsection{LQR}
-.
+
+Let us start with the simplest case:
+
+\eq{
+	c(x,u) &= \qf{x}{C_x} + \qf{u}{C_u} \\
+    d(x,u) &= D_x x + D_u u
+}
+
+The total cost that we are trying to minimize:
+
+\eq{
+	J(x) &= \min_\bfu \sum_i c(x_i, u_i) \\
+    &= \min_\bfu \sum_i \qf{x_i}{C_x} + \qf{u_i}{C_u}
+}
+
+To get a recursive relationship, we can also write $J_t$ to denote the cost from time $t$ up until $T$. 
+
+\eq{
+	J_t(x) &= \min_\bfu \sum_{i=t}^T c(x_i, u_i) \\
+    &= \min_{u_t} c(x, u_t) + J_{t+1}(d(x, u_t)) \\
+    &= \min_{u_t} c(x, u_t) + J_{t+1}(D_x x + D_u u_t)
+}
+
+We want to minimize $J = J_1$. We will develop an inductive solution which can minimize every $J_t$. We claim that $J_{t}(x)$ can be written as a quadratic function of $x$ for every $t$. 
+
+In the base case, we have 
+\eq{
+	J_T(x) &= 0 \\
+    &= \qf{x}{P_T}
+    \intertext{where $P_T$ is a zero matrix}
+}
+
+Suppose we have written $J_{t+1}(x) = \qf{x}{P_{t+1}}$
+
+\eq{
+	J_t(x) &= \min_{u_t} c(x, u_t) + J_{t+1}(D_x x + D_u u_t) \\
+    &= \min_{u_t} \qf{x}{C_x} + \qf{u_t}{C_u} + \qf{(D_x x + D_u u_t)}{P_{t+1}} \\
+    &= \min_{u_t} \qf{x}{C_x} + \qf{u_t}{C_u} + \qf{x}{D_x^T P_{t+1} D_x} + \qf{u_t}{D_u^T P_{t+1} D_u} + 
+    x^T D_x^T P_{t+1} D_u u_t + u^T D_u^T P_{t+1} D_x x \\
+}
+
+Taking the gradient wrt $u_t$ and setting it to 0 gives:
+\eq{
+	0 &= 2C_u u_t + 2D_u^T P_{t+1} D_u u_t + 2D_u^T P_{t+1}D_x x \\
+    &= (C_u + D_u^T P_{t+1} D_u) u_t + D_u^T P_{t+1}D_x x \\
+    (C_u + D_u^T P_{t+1} D_u) u_t &= D_u^T P_{t+1}D_x x \\
+    u_t &= (C_u + D_u^T P_{t+1} D_u)^{-1} D_u^T P_{t+1}D_x x
+}
+
+Let $K$ be the product of the matrices on the RHS, so that $u_t = Kx$. Now we can substitute $Kx$ into our expression:
+
+\eq{
+	J_t(x) &= \qf{x}{C_x} + \qf{(Kx)}{C_u} + \qf{x}{D_x^T P_{t+1} D_x} + \qf{(Kx)}{D_u^T P_{t+1} D_u} + 
+    	x^T D_x^T P_{t+1} D_u K x + x^T K^T D_u^T P_{t+1} D_x x \\
+    &= \qf{x}{\paren{C_x + K^TC_uK + D_x^T P_{t+1} D_x + K^T D_u^T P_{t+1} D_u K + D_x^T P_{t+1} D_u K + K^T D_u^T P_{t+1} D_x}} \\
+    &= \qf{x}{P_t}
+}
+
+This completes the proof. Now we will consider the full case:
+
+\eq{
+	0 &= 0
+}
+
 \subsubsection{MPC and ILQR}
 .
 \subsubsection{Stochastic Optimal Control}
