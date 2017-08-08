@@ -15,6 +15,8 @@
 \usepackage{color}
 \usepackage{soul}
 
+\allowdisplaybreaks
+
 % let the macro madness begin
 
 \newcommand{\nec}[1]{\newcommand{#1}}
@@ -190,7 +192,8 @@ Meanwhile, we are looking for a joint conjugate prior $P(x, \sigma)$. What if we
 
 \eq{
   p(x,\sigma|y) &\propto p(y|x,\sigma) p(x,\sigma) \\
-  &= \uvnml{y}{x}{\sigma} \uvnml{x}{\mu}{\sigma_0} \uvnml{\sigma}{\mu_\sigma}{\sigma_\sigma} \\
+  &= \uvnml{y}{x}{\sigma} \cdot \uvnml{x}{\mu}{\sigma_0} \\
+  &\qquad \cdot \uvnml{\sigma}{\mu_\sigma}{\sigma_\sigma} \\
   &= \nmz \exp \left(-\left(\frac{(y-x)^2}{2\sigma^2} + \frac{(x-\mu)^2}{2\sigma_0^2} + \frac{(\sigma-\mu_\sigma)^2}{2\sigma_\sigma^2} \right)\right)
 }
 
@@ -264,8 +267,8 @@ So far, we've actually been cheating a bit by only using single sample updates w
 
 \eq{
   p(x,\lambda|\y) &\propto p(\y|x,\lambda) p(x,\lambda) \\
-  &= \paren{\frac{\lambda}{2 \pi}}^{\frac{n}{2}} \nexp{\lambda \sum_i (y_i-x)^2}
-  \uvnmlp{x}{\mu}{(k\lambda)} \gammadist{\lambda}{\alpha}{\beta} \\
+  &= \paren{\frac{\lambda}{2 \pi}}^{\frac{n}{2}} \nexp{\lambda \sum_i (y_i-x)^2} \\
+  & \qquad \cdot \uvnmlp{x}{\mu}{(k\lambda)} \gammadist{\lambda}{\alpha}{\beta} \\
   &= \nmz \lambda^{\alpha+\frac{n+1}{2}} e^{-\beta \lambda} \exp{(\nhaf \ \cdot)}
 }
 
@@ -289,8 +292,8 @@ As before, we want to complete the square
 \eq{
   &(n+k)\lambda x^2 - 2 \lambda \paren{k \mu + S_y} x + \lambda \paren{S_{y^2}+k\mu^2} \\
   &= (n+k)\lambda \paren{x^2 - 2 \frac{k \mu + S_y}{(n+k)} x} + \lambda \paren{S_{y^2}+k\mu^2} \\
-  &= (n+k)\lambda \paren{x^2 - 2 \frac{k \mu + S_y}{(n+k)} x + \paren{\frac{k \mu + S_y}{(n+k)}}^2}
-  + \lambda \paren{S_{y^2}+k\mu^2} - (n+k)\lambda \paren{\frac{k \mu + S_y}{n+k}}^2\\
+  &= (n+k)\lambda \paren{x^2 - 2 \frac{k \mu + S_y}{(n+k)} x + \paren{\frac{k \mu + S_y}{(n+k)}}^2} \\
+  & \qquad + \lambda \paren{S_{y^2}+k\mu^2} - (n+k)\lambda \paren{\frac{k \mu + S_y}{n+k}}^2\\
   &= (n+k)\lambda \paren{x - \frac{k \mu + S_y}{(n+k)}}^2
   + \lambda \paren{S_{y^2}+k\mu^2} - \lambda \frac{(k \mu + S_y)^2}{n+k}\\
   &= (n+k)\lambda \paren{x - \frac{k \mu + S_y}{(n+k)}}^2
@@ -341,10 +344,10 @@ Our strategy will be to multiply the likelihood by the gaussian factor in the pr
 \eq{
   p(x|\y) &\propto p(\y|x)p(x) \\
   &= p(\y|x)p(x|\mu, k\Lambda)p(L) \\
-  &= (2 \pi)^{-\frac{ND}{2}} |\Lambda|^{\frac{N}{2}} \bexp{\nhaf \sum_i \qfo{y_i}{\Lambda}{x}}
-  \mvnmlp{x}{\mu}{k \Lambda} p(L)\\
-  &= \nmz |\Lambda|^{\frac{N+1}{2}} \bexp{\nhaf \sum_i \qfo{y_i}{\Lambda}{x}}
-  \bexp{\nhaf \qfo{x}{k\Lambda}{\mu} }p(L) \\
+  &= (2 \pi)^{-\frac{ND}{2}} |\Lambda|^{\frac{N}{2}} \bexp{\nhaf \sum_i \qfo{y_i}{\Lambda}{x}} \\
+  &\qquad \cdot \mvnmlp{x}{\mu}{k \Lambda} p(L)\\
+  &= \nmz |\Lambda|^{\frac{N+1}{2}} \bexp{\nhaf \sum_i \qfo{y_i}{\Lambda}{x}} \\
+  & \qquad \cdot \bexp{\nhaf \qfo{x}{k\Lambda}{\mu} }p(L) \\
 }
 
 Lets explore the terms inside the exponential:
@@ -359,8 +362,8 @@ Now we can complete the terms with respect to $x$. Given that $A = (n+k)\Lambda$
 
 \eq{
   &\qfo{x}{A}{\minv A b} - \qf{b}{A} + \sum_i \qf{y_i}{\Lambda} - 2k\qf{\mu}{\Lambda} \\
-  &= \qfo{x}{(n+k)\Lambda}{\minv{((n+k)\Lambda)}b} - \qf{b}{((n+k)\Lambda)} +
-  \sum_i \qf{y_i}{\Lambda} - 2k\qf{\mu}{\Lambda}\\
+  &= \qfo{x}{(n+k)\Lambda}{\minv{((n+k)\Lambda)}b} - \qf{b}{((n+k)\Lambda)} \\
+  &\qquad + \sum_i \qf{y_i}{\Lambda} - 2k\qf{\mu}{\Lambda}\\
 }
 
 So the extra terms are
@@ -445,7 +448,8 @@ To do this, first expand out all the terms in the exponential in $f$. We will al
 
 If you expand this out, it becomes
 \eq{
-(x_a-\mu_a)^T \Lambda_{aa} (x_a-\mu_a) + (x_a-\mu_a)^T \Lambda_{ab} (x_b-\mu_b) + (x_b-\mu_b)^T \Lambda_{ba} (x_a-\mu_a) + (x_b-\mu_b)^T \Lambda_{bb} (x_b-\mu_b)
+&(x_a-\mu_a)^T \Lambda_{aa} (x_a-\mu_a) + (x_a-\mu_a)^T \Lambda_{ab} (x_b-\mu_b)\\
+&\qquad +(x_b-\mu_b)^T \Lambda_{ba} (x_a-\mu_a) + (x_b-\mu_b)^T \Lambda_{bb} (x_b-\mu_b)
 }
 
 
@@ -502,13 +506,15 @@ I'll reproduce $A$ again.
 
 Now let's expand $m$ back to full size again.
 \eq{
-(x_a-\mu_a)^T \Lambda_{aa} (x_a-\mu_a) - 2 (x_a-\mu_a)^T \Lambda_{ab} \mu_b - \left( \Lambda_{bb}\mu_b - \Lambda_{ba} (x_a-\mu_a) \right)^T \Lambda_{bb}^{-1} \left( \Lambda_{bb}\mu_b - \Lambda_{ba} (x_a-\mu_a) \right)
+&(x_a-\mu_a)^T \Lambda_{aa} (x_a-\mu_a) - 2 (x_a-\mu_a)^T \Lambda_{ab} \mu_b \\
+&\qquad - \left( \Lambda_{bb}\mu_b - \Lambda_{ba} (x_a-\mu_a) \right)^T \Lambda_{bb}^{-1} \left( \Lambda_{bb}\mu_b - \Lambda_{ba} (x_a-\mu_a) \right)
 }
 
 
 To make our job easier, I'm going to play around one of the terms
 \eq{
-(x_a-\mu_a)^T \Lambda_{aa} (x_a-\mu_a) - 2 (x_a-\mu_a)^T \Lambda_{ab} \mu_b - \left( \Lambda_{bb}\mu_b - (x_a-\mu_a)^T \Lambda_{ba}^T \right)^T \Lambda_{bb}^{-1} \left( \Lambda_{bb}\mu_b - \Lambda_{ba} (x_a-\mu_a) \right)
+&(x_a-\mu_a)^T \Lambda_{aa} (x_a-\mu_a) - 2 (x_a-\mu_a)^T \Lambda_{ab} \mu_b \\
+&\qquad - \left( \Lambda_{bb}\mu_b - (x_a-\mu_a)^T \Lambda_{ba}^T \right)^T \Lambda_{bb}^{-1} \left( \Lambda_{bb}\mu_b - \Lambda_{ba} (x_a-\mu_a) \right)
 }
  
 Now, we're going to try grabbing out all the quadratic terms. You should find
@@ -552,7 +558,8 @@ Let's start with $p(x|y)$.
 
 \eq{
   p(x|y) &\propto \nmz p(y|x)p(x) \\
-  &= \mvnmlp{y}{Ax+b}{L} \mvnmlp{x}{\mu}{\Lambda} \\
+  &= \mvnmlp{y}{Ax+b}{L} \\
+  &\qquad \cdot \mvnmlp{x}{\mu}{\Lambda} \\
 }
 
 The terms inside the exponent, dropping the $\nhaf$:
@@ -700,18 +707,21 @@ There is some intuition to the $\log$ term -- if the amount of space to search i
 
 The entropy of the multivariate gaussian can be computed as:
 
-We are computing the entropy of the multivariate gaussian.
 \eq{
-  H[x] &= -\int (2\pi)^{-\frac{D}{2}}  | \Sigma |^{-\frac{1}{2}} \exp \left( -\frac{1}{2} (x-\mu)^T \Sigma^{-1} (x-\mu) \right)
+  H[x] &= -\int (2\pi)^{-\frac{D}{2}}  | \Sigma |^{-\frac{1}{2}} \exp \left( -\frac{1}{2} (x-\mu)^T \Sigma^{-1} (x-\mu) \right) \\
+  & \qquad \qquad \cdot 
   \log \left( 
     (2\pi)^{-\frac{D}{2}}  | \Sigma |^{-\frac{1}{2}} \exp \left( -\frac{1}{2} (x-\mu)^T \Sigma^{-1} (x-\mu) \right)
   \right) dx\\
-  &=  -\log \left( (2\pi)^{-\frac{D}{2}}  | \Sigma |^{-\frac{1}{2}} \right) -\int (2\pi)^{-\frac{D}{2}}  | \Sigma |^{-\frac{1}{2}} \exp \left( -\frac{1}{2} (x-\mu)^T \Sigma^{-1} (x-\mu) \right)
+  &=  -\log \left( (2\pi)^{-\frac{D}{2}}  | \Sigma |^{-\frac{1}{2}} \right) \\
+  & \qquad -\int (2\pi)^{-\frac{D}{2}}  | \Sigma |^{-\frac{1}{2}} \exp \left( -\frac{1}{2} (x-\mu)^T \Sigma^{-1} (x-\mu) \right) \\
+  & \qquad \qquad \cdot 
   \log \left( 
     \exp \left( -\frac{1}{2} (x-\mu)^T \Sigma^{-1} (x-\mu) \right)
   \right) dx\\
-  &=  \frac{D}{2} \log(2\pi) + \frac{1}{2} \log |\Sigma| - \int (2\pi)^{-\frac{D}{2}}  | \Sigma |^{-\frac{1}{2}} \exp \left( -\frac{1}{2} (x-\mu)^T \Sigma^{-1} (x-\mu) \right)
-  \left( -\frac{1}{2} (x-\mu)^T \Sigma^{-1} (x-\mu) \right) dx\\
+  &=  \frac{D}{2} \log(2\pi) + \frac{1}{2} \log |\Sigma| \\
+  &\qquad - \int (2\pi)^{-\frac{D}{2}}  | \Sigma |^{-\frac{1}{2}} \exp \left( -\frac{1}{2} (x-\mu)^T \Sigma^{-1} (x-\mu) \right) \\
+  &\qquad \qquad \cdot \left( -\frac{1}{2} (x-\mu)^T \Sigma^{-1} (x-\mu) \right) dx\\
   &= \frac{D}{2} \log(2\pi) + \frac{1}{2} \log |\Sigma| + \frac{1}{2}E\left[ \frac{1}{2} (x-\mu)^T \Sigma^{-1} (x-\mu) \right]\\
   &= \frac{D}{2} \log(2\pi) + \frac{1}{2} \log |\Sigma| + \frac{D}{2}
 }
@@ -796,23 +806,25 @@ Let's try the multivariate gaussian as well
   q(x) &= (2\pi)^{-\frac{D}{2}} |L|^{-\frac{1}{2}} 
   \exp \left(-\frac{1}{2} (x-m)^T L^{-1} (x-m) \right) \\
   \intertext{Then the KL divergence is}
-  D_{KL}(p||q) &= E_p\left[\log \frac{p(x)}{q(x)} \right] \\
-  &= E_p\left[\log \frac{
+  &E_p\left[\log \frac{p(x)}{q(x)} \right] \\
+  &= E_p\bigg[ \log \frac{
       (2\pi)^{-\frac{D}{2}} |\Sigma|^{-\frac{1}{2}} 
       \exp \left(-\frac{1}{2} (x-\mu)^T \Sigma^{-1} (x-\mu) \right)
     }{
       (2\pi)^{-\frac{D}{2}} |L|^{-\frac{1}{2}} 
       \exp \left(-\frac{1}{2} (x-m)^T L^{-1} (x-m) \right)
     }  
-  \right]\\
-  &= E_p \left[ \frac{1}{2} \log |L| - \frac{1}{2} \log |\Sigma| + 
+  \bigg]\\
+  &= E_p \bigg[ \frac{1}{2} \log |L| - \frac{1}{2} \log |\Sigma| \\
+  	& \qquad \qquad +
     \log \left(
       \exp \left(
         \frac{1}{2} \left( (x-m)^T L^{-1} (x-m) - (x-\mu)^T \Sigma^{-1} (x-\mu) \right)
-      \right) \right) \right]\\
-  &= E_p \left[ \frac{1}{2} \log |L| - \frac{1}{2} \log |\Sigma| + 
+      \right) \right) \bigg]\\
+  &= E_p \bigg[ \frac{1}{2} \log |L| - \frac{1}{2} \log |\Sigma| \\
+  	& \qquad \qquad +
     \frac{1}{2} \left( (x-m)^T L^{-1} (x-m) - (x-\mu)^T \Sigma^{-1} (x-\mu) \right)
-  \right]\\
+  \bigg]\\
   &= \frac{1}{2} E_p \left[ \log |L| - \log |\Sigma| + 
     (x-m)^T L^{-1} (x-m) - (x-\mu)^T \Sigma^{-1} (x-\mu)
   \right]
@@ -1561,8 +1573,8 @@ Suppose we have written $J_{t+1}(x) = \qf{x}{P_{t+1}}$
 \eq{
 	J_t(x) &= \min_{u_t} c(x, u_t) + J_{t+1}(D_x x + D_u u_t) \\
     &= \min_{u_t} \qf{x}{C_x} + \qf{u_t}{C_u} + \qf{(D_x x + D_u u_t)}{P_{t+1}} \\
-    &= \min_{u_t} \qf{x}{C_x} + \qf{u_t}{C_u} + \qf{x}{D_x^T P_{t+1} D_x} + \qf{u_t}{D_u^T P_{t+1} D_u} + 
-    x^T D_x^T P_{t+1} D_u u_t + u^T D_u^T P_{t+1} D_x x \\
+    &= \min_{u_t} \qf{x}{C_x} + \qf{u_t}{C_u} + \qf{x}{D_x^T P_{t+1} D_x} + \qf{u_t}{D_u^T P_{t+1} D_u} \\
+    & \qquad \qquad + x^T D_x^T P_{t+1} D_u u_t + u^T D_u^T P_{t+1} D_x x \\
 }
 
 Taking the gradient wrt $u_t$ and setting it to 0 gives:
@@ -1576,9 +1588,10 @@ Taking the gradient wrt $u_t$ and setting it to 0 gives:
 Let $K$ be the product of the matrices on the RHS, so that $u_t = Kx$. Now we can substitute $Kx$ into our expression:
 
 \eq{
-	J_t(x) &= \qf{x}{C_x} + \qf{(Kx)}{C_u} + \qf{x}{D_x^T P_{t+1} D_x} + \qf{(Kx)}{D_u^T P_{t+1} D_u} + 
-    	x^T D_x^T P_{t+1} D_u K x + x^T K^T D_u^T P_{t+1} D_x x \\
-    &= \qf{x}{\paren{C_x + K^TC_uK + D_x^T P_{t+1} D_x + K^T D_u^T P_{t+1} D_u K + D_x^T P_{t+1} D_u K + K^T D_u^T P_{t+1} D_x}} \\
+	J_t(x) &= \qf{x}{C_x} + \qf{(Kx)}{C_u} + \qf{x}{D_x^T P_{t+1} D_x} + \qf{(Kx)}{D_u^T P_{t+1} D_u} \\
+    & \qquad + x^T D_x^T P_{t+1} D_u K x + x^T K^T D_u^T P_{t+1} D_x x \\
+    &= \qf{x}{(C_x + K^T C_u K + D_x^T P_{t+1} D_x + K^T D_u^T P_{t+1} D_u K \\
+    & \qquad \qquad + D_x^T P_{t+1} D_u K + K^T D_u^T P_{t+1} D_x)} \\
     &= \qf{x}{P_t}
 }
 
@@ -1650,8 +1663,12 @@ To begin, note that the expected reward of a trajectory is the value of the star
     + \pol(a|s) \gradt \paren{R(s, a) + \gamma \sum_{s'} P(s'|a, s) V_{\pol}(s')}\\
     &= \sum_{a} \gradt \pol(a|s) q_{\pol}(s, a) 
     + \gamma \pol(a|s) \paren{\sum_{s'} P(s'|a, s) \gradt V_{\pol}(s')}\\
-    &= \sum_{a} \gradt \pol(a|s) q_{\pol}(s, a) 
-    + \gamma \pol(a|s) \paren{\sum_{s'} P(s'|a, s) \paren{\sum_{a} \gradt \pol(a|s) q_{\pol}(s, a) + \gamma \pol(a'|s') \paren{\cdots}}}\\
+    &= \sum_{a} \gradt \pol(a|s) q_{\pol}(s, a) \gamma \pol(a|s) 
+    \bigg( \sum_{s'} P(s'|a, s) 
+    	\bigg( \sum_{a} \gradt \pol(a|s) q_{\pol}(s, a) \\
+    		& \qquad \qquad \qquad \qquad + \gamma \pol(a'|s') (\cdots) 
+        \bigg) 
+    \bigg)
 }
 
 Notice that this recursion can be unrolled forever, and since the $\gamma$ term sets up an exponential decay, we can just ignore the final terms in the expression. All that is left is to sum of all the terms $\gradt \pol(a|s) q_{\pol}(s, a)$. The first term has the constant multiplier 1, the next term has the constant multiplier $\gamma P(s'|s)$, the third term has the constant $\gamma^2 P(s''|s)$ and so on. Let $\mu_{\pol}(s';s)$ denote the expected discounted visitation counts of state $s'$, starting from $s$. This expression is pretty easy to make use of in practice, because it can be sampled for by rolling out the policy. Then we can write simply:
@@ -1883,8 +1900,10 @@ Example of using traces:
   &= d (x^Tx)^2 - 2 d tr(Zxx^T) \\
   &= 4x^Tx x^T (dx) - 2 d tr(x^T Z x) \\
   &= 4x^Tx x^T (dx) - 2 d(x^T Z x) \\
-  &= 4x^Tx x^T (dx) - 4 x^T Z dx & \text{assuming $Z$ is symmetric}\\
+  &= 4x^Tx x^T (dx) - 4 x^T Z dx\\
 }
+
+Note this assumes $Z$ is symmetric.
 
 There are two special cases of differentials -- inverses, and log determinants. I won't prove these claims.
 
