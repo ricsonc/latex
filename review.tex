@@ -13,6 +13,7 @@
 \usepackage{tikz}
 \usepackage{tikz-cd}
 \usepackage{color}
+\usepackage{soul}
 
 % let the macro madness begin
 
@@ -58,7 +59,7 @@
 \nec{\hess}{\mathbf{H}}
 \nec{\parf}[2]{\frac{\partial #1}{\partial #2}}
 \nec{\parfsq}[3]{\frac{\partial^2 #1}{\partial #2 \partial #3}}
-\nec{\st}{\text{subject to }}
+\rec{\st}{\text{subject to }}
 \nec{\lag}{\mathcal{L}}
 
 %linear algebra
@@ -97,7 +98,7 @@
 \nec{\pol}{\pi_\theta}
 
 % convenience
-\nec{\todo}[1]{{\color{red} \textbf{todo: #1}}}
+\nec{\todo}[1]{{\color{red} \textbf{ \hl{todo: #1}}}}
 
 \begin{document}
 \maketitle
@@ -111,7 +112,6 @@ These are a collection of personal notes, and are not intended to teach or intro
 \section{Todo}
 
 \itmz{
-\item conditional gaussians
 \item bayesian lr and lr
 \item variational methods and CRFs
 \item kernel density estimators
@@ -415,7 +415,7 @@ I'm reasonably sure these are at least nearly correct, although I haven't bother
 
 Despite these manipulations being pretty nasty to derive, they seem to be very useful, so it is good to know how they can be solved. 
 
-\subsubsection{Conditioning a gaussian on a subset of variables}
+\subsubsection{Partitioned Gaussians}
 
 Given a multivariate gaussian distribution, we want to figure out the marginal distribution when we marginalize out a subset of the variables. We start with a gaussian random variable $x = \vt{x_a}{x_b}$, with mean $\mu = \vt{\mu_a}{\mu_b}$ and precision $\Lambda = \mt{\Lambda_{aa}}{\Lambda_{ab}}{\Lambda_{ba}}{\Lambda_{bb}}$. The probability distribution function is
 
@@ -530,7 +530,7 @@ Reading off that equation from before, this means that $\mu_* = \mu_a$.
 
 To conclude, if we start off with a multivariate gaussian with the variables partitioned into groups $x_a$ and $x_b$, and we ignore all the variables in $x_b$, we end up with another multivariate gaussian with mean $\mu_a$ and covariance $\Sigma_{aa}$.
 
-\subsubsection{Conditioning one gaussian on another}
+\subsubsection{Linearly Dependent Gaussians}
 
 The setup is
 
@@ -583,72 +583,80 @@ We have now arrived at the distribution $x|y$:
  x|y &\sim \nml{\Sigma\paren{A^T L(y-b) + \Lambda \mu}}{\Sigma} \\
 }
 
-Now consider $p(y)$, which requires an integral over the conditional distribution.
-
-\todo{everything here is a huge mess}
-
+Now consider $p(y)$. 
 
 \eq{
-  p(y) &= \int p(y,x) dx \\
-  &= \int p(y|x)p(x) dx\\
-%  &= \int \mvnmlp{y}{(Ax+b)}{L} dx
+	p(y,x) &= p(y|x)p(x)
 }
 
-Notice that this is pretty similar to the computation for $p(x|y)$. Back there, we computed $p(x|y) = \nmz p(x,y)$. We pulled out all the $x$ terms in the joint distribution to get us a normal distribution in $x$. This time, we will pull out all the $x$ terms and recognize that it composes a normal distribution which integrates to 1, or some constant. Then, we will use the left over $y$ terms in order to figure out the distribution.
+We will rewrite the joint distribution of $x$ and $y$ as a partitioned gaussian, and then figure out the partitioned mean and covariance.
 
-The terms inside the exponential of the joint distribution are:
+Same as before the terms inside the exponent are:
 
 \eq{
   \qfo{y}{L}{(Ax+b)} + \qfo{x}{\Lambda}{\mu} \\
 }
 
-Recall that the quadratic terms in $x$ are $A^T L A + \Lambda$ and the linear terms are $-2\paren{A^TL(y-b) + \Lambda \mu}$. If we complete the square, we end up with a quadratic term which contains all the $x$, and an additinal left over term:
+We can write out all the second order terms for $x$ and $y$:
 
 \eq{
-  \qf{\paren{A^TL(y-b)+\Lambda \mu}}{\paren{A^T L A + \Lambda}}
+	y,y &: L \\
+    x,x &: A^T L A + \Lambda \\
+    x,y &: -A^TL \\
+    y,x &: -LA \\
 }
 
-In addition to this term, we can pull out all the $y$ terms from the first part of the joint distribution which we did not use to complete the square:
+So we can rewrite our expression as:
 
 \eq{
-  \qf{y}{L} -2y^TLb
+	\qf{\vt{y}{x}}{\mt{L}{-LA}{-A^TL}{A^T L A + \Lambda}}
 }
 
-Now all that remains is to figure out the quadratic and linear terms in $y$.
+Now we see that this looks like the precision matrix of a partitioned gaussian. We want to find the mean and covariance of this partitioned gaussian (or at least the $y$ components of them)
 
-The quadratic terms:
-\eq{
-  L + LAA^TLAA^TL + LA^T \Lambda A^T L
-}
-
-We are trying to arrive at the correct soltion:
+First let us invert the matrix using our matrix inversion identity:
 
 \eq{
-  \paren{\minv L + A \minv \Lambda A^T}^{-1}
+	\mt{L}{-LA}{-A^TL}{A^T L A + \Lambda}^{-1} &= \mt{\minv L + \minv L (-LA) M (-A^TL) \minv L}{-\minv L (-LA) M}{-M (-A^TL) \minv L}{M}
+    \intertext{where}
+    M &= \paren{(A^T L A + \Lambda) - (-A^TL) \minv L (-LA)}^{-1} \\
+    &= \paren{(A^T L A + \Lambda) - A^TLA}^{-1} \\
+    &= \minv \Lambda \\
+    \intertext{Simplifying and substituting in $M$, we get:}
+	\mt{L}{-LA}{-A^TL}{A^T L A + \Lambda}^{-1} &= \mt{\minv L + AMA^T}{AM}{MA^T}{M} \\
+	&= \mt{\minv L + A \minv \Lambda A^T}{A \minv \Lambda}{\minv \Lambda A^T}{\minv \Lambda} \\
 }
 
-We expect linear terms:
+Therefore the covariance matrix for $y$ is simply 
 
 \eq{
-  -2(A\mu+b)
+	\Sigma_{yy} &= \minv L + A \minv \Lambda A^T
 }
 
-And quadratic terms:
+Now consider the linear terms in $x$ and $y$:
+\eq{
+	y &: -2Lb \\
+    x &: 2A^T L b - 2\Lambda \mu
+}
+
+Recall that multiplying the covariance by the linear terms (dropping the $-2$ constant) gives the means:
 
 \eq{
-  \paren{\minv L + A \minv \Lambda A^T}^{-1}
+	\vt{\mu_y}{\mu_x} &= \mt{\minv L + A \minv \Lambda A^T}{A \minv \Lambda}{\minv \Lambda A^T}{\minv \Lambda} \vt{Lb}{\Lambda \mu - A^T L b} \\
+    &= \vt{\paren{\paren{\minv L + A \minv \Lambda A^T} Lb} + \paren{A \minv \Lambda \paren{\Lambda \mu - A^T L b}}}
+    {\paren{\minv \Lambda A^T Lb} + \paren{\minv \Lambda \paren{\Lambda \mu - A^T L b}}} \\
+    &= \vt{b + A \minv \Lambda A^T L b + A \mu - A \minv \Lambda A^TLb}
+    {\minv \Lambda A^T L (b - b) + \mu} \\
+    &= \vt{A \mu + b}{\mu} \\
 }
 
+So we get that the mean of $x$ is $\mu$, as should be the case, and the mean of $y$ is $A \mu +b$.
 
-\todo{finish this off}
-
-So we end up with the distribution for $y$:
+In conclusion, $y$ follows the distribution
 
 \eq{
   y &\sim \nml{A\mu + b}{\minv L + A \minv \Lambda A^T} \\
 }
-
-
 
 \subsection{Information Theory}
 
@@ -1274,7 +1282,7 @@ How can we generalize this algorithm to general graphs, possibly with cycles? We
 .
 \subsection{Variational Inference}
 .
-\subsubsection{Efficient Inference in Fully Connected Gaussian CRFS}
+\subsubsection{Inference for FC Gaussian CRFS}
 
 A very popular class of CRFs are dense gaussian crfs, used for image processing. In this case, variables are arranged in an n by n grid, with given unary potentials and pairwise potentials between every pair of points in the grid.
 
