@@ -1,4 +1,4 @@
-\title{Learning}
+\title{Study Notes}
 \author{Ricson Cheng}
 \date{\today}
 \documentclass[12pt]{article}
@@ -102,7 +102,7 @@
 \begin{document}
 \maketitle
 
-This document was not written to teach or introduce the subjects that it covers. Instead, it is just a personal collection of notes. Therefore the material may be presented out of order and assume prerequisite knowledge. 
+These are a collection of personal notes, and are not intended to teach or introduce material.
 
 \tableofcontents
 
@@ -112,7 +112,6 @@ This document was not written to teach or introduce the subjects that it covers.
 
 \itmz{
 \item conditional gaussians
-\item calculus of variations
 \item bayesian lr and lr
 \item variational methods and CRFs
 \item kernel density estimators
@@ -542,15 +541,114 @@ The setup is
 
 We want to find the distribution of $x|y$ and $y$
 
-\todo{write this section}
+\eq{
+  p(x|y) &= \nmz p(y|x)p(x) \\
+  p(y) &= \int p(y|x) dx
+}
 
-Just for reference, the solutions are
+Let's start with $p(x|y)$.
+
+\eq{
+  p(x|y) &\propto \nmz p(y|x)p(x) \\
+  &= \mvnmlp{y}{Ax+b}{L} \mvnmlp{x}{\mu}{\Lambda} \\
+}
+
+The terms inside the exponent, dropping the $\nhaf$:
+
+\eq{
+  \qfo{y}{L}{(Ax+b)} + \qfo{x}{\Lambda}{\mu} \\
+}
+
+Since we are expecting a normal distribution in $x$, we pull out the quadratic terms in $x$:
+
+\eq{
+  A^T L A + \Lambda
+}
+
+And the linear terms:
+
+\eq{
+  -2\paren{A^TL(y-b) + \Lambda \mu}
+}
+
+For later convenience, we denote
+
+\eq{
+  \minv \Sigma = A^T L A + \Lambda
+}
+
+We have now arrived at the distribution $x|y$:
+
+\eq{
+ x|y &\sim \nml{\Sigma\paren{A^T L(y-b) + \Lambda \mu}}{\Sigma} \\
+}
+
+Now consider $p(y)$, which requires an integral over the conditional distribution.
+
+\todo{everything here is a huge mess}
+
+
+\eq{
+  p(y) &= \int p(y,x) dx \\
+  &= \int p(y|x)p(x) dx\\
+%  &= \int \mvnmlp{y}{(Ax+b)}{L} dx
+}
+
+Notice that this is pretty similar to the computation for $p(x|y)$. Back there, we computed $p(x|y) = \nmz p(x,y)$. We pulled out all the $x$ terms in the joint distribution to get us a normal distribution in $x$. This time, we will pull out all the $x$ terms and recognize that it composes a normal distribution which integrates to 1, or some constant. Then, we will use the left over $y$ terms in order to figure out the distribution.
+
+The terms inside the exponential of the joint distribution are:
+
+\eq{
+  \qfo{y}{L}{(Ax+b)} + \qfo{x}{\Lambda}{\mu} \\
+}
+
+Recall that the quadratic terms in $x$ are $A^T L A + \Lambda$ and the linear terms are $-2\paren{A^TL(y-b) + \Lambda \mu}$. If we complete the square, we end up with a quadratic term which contains all the $x$, and an additinal left over term:
+
+\eq{
+  \qf{\paren{A^TL(y-b)+\Lambda \mu}}{\paren{A^T L A + \Lambda}}
+}
+
+In addition to this term, we can pull out all the $y$ terms from the first part of the joint distribution which we did not use to complete the square:
+
+\eq{
+  \qf{y}{L} -2y^TLb
+}
+
+Now all that remains is to figure out the quadratic and linear terms in $y$.
+
+The quadratic terms:
+\eq{
+  L + LAA^TLAA^TL + LA^T \Lambda A^T L
+}
+
+We are trying to arrive at the correct soltion:
+
+\eq{
+  \paren{\minv L + A \minv \Lambda A^T}^{-1}
+}
+
+We expect linear terms:
+
+\eq{
+  -2(A\mu+b)
+}
+
+And quadratic terms:
+
+\eq{
+  \paren{\minv L + A \minv \Lambda A^T}^{-1}
+}
+
+
+\todo{finish this off}
+
+So we end up with the distribution for $y$:
 
 \eq{
   y &\sim \nml{A\mu + b}{\minv L + A \minv \Lambda A^T} \\
-  y|x &\sim \nml{\Sigma\paren{A^T L(y-b) + \Lambda \mu}}{\Sigma} \\
-  \Sigma &= \minv{\paren{\Lambda A^T L A}}
 }
+
+
 
 \subsection{Information Theory}
 
@@ -1726,6 +1824,146 @@ There are two special cases of differentials -- inverses, and log determinants. 
 
 Normal calculus deals with scalar values and expressions. Multivariable and matrix calculus deals with vector and matrix values and expressions. Calculus of variances deals with values and expressions which are functions. This is very applicable because probability distributions are a very commonly used object which are functions, and we often want to maximize objectives defined on probability distributions.
 
+In functional calulus, we deal with functionals, which often take the following form, where $G$ is some arbitrary function.
+
+\eq{
+F[f] &= \int_a^b G(f(x)) dx
+}
+
+In normal calculus, we often make use of taylor expansions like this.
+
+\eq{
+f(x+\epsilon) &= f(x) + \epsilon \frac{df(x)}{dx} + O(\epsilon^2)
+}
+
+We can extend the idea of taylor expansions to functionals. Instead of adding or subtracting $\epsilon$, we add $\epsilon \eta(x)$, where $\eta$ is an arbitrary function. Everything stays about the same, except with an additional integral. 
+
+\eq{
+F[f+\epsilon \eta] &= F[f] + \epsilon \int_a^b \frac{\partial F[f]}{\partial f(x)}\eta(x) dx + O(\epsilon^2)
+}
+
+In order to find a stationary point in single variable calculus, we set $\frac{df(x)}{dx} = 0$, and the same holds in the variational case.
+
+\eq{
+0 &= \int_a^b \frac{\partial F[f]}{\partial f(x)}\eta(x) dx
+}
+
+Since this has to hold for arbitrary $\eta$, it must be the case that $\frac{\partial F[f]}{f(x)}$ is 0 everywhere. Now we have a simple procedure for finding stationary points.
+
+\enum{
+\item Write down the linear term (the integral)
+\item Factor out $\eta(x)$
+\item Set the integrand to 0
+\item Solve for $f$
+}
+
+
+We can start with the simple exercise of finding the function that most closely matches the $\sin$ function. Our functional is defined:
+
+\eq{
+  F[f] &= \int_0^1 (f(x)-\sin(x))^2 dx
+}
+
+Now we will rewrite the integral dropping out higher order terms in the process.
+
+\eq{
+  F[f+\epsilon \eta] &= \int_0^1 \paren{f(x) + \epsilon \eta(x) - \sin(x)}^2 dx \\
+  &\approx \int_0^1 (f(x)-\sin(x))^2 + \epsilon \eta(x) (f(x)-\sin(x)) dx \\
+  &= F[f] + \epsilon \int_0^1 \paren{f(x)-\sin(x)} \eta(x) dx
+}
+
+Therefore the term we want to set to 0 is $f(x)-\sin(x)$, means $f(x) = \sin(x)$, exactly as expected.
+
+\subsubsection{Euler-Lagrange Equation}
+
+The Euler-Lagrange equation is a functional optimization problem which comes up everywhere, so we might as well solve it now. The lagrangian (not to be confused with the other uses), is some function $G(x, y, y')$, where $y = f(x)$. The functional takes the form:
+
+\eq{
+  F[f] &= \int_a^b G(x, y, y') dx
+}
+
+Furthermore, this comes with the restriction that $f$ is fixed at both endpoints $a$ and $b$, which means $\eta(a) = \eta(b) = 0$. Why this is useful will become apparent later.
+
+The taylor-expansion must therefore involve terms in both $y$ and $y'$:
+
+\eq{
+  F[f+\epsilon \eta] &= F[f] + \epsilon \int_a^b \paren{\frac{\partial G}{\partial f(x)}\eta(x) + \frac{\partial G}{\partial f'(x)}\eta'(x)} dx + O(\epsilon^2)
+}
+
+We want to factor $\eta$ out of the integrand, so we can use our usual technique. In order to do this, we'll integrate the second term. Let's do this integration by parts. Quick review:
+
+\eq{
+  \int_a^b u dv = uv \big\rvert_a^b - \int_a^b vdu
+}
+
+We select $u = \frac{\partial G}{\partial f'(x)}$ and $dv = \eta'(x) dx$, which means
+
+\eq{
+  du &= \frac{d}{dx} \frac{\partial G}{\partial f'(x)} dx\\
+  v &= \eta(x)
+}
+
+\eq{
+  \int_a^b \frac{\partial G}{\partial f'(x)} \eta'(x) dx &=
+  \frac{\partial G}{\partial f'(x)} \eta(x) \big\vert_a^b - \int_a^b \eta(x) \frac{d}{dx} \frac{\partial G}{\partial f'(x)} dx \\
+}
+
+Claim: the first term on the RHS goes to zero, because $\eta(a)$ and $\eta(b)$ are both 0. Therefore we are left with the second term, which we combine with the first term from before, to obtain the integral:
+
+\eq{
+  \int_a^b \paren{\frac{\partial G}{\partial f(x)} - \frac{d}{dx} \frac{\partial G}{\partial f'(x)}}\eta(x) dx
+}
+
+This means that
+
+\eq{
+  \frac{\partial G}{\partial f(x)} &= \frac{d}{dx} \frac{G}{\partial f'(x)}
+}
+
+This completes the solution. Now we will demonstrate an application.
+
+\subsubsection{Shortest Path Problem}
+
+Let's find the shortest path from between two points, namely $(0,0)$ and $(1,1)$. (Now it becomes clear why we said the endpoints of $f$ were fixed!).
+
+Our functional is in the form
+
+\eq{
+  \int_0^1 \sqrt{1+\paren{\frac{df(x)}{dx}}^2} dx
+}
+
+We can use the euler-lagrange equation to solve this by setting:
+
+\eq{
+  G(x, f(x), f'(x)) &= \sqrt{1+\paren{\frac{df(x)}{dx}}^2} 
+}
+
+Now we know that
+\eq{
+  \frac{\partial G}{\partial f} &= 0 \\
+  \frac{\partial G}{\partial f'} &= \haf \paren{1+f'(x)^2}^{\nhaf} \frac{\partial}{\partial f'} \paren{1+\paren{\frac{df(x)}{dx}}^2} \\
+  &= \frac{f'}{\sqrt{1+f'(x)^2}}
+}
+
+So according to our solution, we have:
+\eq{
+  0 &= \frac{d}{dx} \frac{f(x)'}{\sqrt{1+f'(x)^2}} \\
+  C &= \frac{f(x)'}{\sqrt{1+f'(x)^2}}
+}
+
+For some constant $C$ and for all $x$. Now we will solve for $f'(x)$, since given $f(0) = 0$ and $f'(x)$ for all $x$, we can recover the function $f$.
+
+\eq{
+  C &= \frac{f(x)'}{\sqrt{1+f'(x)^2}} \\
+  C^2 &= \frac{f'^2}{1+f'^2} \\
+  C^2(1+f'^2) &= f'^2 \\
+  0 &= f'^2(C^2-1) + C^2 \\
+  f'^2 &= \frac{C^2}{1-C^2} \\
+  f' &= \sqrt{\frac{C^2}{1-C^2}}
+}
+
+Now we know that $f'$ is constant, which means we have drawn a straight line from $(0,0)$ to $(1,1)$. This completes the proof.
+
 \subsubsection{Maximum Entropy Distrbutions}
 
 As an exercise, let us prove that the gaussian distribution has maximum entropy under some constraints (zero mean and unit variance). 
@@ -2012,7 +2250,6 @@ Let's try to solve this with maximum likelihood.
 Now at this point you just run gradient descent to get the answer. 
 
 Another ICA algorithm involves kurtosis, which is a measure of nongaussianity. Kurtosis is the expected value of $x^4$. One may ask why we do not use skewness, which is the expectation of $x^3$. I'm not sure myself, although I have read vague and unsubstantiated claims to the effect that kurtosis somehow encompasses skewness through something called a one-bit-matching theorem.
-
 The algorithm performs kurtosis maximization in order to find the directions along which the data is projected into the least gaussian shape possible, but that's all I know about it.
 
 \subsection{Class Imbalance}
@@ -2024,7 +2261,7 @@ To be precise, suppose a classifier is trained on an artificially balanced datas
 First, we use Bayes' Theorem to obtain
 \eq{
 q(c|x) &= \frac{q(x|c)q(c)}{q(x} \propto q(x|c)q(c) \\
-p(c|x) &= \frac{p(x|c)p(c)}{p(x} \propto p(x|c)p(c) \\
+p(c|x) &= \frac{p(x|c)p(c)}{p(x} \propto p(x|c)p(c) \\s
 \intertext{Furthermore notice that $p(x|c) = q(x|c)$, due to the fact that within a single class, we did not manipulate the data}
 p(c|x) &\propto q(x|c)p(c) \\
 &= q(x|c)q(c) \frac{p(c)}{q(c)} \\
