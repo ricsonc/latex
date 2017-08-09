@@ -1597,9 +1597,97 @@ Let $K$ be the product of the matrices on the RHS, so that $u_t = Kx$. Now we ca
 
 This completes the proof. Now we will consider the full case:
 
+\nec{\Cuu}{C_{uu}}
+\nec{\Cxx}{C_{xx}}
+\nec{\Cux}{C_{ux}}
+\nec{\Cxu}{C_{xu}}
+\nec{\cxt}{c_x^T}
+\nec{\cut}{c_u^T}
+\nec{\Dum}{D_u}
+\nec{\Dxm}{D_x}
+\nec{\vecd}{\vec d}
+\nec{\vecp}{\vec p}
+\nec{\vecdt}{\vec{d\,}^T}
+\nec{\vecpt}{\vec{p\,}^T}
+\nec{\vecq}{\vec q}
+\nec{\veck}{\vec k}
+\nec{\vecm}{\vec m}
+
 \eq{
-	0 &= 0
+	c(x,u) &= c + \vt{c_u}{c_x}^T \vt{u}{x} + \haf \qf{\vt{u}{x}}{\mt{\Cuu}{\Cux}{\Cxu}{\Cxx}} \\
+    d(x,u) &= D_x x + D_u u + \vecd
 }
+
+Without loss of generality, we require the cost matrix to be symmetric, so $\Cxu = \Cux^T$ and both $\Cxx$ and $\Cuu$ are symmetric. Note that it is not reasonable to assume that $D_u$ and $D_x$ are symmetric. However, we will maintain inductively that $P$ is symmetric.
+
+We will repeat the same proof strategy, defining:
+
+\eq{
+	J_T(x) &= \haf \qf{x}{P_T} + \vecpt x + p \\
+    P_T &= \mathbf{0} \\
+    \vecp &= \vec 0 \\
+    p &= 0
+}
+
+Now we can expand the recurrence relation:
+
+\eq{
+	J_t(x) &= \min_{u} c(x, u) + J_{t+1}(D_x x + D_u u + \vecd) \\
+    &= \min_{u} c + \cut u + \cxt x + \haf \qf{x}{\Cxx} + \haf \qf{u}{\Cuu} + x^T \Cxu u \\
+    & \qquad \qquad + \haf \qf{(D_x x + D_u u + \vecd)}{P} \\
+    & \qquad \qquad + \vecpt (D_x x + D_u u + \vecd) + p \\
+    &= \min_{u} c + \cut u + \cxt x + \haf \qf{x}{\Cxx} + \haf \qf{u}{\Cuu} + x^T \Cxu u \\
+    & \qquad \qquad + \haf \qf{x}{\Dxm^T P \Dxm} + \haf \qf{u}{\Dum^T P \Dum} + 
+    \haf x^T D_x^T P D_u u + \haf u^T D_u^T P D_x x\\
+    & \qquad \qquad + \vecdt D_x x + \vecdt D_u u + \vecdt \vecd
+    + \vecpt D_x x + \vecpt D_u u + \vecpt \vecd + p \\
+}
+
+
+\todo{oh god, we forgot terms combining matrices D and vector d, fix below!}
+
+Taking the gradient wrt $u$ and setting it to 0 gives:
+
+\eq{
+	0 &= c_u + \Cuu u + \Cux x + D_u^T P D_u u + D_u^T P D_x x + D_u^T \vecp \\
+    &= (\Cuu + \Dum^T P \Dum) u + (\Cux + D_u^T P D_x) x + (c_u + D_u^T \vecp) \\
+    &= Q_u u + Q_x x + \vecq \\
+    u &= - \minv Q_u Q_x x - \minv Q_u \vecq \\
+    &= Kx + \veck
+}
+
+Now we will plug $u = (Kx+k)$ back into the objective:
+
+\eq{
+	J(x) &= c + \cut (Kx+k) + \cxt x + \haf \qf{x}{\Cxx} + \haf \qf{(Kx+k)}{\Cuu} + x^T \Cxu (Kx+k) \\
+    & \qquad \qquad + \haf \qf{x}{\Dxm^T P \Dxm} + \haf \qf{(Kx+k)}{\Dum^T P \Dum} \\
+    & \qquad \qquad + \haf x^T D_x^T P D_u (Kx+k) + \haf (Kx+k)^T D_u^T P D_x x \\
+    & \qquad \qquad + \vecpt D_x x + \vecpt D_u (Kx+k) + \vecpt \vecd + p \\
+}
+
+To summarize our expressions:
+
+\eq{
+	Q_u &= \Cuu + \Dum^T P \Dum \\
+    Q_x &= \Cux + D_u^T P D_x \\
+    \vecq &= c_u + D_u^T \vecp \\
+    K &= - \minv Q_u Q_x \\
+    \veck &= - \minv Q_u \vecq \\
+    M &= D_x + D_u K \\
+    \vecm &= D_u \veck + \vecd
+}
+
+And our update rules:
+
+\eq{
+	P &\la \Cxx + \qf{K}{\Cuu} + K^T \Cux + \Cxu K + \qf{M}{P} \\
+    \vecp &\la c_x + K^T c_u + K^T \Cuu \veck + \Cxu \veck + M^T P \vecm + M \vecp \\
+    p &\la \cut \veck + \haf \qf{\veck}{\Cuu} + \vecpt \vecm + p
+}
+
+This concludes the proof.
+
+\todo{check $\vecq$ value!}
 
 \subsubsection{MPC and ILQR}
 .
@@ -2353,7 +2441,7 @@ To be precise, suppose a classifier is trained on an artificially balanced datas
 First, we use Bayes' Theorem to obtain
 \eq{
 q(c|x) &= \frac{q(x|c)q(c)}{q(x} \propto q(x|c)q(c) \\
-p(c|x) &= \frac{p(x|c)p(c)}{p(x} \propto p(x|c)p(c) \\s
+p(c|x) &= \frac{p(x|c)p(c)}{p(x} \propto p(x|c)p(c) \\
 \intertext{Furthermore notice that $p(x|c) = q(x|c)$, due to the fact that within a single class, we did not manipulate the data}
 p(c|x) &\propto q(x|c)p(c) \\
 &= q(x|c)q(c) \frac{p(c)}{q(c)} \\
