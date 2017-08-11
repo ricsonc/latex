@@ -132,7 +132,6 @@ These are a collection of personal notes, and are not intended to teach or intro
 \section{Todo}
 
 \itmz{
-\item optimal control
 \item bayesian lr and bayesian lr
 \item variational methods and CRFs
 \item kernel density estimators
@@ -1787,6 +1786,30 @@ Now let's focus on the start state, Let $\mu_{\pol}(s) = \mu_{\pol}(s;s_0)$.
 
 Note that we have managed to eliminate the sums into expectations (this was not previously possible), which means we can perform it by sampling.
 
+\subsubsection{Natural Policy Gradients}
+.
+\subsubsection{Counterfactual Multi-Agent Policy Gradients}
+
+We want to play some cooperative multi-player game with imperfect information. How can the policy gradients framework be applied? One naive method might be Independent Actor Critic -- each player runs actor critic by itself, and comes up with its own policy. However, this doesn't work well because of the credit assignment problem. Since all agents are simultaneously updating their policies, an agent does not know whether or not the reward was due to their action or not.
+
+COMA is a variant of actor-critic which relies on a centralized critic. The idea is that the critic is privy to all the actions and the information of all the agents, and therefore can provide better feedback. 
+
+Recall the advantage function used in Independent Actor Critic:
+
+\eq{
+	A^a_{\pol}(\tau,u) &= Q^a_{\pol}(\tau,u) - \sum_{u'} \pol(u'|\tau) Q^a_{\pol}(\tau,u') 
+}
+
+The super-script $a$ is used to denote which agent is performing the action. Action has been renamed to $u$ in order to reduce overloading. Furthermore, since the setting has imperfect information, we use $\tau$ to denote the past and current trajectory through observation-state, as a single observation does not provide the markovian property anymore.
+
+In COMA, the idea is to freeze the actions of all the other agents, so their stochasticity is ignored. Instead of asking ''If I had taken another action, what would have happened?'', COMA asks ''If everyone had taken the same action, and only my action changed, what would have happened?''
+
+\eq{
+	A^a_{\pol}(s,u) &= Q_{\pol}(s,\u) - \sum_{u^a} \pol(u^a|\tau^a) Q_{\pol}(s,\u^{-a} \cdot u^a) 
+}
+
+The problem here is with the $Q$ network, which operates on the joint action space. This is exponential in the number of agents, which is problematic, because it means the network must have an exponential number of outputs. To solve this, we can redesign the Q-network to take as input the actions of $n-1$ agents, and then output the $Q$ values given the last agent. 
+
 \subsection{Actor-Critic}
 
 The policy gradients method often struggles from the problem of high variance. Note that the gradient is in the direction of positive $q$, which means if all actions yield positive $q$, then the gradient will go all over the place. Of course, in expectation it is a small movement in one direction, but since we are computing the expectation by sampling, we get poor results. To counter this, one popular method is to select some baseline, and subtract it from $q$, so that the gradient is now
@@ -1819,32 +1842,6 @@ Note that a Q-network is sufficient to compute the advantage, given the policy, 
 	A_{\pol}(s,a) &= Q_{\pol}(s,a) - V_{\pol}(s) \\
 	&= Q_{\pol}(s,a) - \sum_{a'} \pol(a'|s) Q_{\pol}(s,a') \\
 }
-
-\subsection{Recurrent Policy Gradients}
-.
-\subsection{Natural Policy Gradients}
-.
-\subsection{Counterfactual Multi-Agent Policy Gradients}
-
-We want to play some cooperative multi-player game with imperfect information. How can the policy gradients framework be applied? One naive method might be Independent Actor Critic -- each player runs actor critic by itself, and comes up with its own policy. However, this doesn't work well because of the credit assignment problem. Since all agents are simultaneously updating their policies, an agent does not know whether or not the reward was due to their action or not.
-
-COMA is a variant of actor-critic which relies on a centralized critic. The idea is that the critic is privy to all the actions and the information of all the agents, and therefore can provide better feedback. 
-
-Recall the advantage function used in Independent Actor Critic:
-
-\eq{
-	A^a_{\pol}(\tau,u) &= Q^a_{\pol}(\tau,u) - \sum_{u'} \pol(u'|\tau) Q^a_{\pol}(\tau,u') 
-}
-
-The super-script $a$ is used to denote which agent is performing the action. Action has been renamed to $u$ in order to reduce overloading. Furthermore, since the setting has imperfect information, we use $\tau$ to denote the past and current trajectory through observation-state, as a single observation does not provide the markovian property anymore.
-
-In COMA, the idea is to freeze the actions of all the other agents, so their stochasticity is ignored. Instead of asking ''If I had taken another action, what would have happened?'', COMA asks ''If everyone had taken the same action, and only my action changed, what would have happened?''
-
-\eq{
-	A^a_{\pol}(s,u) &= Q_{\pol}(s,\u) - \sum_{u^a} \pol(u^a|\tau^a) Q_{\pol}(s,\u^{-a} \cdot u^a) 
-}
-
-The problem here is with the $Q$ network, which operates on the joint action space. This is exponential in the number of agents, which is problematic, because it means the network must have an exponential number of outputs. To solve this, we can redesign the Q-network to take as input the actions of $n-1$ agents, and then output the $Q$ values given the last agent. 
 
 \subsection{Trust Region Policy Optimization}
 .
