@@ -103,6 +103,23 @@
 % convenience
 \nec{\todo}[1]{{\color{red} \textbf{ \hl{todo: #1}}}}
 
+%optimal control
+\nec{\Cuu}{C_{uu}}
+\nec{\Cxx}{C_{xx}}
+\nec{\Cux}{C_{ux}}
+\nec{\Cxu}{C_{xu}}
+\nec{\cxt}{c_x^T}
+\nec{\cut}{c_u^T}
+\nec{\Dum}{D_u}
+\nec{\Dxm}{D_x}
+\nec{\vecd}{\vec d}
+\nec{\vecp}{\vec p}
+\nec{\vecdt}{\vec{d\,}^T}
+\nec{\vecpt}{\vec{p\,}^T}
+\nec{\vecq}{\vec q}
+\nec{\veck}{\vec k}
+\nec{\vecm}{\vec m}
+
 \begin{document}
 \maketitle
 
@@ -1597,22 +1614,6 @@ Let $K$ be the product of the matrices on the RHS, so that $u_t = Kx$. Now we ca
 
 This completes the proof. Now we will consider the full case:
 
-\nec{\Cuu}{C_{uu}}
-\nec{\Cxx}{C_{xx}}
-\nec{\Cux}{C_{ux}}
-\nec{\Cxu}{C_{xu}}
-\nec{\cxt}{c_x^T}
-\nec{\cut}{c_u^T}
-\nec{\Dum}{D_u}
-\nec{\Dxm}{D_x}
-\nec{\vecd}{\vec d}
-\nec{\vecp}{\vec p}
-\nec{\vecdt}{\vec{d\,}^T}
-\nec{\vecpt}{\vec{p\,}^T}
-\nec{\vecq}{\vec q}
-\nec{\veck}{\vec k}
-\nec{\vecm}{\vec m}
-
 \eq{
 	c(x,u) &= c + \vt{c_u}{c_x}^T \vt{u}{x} + \haf \qf{\vt{u}{x}}{\mt{\Cuu}{\Cux}{\Cxu}{\Cxx}} \\
     d(x,u) &= D_x x + D_u u + \vecd
@@ -1639,18 +1640,15 @@ Now we can expand the recurrence relation:
     &= \min_{u} c + \cut u + \cxt x + \haf \qf{x}{\Cxx} + \haf \qf{u}{\Cuu} + x^T \Cxu u \\
     & \qquad \qquad + \haf \qf{x}{\Dxm^T P \Dxm} + \haf \qf{u}{\Dum^T P \Dum} + 
     \haf x^T D_x^T P D_u u + \haf u^T D_u^T P D_x x\\
-    & \qquad \qquad + \vecdt D_x x + \vecdt D_u u + \vecdt \vecd
+    & \qquad \qquad + \vecdt P D_x x + \vecdt P D_u u + \vecdt \vecd
     + \vecpt D_x x + \vecpt D_u u + \vecpt \vecd + p \\
 }
-
-
-\todo{oh god, we forgot terms combining matrices D and vector d, fix below!}
 
 Taking the gradient wrt $u$ and setting it to 0 gives:
 
 \eq{
-	0 &= c_u + \Cuu u + \Cux x + D_u^T P D_u u + D_u^T P D_x x + D_u^T \vecp \\
-    &= (\Cuu + \Dum^T P \Dum) u + (\Cux + D_u^T P D_x) x + (c_u + D_u^T \vecp) \\
+	0 &= c_u + \Cuu u + \Cux x + D_u^T P D_u u + D_u^T P D_x x + D_u^T \vecp + D_u^T P \vecd\\
+    &= (\Cuu + \Dum^T P \Dum) u + (\Cux + D_u^T P D_x) x + (c_u + D_u^T \vecp + D_u^T P \vecd) \\
     &= Q_u u + Q_x x + \vecq \\
     u &= - \minv Q_u Q_x x - \minv Q_u \vecq \\
     &= Kx + \veck
@@ -1659,10 +1657,34 @@ Taking the gradient wrt $u$ and setting it to 0 gives:
 Now we will plug $u = (Kx+k)$ back into the objective:
 
 \eq{
-	J(x) &= c + \cut (Kx+k) + \cxt x + \haf \qf{x}{\Cxx} + \haf \qf{(Kx+k)}{\Cuu} + x^T \Cxu (Kx+k) \\
-    & \qquad \qquad + \haf \qf{x}{\Dxm^T P \Dxm} + \haf \qf{(Kx+k)}{\Dum^T P \Dum} \\
-    & \qquad \qquad + \haf x^T D_x^T P D_u (Kx+k) + \haf (Kx+k)^T D_u^T P D_x x \\
-    & \qquad \qquad + \vecpt D_x x + \vecpt D_u (Kx+k) + \vecpt \vecd + p \\
+    J(x) &= c + \cut (Kx+\veck) + \cxt x \\
+    & \qquad + \haf \qf{x}{\Cxx} + \haf \qf{(Kx+\veck)}{\Cuu} + x^T \Cxu (Kx+\veck) \\
+    & \qquad + \haf \qf{(D_x x + D_u (Kx+\veck) + \vecd)}{P} \\
+    & \qquad + \vecpt (D_x x + D_u (Kx+\veck) + \vecd) + p \\
+\intertext{Denote $M = D_x + D_u K$ and $\vecm = D_u \veck = \vecd$}
+	&= c + \cut (Kx+\veck) + \cxt x \\
+    & \qquad + \haf \qf{x}{\Cxx} + \haf \qf{(K x+\veck)}{\Cuu} + x^T \Cxu (K x+\veck) \\
+    & \qquad + \haf \qf{(M x + \vecm)}{P} + \vecpt (M x + \vecm) + p \\
+\intertext{Expand}
+	&= c + \cut K x + \cut \veck + \cxt x + \haf \qf{x}{\Cxx} + \haf \qf{\veck}{\Cuu} + \haf \qf{x}{K^T \Cuu K} \\
+    & \qquad + x^T K^T \Cuu \veck + x^T \Cxu K x + x^T \Cxu \veck \\
+    & \qquad + \haf \qf{\vecm}{P} + \haf \qf{x}{M^TPM} + x^T M^T P \vecm + \vecpt M x + \vecpt \vecm + p \\
+\intertext{Now group the terms by their order}
+	&= c + \cut \veck + \haf \qf{\veck}{\Cuu} + \haf \qf{\vecm}{P} + \vecpt \vecm + p \\
+    & \qquad + \cxt x + \cut K x + x^T K^T \Cuu \veck + x^T \Cxu \veck + x^T M^T P \vecm + \vecpt M x \\
+    & \qquad + \haf \qf{x}{\Cxx} + \haf \qf{x}{K^T \Cuu K} + x^T \Cxu K x + \haf \qf{x}{M^TPM}
+\intertext{Regroup into quadratic form}
+	&= c + \cut \veck + \haf \qf{\veck}{\Cuu} + \haf \qf{\vecm}{P} + \vecpt \vecm + p \\
+    & \qquad + (c_x + K^T c_u + K^T \Cuu \veck + \Cxu \veck + M^T P \vecm + M^T \vecp)^T x \\
+    & \qquad + \haf \qf{x}{(\Cxx + K^T \Cuu K + 2\Cxu K + M^TPM)}
+}
+
+This gives us the update rules:
+
+\eq{
+	P &\la \Cxx + K^T \Cuu K + 2\Cxu K + M^TPM \\
+    \vecp &\la c_x + K^T c_u + K^T \Cuu \veck + \Cxu \veck + M^T P \vecm + M^T \vecp \\
+    p &\la c + \cut \veck + \haf \qf{\veck}{\Cuu} + \haf \qf{\vecm}{P} + \vecpt \vecm + p
 }
 
 To summarize our expressions:
@@ -1670,24 +1692,14 @@ To summarize our expressions:
 \eq{
 	Q_u &= \Cuu + \Dum^T P \Dum \\
     Q_x &= \Cux + D_u^T P D_x \\
-    \vecq &= c_u + D_u^T \vecp \\
+    \vecq &= c_u + D_u^T \vecp + D_u^T P \vecd \\
     K &= - \minv Q_u Q_x \\
     \veck &= - \minv Q_u \vecq \\
     M &= D_x + D_u K \\
     \vecm &= D_u \veck + \vecd
 }
 
-And our update rules:
-
-\eq{
-	P &\la \Cxx + \qf{K}{\Cuu} + K^T \Cux + \Cxu K + \qf{M}{P} \\
-    \vecp &\la c_x + K^T c_u + K^T \Cuu \veck + \Cxu \veck + M^T P \vecm + M \vecp \\
-    p &\la \cut \veck + \haf \qf{\veck}{\Cuu} + \vecpt \vecm + p
-}
-
 This concludes the proof.
-
-\todo{check $\vecq$ value!}
 
 \subsubsection{MPC and ILQR}
 .
@@ -2441,7 +2453,7 @@ To be precise, suppose a classifier is trained on an artificially balanced datas
 First, we use Bayes' Theorem to obtain
 \eq{
 q(c|x) &= \frac{q(x|c)q(c)}{q(x} \propto q(x|c)q(c) \\
-p(c|x) &= \frac{p(x|c)p(c)}{p(x} \propto p(x|c)p(c) \\
+p(c|x) &= \frac{p(x|c)p(c)}{p(x} \propto p(x|c)p(c) \\s
 \intertext{Furthermore notice that $p(x|c) = q(x|c)$, due to the fact that within a single class, we did not manipulate the data}
 p(c|x) &\propto q(x|c)p(c) \\
 &= q(x|c)q(c) \frac{p(c)}{q(c)} \\
