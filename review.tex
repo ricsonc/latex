@@ -1076,7 +1076,7 @@ To proceed further, we must assume that $p_j$ are eigenvectors. We will then sho
   &\leq \sum_j \lambda_j^2 \sos{p_j}
 }
 
-It is now clear thatn $\lambda_j = 0$. Therefore our problem is reduced to
+It is now clear that $\lambda_j = 0$. Therefore our problem is reduced to
 
 \eq{
   0 &= \grad \lag \\
@@ -1294,10 +1294,67 @@ How can we generalize this algorithm to general graphs, possibly with cycles? We
 
 \section{Linear and Nonlinear Bayesian Models}
 
+The Bayesian models we discuss all operate in the same way. First, we have a prior on the weights/parameters of the model. Then, we can describe the likelihood of the data given the parameters. This gives us a posterior distribution on the parameters. Finally, we can solve for the predicative distribution by integrating predictions across the posterior. 
+
 \subsection{Bayesian Linear Regression}
-.
+
+We consider the example where each data-point is $x \in \RR^n$ and each target is $y \in \RR$. Therefore our weight matrix $w$ will be shaped $m$ by $n$. Our model for data generation is
+
+\eq{
+	y_i|w &\sim \nml{x_i^T w}{\beta^{-1}} \\
+    \vec y | w &\sum \nml{X^T w}{\beta^{-1} I}
+}
+
+where matrix $X$ has all the datapoints $x_i$ as columns concatenated together.
+
+Therefore the likelihood comes out to
+
+\eq{
+	p(y|w) &= \prod_i \uvnmlp{y_i}{w^T x_i}{\beta^{-1}} \\
+    &= \nmz \bexp{ -\frac{\beta}{2} \sum_i (y_i-w^T x_i)^2 } \\   
+    &= \nmz \bexp{ -\frac{\beta}{2} \paren{\sum_i y_i^2 + \sum_i (w^T x_i)^2 - 2 \sum_i y_i w^Tx_i } } \\
+    &= \nmz \bexp{ -\frac{\beta}{2} \paren{\sum_i w^T x_i x_i^T w - 2  w^T\sum_i y_i x_i } } \\
+    &= \nmz \bexp{ -\frac{\beta}{2} \paren{\qf{w}{\paren{\sum_i x_i x_i^T}} - 2  w^T\sum_i y_i x_i } } \\
+}
+
+This is normal in $w$. Recall that the conjugate prior of the normal distribution is another normal distribution. Therefore we use the prior:
+
+\eq{
+	w &\sim \nml{0}{\alpha^{-1} I } \\
+}
+
+Now consider the distribution of $w$ and $\vec y | w$. This is a linear gaussian model which we have solved before. 
+
+\eq{
+    \Sigma &= X (\beta I) X^T + \alpha I \\
+    &= \beta XX^T + \alpha I \\
+    w|y &\sim \nml{\Sigma (X (\beta I) y + \alpha^{-1} I \mu)}{\Sigma} \\
+    &\sim \nml{\beta \Sigma X y}{\Sigma}
+}
+
+Now that we have a posterior on the weights, we can find a predicative distribution for some new data-point $x'$ and the associated target $y'$
+
+\eq{
+	y'|w,y &\sim \nml{x'^T w}{\beta^{-1}}
+}
+
+We can find the distribution of $y'$, as we have derived in the section on linear gaussian models.
+
+\eq{
+	y' &\sim \nml{x'^T \mu_w}{\beta^{-1} + x'^T \Sigma x'}
+	\intertext{where $\mu_w$ is the previously derived}
+	\mu_w &= \beta \Sigma X y \\
+	y' &\sim \nml{\beta x'^T \Sigma X y}{\beta^{-1} + x'^T \Sigma x'}
+}
+
 \subsubsection{Evidence Approximation}
-.
+
+In the previous section, we had fixed values for $\alpha$ and $\beta$. However, to have a fully bayesian model, we should give these variables a prior distribution as well.
+
+\subsubsection{Multivariate Linear Regression}
+
+This is quite a bit more involved that the single-variate version because our weight matrix $W$ is now an $n$ by $m$ matrix. We say that the vectorized form of $W$ is gaussian.
+
 \subsection{Bayesian Logistic Regression}
 .
 \subsubsection{Laplace Approximation}
