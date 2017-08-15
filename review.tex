@@ -129,7 +129,7 @@ These are a collection of personal notes, and are not intended to teach or intro
 
 \newpage
 
-\section{Todo}
+\paragraph{Todo}
 
 \itmz{
 \item bayesian lr and bayesian lr
@@ -681,6 +681,12 @@ In conclusion, $y$ follows the distribution
 
 \eq{
   y &\sim \nml{A\mu + b}{\minv L + A \minv \Lambda A^T} \\
+}
+
+Note that in the simple case where $A = I$ and $b = \vec 0$ we have
+\eq{
+  x | y & \sim \nml{(L + \Lambda)^{-1} Ly + \Lambda \mu}{(L + \Lambda)^{-1}} \\
+  y &\sim \nml{\mu}{\minv L + \minv \Lambda}
 }
 
 \subsection{Information Theory}
@@ -1347,29 +1353,71 @@ We can find the distribution of $y'$, as we have derived in the section on linea
 	y' &\sim \nml{\beta x'^T \Sigma X y}{\beta^{-1} + x'^T \Sigma x'}
 }
 
-\subsubsection{Evidence Approximation}
+\subsubsection{Evidence Approximation *}
 
 In the previous section, we had fixed values for $\alpha$ and $\beta$. However, to have a fully bayesian model, we should give these variables a prior distribution as well.
 
-\subsubsection{Multivariate Linear Regression}
+\eq{
+  w | \alpha &\sim \nml{0}{\alpha^{-1} I} \\
+  \alpha, \beta &\sim p(\alpha, \beta) \\
+}
+
+We want to solve for the distribution of $y'$
+
+\eq{
+  p(y') &= \int \int p(y'|\alpha, \beta) p(\alpha, \beta) \, d\alpha\, d\beta
+}
+
+Recall that $p(y'|\alpha, \beta)$ is a known gaussian distribution.
+
+Rather than try to integrate this expression, the evidence approximation makes the following claim: $p(y'|\alpha, \beta)$ is relatively small for most $\alpha$ and $\beta$, and peaks sharply at some optimal values $\alpha^*$, $\beta^*$. Therefore, we can approximate
+
+\eq{
+  p(y') &= p(y'|\alpha^*, \beta^*)
+}
+
+The values $\alpha^*$ and $\beta^*$ can be found the obvious way -- by maximizing the likelihood of the data.
+
+\eq{
+  \alpha^*, \beta^* = \argmax_{\alpha, \beta} p(y|\alpha, \beta)
+}
+
+Note that we can't simply take the posterior on $w$ -- let's call it $q$, and claim that
+
+\eq{
+  p(y|\alpha, \beta) = \prod_i \int p(y_i|w)q(w)\, dw
+}
+
+This is incorrect because
+
+\eq{
+  p(y|\alpha, \beta) &= \prod_i \int p(y_i|w, \beta)p(w|\alpha)\, dw
+}
+
+And in the previous attempt, we took $p(w|\alpha)$ to be $p(w|y, \alpha, \beta)$ and allowed ourselves to cheat by looking at the data.
+
+% do stuff...
+
+
+\subsubsection{Multivariate Linear Regression *}
 
 This is quite a bit more involved that the single-variate version because our weight matrix $W$ is now an $n$ by $m$ matrix. We say that the vectorized form of $W$ is gaussian.
 
-\subsection{Bayesian Logistic Regression}
+\subsection{Bayesian Logistic Regression *}
 .
-\subsubsection{Laplace Approximation}
+\subsubsection{Laplace Approximation *}
 .
-\subsection{Spline and Wavelet Bases}
+\subsection{Spline and Wavelet Bases *}
 .
-\subsection{Bayesian Neural Networks}
+\subsection{Bayesian Neural Networks *}
 
-\section{Approximate Inference}
+\section{Approximate Inference *}
 
-\subsection{Expectation Maximization}
+\subsection{Expectation Maximization *}
 .
-\subsection{Variational Inference}
+\subsection{Variational Inference *}
 .
-\subsubsection{Inference for FC Gaussian CRFS}
+\subsubsection{Inference for FC Gaussian CRFS *}
 
 A very popular class of CRFs are dense gaussian crfs, used for image processing. In this case, variables are arranged in an n by n grid, with given unary potentials and pairwise potentials between every pair of points in the grid.
 
@@ -1415,13 +1463,13 @@ We can also combine both importance sampling with self-normalized sampling
 Notice that this only requires the ability to compute the ratio of $p$ and $q$ up to some constant factor.
 \fi
 
-\subsection{Monte Carlo Markov Chain}
+\subsection{Monte Carlo Markov Chain *}
 .
-\subsubsection{Metropolis Hastings}
+\subsubsection{Metropolis Hastings *}
 .
-\subsubsection{Reversible Jump MCMC}
+\subsubsection{Reversible Jump MCMC *}
 .
-\subsection{Gibbs Sampling}
+\subsection{Gibbs Sampling *}
 .
 \section{Optimization}
 
@@ -1600,9 +1648,9 @@ Basically, we want to solve a problem with all the following constraints (these 
 \item $\mu g = 0$
 }
 
-\subsection{SGD Variants}
+\subsection{SGD Variants *}
 .
-\subsection{BADMM Algorithm}
+\subsection{BADMM Algorithm *}
 .
 \section{Reinforcement Learning}
 
@@ -1757,9 +1805,9 @@ To summarize our expressions:
 
 This concludes the proof.
 
-\subsubsection{MPC and ILQR}
+\subsubsection{MPC and ILQR *}
 .
-\subsubsection{Stochastic Optimal Control}
+\subsubsection{Stochastic Optimal Control *}
 .
 \subsection{Q-Learning}
 
@@ -1843,7 +1891,7 @@ Now let's focus on the start state, Let $\mu_{\pol}(s) = \mu_{\pol}(s;s_0)$.
 
 Note that we have managed to eliminate the sums into expectations (this was not previously possible), which means we can perform it by sampling.
 
-\subsubsection{Natural Policy Gradients}
+\subsubsection{Natural Policy Gradients *}
 .
 \subsubsection{Counterfactual Multi-Agent Policy Gradients}
 
@@ -1900,13 +1948,12 @@ Note that a Q-network is sufficient to compute the advantage, given the policy, 
 	&= Q_{\pol}(s,a) - \sum_{a'} \pol(a'|s) Q_{\pol}(s,a') \\
 }
 
-\subsection{Trust Region Policy Optimization}
+\subsection{Trust Region Policy Optimization *}
 .
-\subsection{Guided Policy Search}
+\subsection{Guided Policy Search *}
 .
-\subsection{End to End Deep Visuomotor Policies}
+\subsection{End to End Deep Visuomotor Policies *}
 .
-
 \section{Neural Networks}
 
 \subsection{Variational Autoencoders}
@@ -1965,13 +2012,13 @@ Computing $\kl{q}{p(z)}$ is easy, because $p(z)$ has an analytical form (the sta
 
 Naive strategy: Sample $z \sim q$. Compute the gradient of $\log p(x|z)$ in order to approximate gradient of expectation. This is not ideal because the gradient will not backpropagate to the network $q$. Solution: use reparameterization trick.  
 
-\subsection{Architectures}
+\subsection{Architectures *}
 
-\subsubsection{Neural Turing Machine}
+\subsubsection{Neural Turing Machine *}
 .
-\subsubsection{Neural GPU}
+\subsubsection{Neural GPU *}
 .
-\subsubsection{Grid LSTM}
+\subsubsection{Grid LSTM *}
 .
 \section{Mathematical Background}
 
@@ -2479,7 +2526,7 @@ We can add on a penalty term $C\sum_i \epsilon_i$ to the objective. This produce
 
 When minimizing with respect to $\epsilon$, it is clear that as long as $C-\lambda_i > 0$, we will pick $\epsilon_i = 0$. On the other hand, if $C -\lambda_i < 0$, then $\epsilon \rightarrow \infty$ and the lagrangian approaches $- \infty$. Therefore, the maximizer over $\lambda$ in the dual problem will set $0 < \lambda_i < C$ as an additional constraint.
 
-\subsection{Gaussian Processes}
+\subsection{Gaussian Processes *}
 .
 \subsection{Independent Component Analysis}
 
