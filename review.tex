@@ -1332,7 +1332,7 @@ This is normal in $w$. Recall that the conjugate prior of the normal distributio
 Now consider the distribution of $w$ and $\vec y | w$. This is a linear gaussian model which we have solved before. 
 
 \eq{
-    \Sigma &= X (\beta I) X^T + \alpha I \\
+    \minv \Sigma &= X (\beta I) X^T + \alpha I \\
     &= \beta XX^T + \alpha I \\
     w|y &\sim \nml{\Sigma (X (\beta I) y + \alpha^{-1} I \mu)}{\Sigma} \\
     &\sim \nml{\beta \Sigma X y}{\Sigma}
@@ -1385,19 +1385,119 @@ The values $\alpha^*$ and $\beta^*$ can be found the obvious way -- by maximizin
 Note that we can't simply take the posterior on $w$ -- let's call it $q$, and claim that
 
 \eq{
-  p(y|\alpha, \beta) = \prod_i \int p(y_i|w)q(w)\, dw
+  p(y|\alpha, \beta) = \int p(y|w, \beta)q(w|\alpha)\, dw
 }
 
 This is incorrect because
 
 \eq{
-  p(y|\alpha, \beta) &= \prod_i \int p(y_i|w, \beta)p(w|\alpha)\, dw
+  p(y|\alpha, \beta) &= \int p(y|w, \beta)p(w|\alpha)\, dw
 }
 
-And in the previous attempt, we took $p(w|\alpha)$ to be $p(w|y, \alpha, \beta)$ and allowed ourselves to cheat by looking at the data.
+And in the previous attempt, we took $p(w|\alpha)$ to be $p(w|y, \alpha, \beta)$ and allowed ourselves to cheat by looking at the data. We will evaluate the integral. First be very careful that 
 
-% do stuff...
+\eq{
+	p(y|\alpha, \beta) &\neq \prod_i p(y_i | \alpha, \beta)
+}
 
+because each $y_i$ influences the probability of $w$, which changes the probability of another $y_j$. Therefore our integrand is
+
+\eq{
+	\paren{ \prod_i p(y_i | w, \beta) } p(w|\alpha) 
+}
+
+We will solve this integral by completing the square. However, unusually, we will need to carefully keep track of all the constant terms as well.
+
+\eq{
+	\mvnmlp{w}{0}{\alpha I} \prod_i \uvnmlp{y_i}{w^T x_i}{\beta} 
+}
+
+Let's complete the square of the term inside the exponent:
+\eq{
+	&\beta \sum_i (y_i-w^T x_i)^2 + \alpha w^T w \\
+    &= \beta (y-X^T w)^T (y-X^T w) + \alpha w^T w \\
+    &= \beta y^Ty - 2\beta y^T X^T w + \qf{w}{(\beta XX^T + \alpha I)} \\
+    &= \beta y^Ty - 2\beta y^T X^T w + \qf{w}{\minv \Sigma} \\
+    &= \qf{(w - \beta \Sigma X y)}{\minv \Sigma} + \qf{(\beta Xy)}{ \Sigma} + \beta y^T y
+\intertext{Notice that $\beta \Sigma X y$ was the mean of the posterior on $w$ from before. Call it $\hat w$}
+ 	&= \qf{(w- \hat w)}{\minv \Sigma} - \qf{(\beta Xy)}{ \Sigma} + \beta y^T y 
+}
+
+The integral will take care of the first term, leaving us with the inverse coefficient on the exponential for a multivariate gaussian:
+
+\eq{
+	\paren{ (2 \pi)^{-\frac{D}{2}} |\Lambda|^{\haf} }^{-1}
+}
+
+Therefore the terms we have left are
+
+\eq{
+	(2\pi)^{-\frac{D-D}{2}} |\alpha I|^{\haf} |\Lambda|^{\nhaf} \paren{\frac{\beta}{2\pi}}^{-\frac{N}{2}} \bexp{\nhaf \paren{\qf{(\beta Xy)}{ \Sigma} + \beta y^T y }}
+}
+
+So the log likelihood is
+
+\eq{
+	&-\frac{N}{2} \log (2\pi) + \frac{D}{2} \log \alpha - \haf \log |\Lambda| + \frac{N}{2} \log \beta - \haf \paren{\qf{(\beta Xy)}{ \Sigma} + \beta y^T y }
+}
+
+We can do some more work with the expression
+
+\eq{
+  & - \qf{(\beta Xy)}{ \Sigma} + \beta y^T y \\
+  &= - \beta^2 y^T X^T \Sigma X y + \beta y^T y \\
+  &= - \beta^2 y^T X^T \minv \Sigma \Sigma \minv \Sigma X y + \beta y^T y \\
+  &= - \hat w ^T \Sigma \hat w + \beta y^T y \\
+  &= - \hat w ^T \minv \Sigma \hat w + \beta y^T y \\
+  &= - \alpha \hat w^T \hat w - \beta \hat w^T X X^T \hat w + \beta y^T y \\
+  &= - \alpha \hat w^T \hat w +
+  \beta \paren{y^Ty - \hat w^T X X^T \hat w} 
+}
+
+We will complete the square for the second term for $y$. Clearly, the quadratic term has coefficient $I$, and by looking at the constant term, we know $b^T I^{-1} b = \hat w^T XX^T \hat w$ so $b = X^T \hat w$. Therefore, we will need to inject the term $-2 b^T y$ into the expression.
+
+
+\eq{
+  &y^T y - 2\hat w^T X y - \hat w^T XX^T \hat w + 2 \hat w^T X y\\
+  &= \sos{(y-X^T \hat w)} + \hat w^T XX^T \hat w  - 2\hat w^T XX^T \hat w + 2 \hat w^T X y\\
+  &= \sos{(y-X^T \hat w)} -2 \hat w^T XX^T \hat w+ 2 \hat w^T X y
+}
+
+Let's start by eliminating the last two terms.
+
+\eq{
+  2 \hat w^T X y &= 2 \beta y^T X^T \Sigma X y \\
+  &= \frac{2}{\beta} \hat w^T \minv \Sigma w
+}
+
+Canceling out with the $\beta$ coefficient on the whole second term, this gives us
+\eq{
+  2 \hat w^T \minv \Sigma \hat w
+}
+
+So we have collectively:
+
+\eq{
+  &= - \alpha \hat w^T \hat w + \beta \sos{(y-X^T \hat w)} + 2 \hat w^T \minv \Sigma \hat w \\
+  &= - \alpha \hat w^T \hat w + \beta \sos{(y-X^T \hat w)} + 2 \alpha \hat w^T \hat w + 2 \beta \hat w^T XX^T \hat w \\
+  &= \alpha \hat w^T \hat w + \beta \sos{(y-X^T \hat w)} + 2 \beta \hat w^T XX^T \hat w \\
+}
+
+If we pup back the last term inside the $\beta$ coefficient, we get $2\hat w^T XX^T \hat w$ which cancels out perfectly with the other term left over. This leaves us with
+
+\eq{
+  \alpha \hat w^T \hat w + \beta \sos{(y-X^T \hat w)}
+}
+
+In conclusion, the log likelihood is:
+
+\eq{
+	&-\frac{N}{2} \log (2\pi) + \frac{D}{2} \log \alpha - \haf \log |\Lambda| + \frac{N}{2} \log \beta - \frac{\alpha}{2} \hat w^T \hat w + \frac{\beta}{2} \sos{(y-X^T \hat w)}
+}
+
+Recall from a long time ago that we are trying to maximize the log-likelihood with respect to the hyperparameters.
+
+\todo{write this section}
 
 \subsubsection{Multivariate Linear Regression *}
 
