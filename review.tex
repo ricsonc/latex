@@ -132,9 +132,9 @@ These are a collection of personal notes, and are not intended to teach or intro
 \paragraph{Todo}
 
 \itmz{
-\item bayesian lr and bayesian lr
+\item bayesian models
+\item mpc and ilqr
 \item variational methods and CRFs
-\item kernel density estimators
 }
   
 \section{Probability Theory}
@@ -989,6 +989,25 @@ According to the identity, then
 
 This completes the proof.
 
+\subsubsection{Trace of an inverse matrix}
+
+Consider a real symmetric positive definite matrix $A$. How can $\tr(\minv A)$ be computed? First notice that it is always possible to find the eigendecomposition (from a later section) $A = P D \minv P$ for some $P$ and diagonal $D$. 
+
+\eq{
+	\minv A &= (P D \minv P)^{-1} \\
+    &= P (PD)^{-1} \\
+    &= P \minv D \minv P
+    \tr(\minv A) &= \tr(P \minv D \minv P) \\
+    &= \tr(\minv P P \minv D) \\
+    &= \tr(\minv D)
+}
+
+By definition of eigendecomposition, the values on the diagonal of $D$ are the eigenvalues of $A$, and therefore the values on the diagonal of $\minv D$ are the inverse of the eigenvalues. Therefore, if $\lambda_i$ are the eigenvalues of $A$, then:
+
+\eq{
+	\tr(\minv A) &= \sum_i \frac{1}{\lambda_i}
+}
+
 \subsection{Decompositions and Factorizations}
 
 A matrix decomposition or a matrix factorization is the process of finding a product of matrices which equal the matrix we are decomposing or factoring.
@@ -1353,7 +1372,7 @@ We can find the distribution of $y'$, as we have derived in the section on linea
 	y' &\sim \nml{\beta x'^T \Sigma X y}{\beta^{-1} + x'^T \Sigma x'}
 }
 
-\subsubsection{Evidence Approximation *}
+\subsubsection{Evidence Approximation}
 
 In the previous section, we had fixed values for $\alpha$ and $\beta$. However, to have a fully bayesian model, we should give these variables a prior distribution as well.
 
@@ -1426,19 +1445,19 @@ Let's complete the square of the term inside the exponent:
 The integral will take care of the first term, leaving us with the inverse coefficient on the exponential for a multivariate gaussian:
 
 \eq{
-	\paren{ (2 \pi)^{-\frac{D}{2}} |\Lambda|^{\haf} }^{-1}
+	\paren{ (2 \pi)^{-\frac{D}{2}} |\Sigma|^{\nhaf} }^{-1}
 }
 
 Therefore the terms we have left are
 
 \eq{
-	(2\pi)^{-\frac{D-D}{2}} |\alpha I|^{\haf} |\Lambda|^{\nhaf} \paren{\frac{\beta}{2\pi}}^{-\frac{N}{2}} \bexp{\nhaf \paren{\qf{(\beta Xy)}{ \Sigma} + \beta y^T y }}
+	(2\pi)^{-\frac{D-D}{2}} |\alpha I|^{\haf} |\Sigma|^{\haf} \paren{\frac{\beta}{2\pi}}^{-\frac{N}{2}} \bexp{\nhaf \paren{\qf{(\beta Xy)}{ \Sigma} + \beta y^T y }}
 }
 
 So the log likelihood is
 
 \eq{
-	&-\frac{N}{2} \log (2\pi) + \frac{D}{2} \log \alpha - \haf \log |\Lambda| + \frac{N}{2} \log \beta - \haf \paren{\qf{(\beta Xy)}{ \Sigma} + \beta y^T y }
+	&-\frac{N}{2} \log (2\pi) + \frac{D}{2} \log \alpha - \haf \log |\Sigma| + \frac{N}{2} \log \beta - \haf \paren{\qf{(\beta Xy)}{ \Sigma} + \beta y^T y }
 }
 
 We can do some more work with the expression
@@ -1492,16 +1511,93 @@ If we pup back the last term inside the $\beta$ coefficient, we get $2\hat w^T X
 In conclusion, the log likelihood is:
 
 \eq{
-	&-\frac{N}{2} \log (2\pi) + \frac{D}{2} \log \alpha - \haf \log |\Lambda| + \frac{N}{2} \log \beta - \frac{\alpha}{2} \hat w^T \hat w + \frac{\beta}{2} \sos{(y-X^T \hat w)}
+	&-\frac{N}{2} \log (2\pi) + \frac{D}{2} \log \alpha - \haf \log |\minv \Sigma| + \frac{N}{2} \log \beta - \frac{\alpha}{2} \hat w^T \hat w + \frac{\beta}{2} \sos{(y-X^T \hat w)}
 }
 
-Recall from a long time ago that we are trying to maximize the log-likelihood with respect to the hyperparameters.
+Recall from a long time ago that we are trying to maximize the log-likelihood with respect to the hyperparameters. Let's take the derivative with respect to $\alpha$ and $\beta$.
 
-\todo{write this section}
+\eq{
+	\frac{\partial p(y|\alpha, \beta)}{\partial \alpha} &= \frac{D}{2\alpha} - \haf \frac{\partial}{\partial \alpha} \log |\minv \Sigma| - \haf \sos{\hat w}
+}
+
+Recall the differential of a log determinant:
+
+\eq{
+	d( \log |\minv \Sigma|) &= \tr(\Sigma d(\minv \Sigma)) \\
+    &= \tr(\Sigma d(\alpha I + \beta XX^T)) \\
+    &= \tr(\Sigma d\alpha)
+}
+
+So the derivative comes out to 
+\eq{
+	\frac{\partial p(y|\alpha, \beta)}{\partial \alpha} &= \frac{D}{2\alpha} - \haf \tr(\Sigma) - \haf \sos{\hat w}
+}
+
+What is $\tr(\Sigma) = \tr((\alpha I + \beta XX^T)^{-1})$? Recall that it is the sum of the inverse eigenvalues of the matrix $\alpha I + \beta XX^T$, as shown in the matrix identities section. 
+
+\eq{
+	(\alpha I + \beta XX^T) v_i &= \lambda_i v_i \\
+    \beta XX^T v_i &= (\lambda_i - \alpha) v_i
+}
+
+Therefore, if $E[\beta XX^T]$ denotes all the relevant eigenvalues, the trace of $\Sigma$ is $\sum_{E[\beta XX^T]} (\lambda_i + \alpha)^{-1}$
+
+Setting the derivative to 0 we expect:
+
+\eq{
+	0 &= \frac{D}{2\alpha} - \haf \sum_i \frac{1}{\lambda_i + \alpha} - \haf \sos{\hat w} \\
+    0 &= D - \sum_i \frac{\alpha}{\lambda_i + \alpha} - \alpha \sos{\hat w} \\
+    &= \sum_i 1- \frac{\alpha}{\lambda_i + \alpha} - \alpha \sos{\hat w} \\
+    &= \sum_i \frac{\lambda_i}{\lambda_i + \alpha} - \alpha \sos{\hat w} \\
+}
+
+Making use of the fixed point iteration algorithm, we can arrange this in the form:
+
+\eq{
+  \alpha &= \frac{\sum_i \frac{\lambda_i}{\lambda_i + \alpha}}{\sos{\hat w}}
+}
+
+Now we will try to do the same thing will $\beta$
+\eq{
+  \frac{\partial p(y|\alpha, \beta)}{\partial \beta} &= \nhaf \frac{\partial}{\partial \beta} \log |\minv \Sigma| + \frac{N}{2\beta} + \frac{\partial}{\partial \beta} \frac{\beta}{2} \sos{(y-X^T \hat w)}
+}
+
+First we will tackle the log determinant.
+
+\eq{
+	d( \log |\minv \Sigma|) &= \tr(\Sigma d(\minv \Sigma)) \\
+    &= \tr(\Sigma d(\alpha I + \beta XX^T)) \\
+    &= \tr(\Sigma d\beta XX^T)
+}
+
+So the derivative comes out to $\tr(X^T \Sigma X)$. We want to find the inverse of this matrix and take the eigenvectors, because the sum of those yields the trace.
+
+\eq{
+  (X^T \Sigma X)^{-1} &= \minv X (X^T \Sigma)^{-1} \\
+  &= \minv X \minv \Sigma (X^T)^{-1} \\
+  &= \minv X (\alpha I + \beta XX^T) (X^T)^{-1} \\
+  &= \alpha \minv X (X^T)^{-1} + \beta \minv X X X^T (X^T)^{-1} \\
+  &= \alpha (X^TX)^{-1} + \beta I\\
+}
+
+Then the eigenvectors are:
+
+\eq{
+  \alpha (X^TX)^{-1} v_i + \beta I v_i &= \lambda_i v_i \\
+  \alpha (X^TX)^{-1} v_i &= (\lambda_i - \beta) v_i
+}
+
+And the gradient of the log determinant comes out to:
+
+\eq{
+  \sum_i \frac{1}{\lambda_i + \beta}
+}
+
+\todo{check this}
 
 \subsubsection{Multivariate Linear Regression *}
 
-This is quite a bit more involved that the single-variate version because our weight matrix $W$ is now an $n$ by $m$ matrix. We say that the vectorized form of $W$ is gaussian.
+This is quite a bit more involved that the univariate version because our weight matrix $W$ is now an $n$ by $m$ matrix. We say that the vectorized form of $W$ is gaussian.
 
 \subsection{Bayesian Logistic Regression *}
 .
@@ -1750,6 +1846,28 @@ Basically, we want to solve a problem with all the following constraints (these 
 
 \subsection{SGD Variants *}
 .
+\subsection{Fixed Point Iteration}
+
+Suppose you are trying to minimize $g(x)$, so you want to set $g'(x) = 0$. Unfortunately, it is not always trivial to solve for $x$. For example, consider
+
+\eq{
+  g'(x) &= \cos(x)^3 - \sqrt{x}
+}
+
+Instead, we hope to transform to expression to something like $f(x) = x$. This is usually much easier to do
+
+\eq{
+  0 &= \cos(x) - \sqrt{x} \\
+  \sqrt{x} &= \cos(x) \\
+  x &= \cos(x)^2
+}
+
+Here we have $f(x) = \cos(x)^2$
+
+Now all that remains is an algorithm to find the fixed point. It turns out that starting out with an arbitrary guess and repeatedly applying $f$ will converge to the fixed point under certain conditions.
+
+One sufficient requirement for convergence is a Lipschitz constant of less than 1. The Lipschitz constant of a function is the greatest value $K$ such that the magnitude of the slope of the line between any two points on the function is at most $K$. Note that a upper bound on the derivative of a function translates to an upper bound on the Lipschitz constant of a function but not vice versa. In any case, the Lipschitz constant of $\cos(x)^2$ is exactly 1, therefore we should be able to recover $x$.
+
 \subsection{BADMM Algorithm *}
 .
 \section{Reinforcement Learning}
