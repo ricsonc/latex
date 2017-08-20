@@ -74,6 +74,8 @@
 \nec{\sos}[1]{#1^T #1}
 \nec{\scov}[1]{#1 #1^T}
 
+\nec{\bmat}[1]{\begin{bmatrix} #1 \end{bmatrix}}
+\nec{\mat}[1]{\begin{matrix} #1 \end{matrix}}
 \nec{\vt}[2]{\begin{bmatrix} #1 \\ #2 \end{bmatrix}}
 \nec{\mt}[4]{\begin{bmatrix} #1 & #2 \\ #3 & #4 \end{bmatrix}}
 \nec{\vtx}{\vt{x_a}{x_b}}
@@ -2872,7 +2874,7 @@ This expression can now be optimized using your favorite convex optimization pro
 
 We can recover $b$ by computing the expression $v^Tx_i$ for all positive samples. Since we know we have satisfied the constraint $v^Tx_i - b > 1$, and in fact, $min(v^Tx_i -b) = 1$ when the constraint is tight, therefore, $min(v^Tx_i)-1 = b$. 
 
-\subsubsection{Kernel}
+\subsubsection{Kernel Trick}
 
 The most interesting thing about this dual form is that none of the vectors $x_i$ must be explicitly computed. Instead, it is sufficient that the dot product of $x_i^T x_j$ be computed. In fact, we can transform the inputs arbitrarily, and compute $K(x_i, x_j) = \phi(x_i)^T \phi(x_j)$ even if computing $\phi$ itself is computationally expensive. The traditional euclidean kernel is $K(x_i, x_j) = x_i^Tx_j$. We can also use the gaussian kernel
 
@@ -2916,7 +2918,7 @@ Let's try to solve this with maximum likelihood.
   \log p(s) &= \log |U| + \sum_{u \in U} \log \sigma'(u^T x)
 }
 
-Now at this point you just run gradient descent to get the answer. 
+At this point you just run gradient descent to get the answer. 
 
 Another ICA algorithm involves kurtosis, which is a measure of nongaussianity. Kurtosis is the expected value of $x^4$. One may ask why we do not use skewness, which is the expectation of $x^3$. I'm not sure myself, although I have read vague and unsubstantiated claims to the effect that kurtosis somehow encompasses skewness through something called a one-bit-matching theorem.
 The algorithm performs kurtosis maximization in order to find the directions along which the data is projected into the least gaussian shape possible, but that's all I know about it.
@@ -2938,6 +2940,73 @@ p(c|x) &\propto q(x|c)p(c) \\
 }
 
 Therefore the correct method of correcting for class redistribution is to multiply probabilities by the ratio $\frac{p(c)}{q(c)}$. Remember to renormalize afterwards.
+
+\subsection{Perspective geometry}
+
+A point in 3-D space can be represented in homogeneous coordinates as $\bmat{ x \\ y \\ z \\ s}$ which is equivalent to the 3D point $\bmat{ x/s \\ y/s \\ z/s }$.
+
+We will now introduce three matrices -- the translation, rotation, and projection matrix.
+
+The translation matrix takes the form
+
+\eq{
+	T &= I + \sparen{ \begin{array}{c|c} 0 & \mat{\Delta x \\ \Delta y \\ \Delta z} \\ \hline \mat{\,&0&\,} & 0 \end{array}} \\
+\intertext{We can see the effect of the translation matrix on a point}
+    T \bmat{x \\ y \\ z \\ s} &= \bmat{x \\ y \\ z \\ s} + s \bmat{\Delta x \\ \Delta y \\ \Delta z \\ 0}
+}
+
+Given a 3 by 3 rotation matrix, the homogeneous rotation matrix is simply $\sparen{ \begin{array}{c|c} R & 0 \\ \hline 0 & 1 \end{array}}$
+Given angles $\alpha$, $\beta$, and $\gamma$ for rotation about the $x$, $y$, and $z$ axes, the 3 by 3 rotation matrix can be written as a product of rotation matices:
+
+\nec{\calpha}{\cos(\alpha)}
+\nec{\salpha}{\sin(\alpha)}
+\nec{\cbeta}{\cos(\beta)}
+\nec{\sbeta}{\sin(\beta)}
+\nec{\cgamma}{\cos(\gamma)}
+\nec{\sgamma}{\sin(\gamma)}
+
+\eq{
+	R &= \bmat{1 & 0 & 0 \\ 0 & \calpha & -\salpha \\ 0 & \salpha & \calpha} 
+    \bmat{\cbeta & 0 & \sbeta \\ 0 & 1 & 0 \\ -\sbeta & 0 & \cbeta} 
+    \bmat{\cgamma & -\sgamma & 0 \\ \sgamma & \cgamma & 0 \\ 0 & 0 & 1}
+}
+
+Note that the rotation and translation matrix can multiplied and combined as
+\eq{
+	\sparen{ \begin{array}{c|c} R & T \\ \hline 0 & 1 \end{array}}
+}
+
+Finally, the projection matrix projects a 3D point onto a 2D camera plane when we have given focal lengths $f_x$ and $f_y$.
+
+\eq{
+	K &= \bmat{f_x & 0 & 0 & 0 \\ 0 & f_y & 0 & 0 \\ 0 & 0 & 1 & 0}
+}
+
+Finally, we can transform to image coordinates by off-setting the points half of the image width and height and by flipping the $y$ axis:
+
+\eq{
+	C &= \bmat{1 & 0 & c_x \\ 0 & -1 & -c_y \\ 0 & 0 & 1}
+}
+
+Therefore the full transformation from world coordinates to image points is computed by the transformation:
+
+\eq{
+	M &= CKRT
+}
+
+\subsubsection{Inverse graphics}
+
+The transformation carried out by the projection matrix is essentially:
+
+\eq{
+	x &= \frac{f_x X}{Z}
+}
+
+Therefore if we are given the depth of each point on the camera plane, we may invert the process:
+
+\eq{
+	X &= \frac{Z}{f_x}x
+}
 
 \section{Category Theory}
 
