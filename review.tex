@@ -1755,7 +1755,7 @@ Where $w|y$ is gaussian. $y'|w$ is also gaussian, but not in a nice way. In line
 
 \subsection{Expectation Maximization *}
 .
-\subsection{Variational Inference *}
+\subsection{Variational Inference}
 .
 \subsubsection{Inference for FC Gaussian CRFS *}
 
@@ -1803,14 +1803,77 @@ We can also combine both importance sampling with self-normalized sampling
 Notice that this only requires the ability to compute the ratio of $p$ and $q$ up to some constant factor.
 \fi
 
-\subsection{Monte Carlo Markov Chain *}
-.
-\subsubsection{Metropolis Hastings *}
-.
-\subsubsection{Reversible Jump MCMC *}
-.
-\subsection{Gibbs Sampling *}
-.
+\subsection{Monte Carlo Markov Chain}
+
+MCMC is a class of sampling methods that relies on the ability to construct a markov chain which has the same equilibrium distribution as the target distribution we are able to sample from. Since it is easy to sample from a markov chain, this allows us to sample from the target distribution in a straightforward manner. The main challenge is the construction of the markov chain.
+
+Problems with MCMC methods usually involve the issue that consecutive samples are often highly correlated. In addition, the burn-in period of the markov chain, before the distribution has converged to the equilibrium distribution, can be very long. 
+
+\subsubsection{Metropolis Algorithm}
+
+Instead of directly specifying the transition probabilities of the markov chain, in metropolis hastings, we specify a transition procedure:
+First, we select a proposal distribution. A popular proposal distribution is a gaussian centered on the current state. Then, we sample a point $x'$ from the proposal distribution, and compute $\frac{P(x')}{P(x)}$ where $x$ is our current state. That ratio is our chance of accepting the new point and transitioning to it. The distribution must be symmetric -- $\pi(x'|x) = \pi(x|x')$.
+
+Note that it is suffient to compute $P$ only up to a constant factor, which is very useful for sampling from distributions which cannot be tractably normalized. 
+
+We claim that the equilibrium distribution of the markov chain is equivalent to the original distribution. Proof:
+
+\eq{
+\intertext{We will satisfy the conditions detailed balance, which is true of many stationary markov chains (but not strictly required). This should intuitively make sense}
+P(x_{t+1} = x',x_t = x) &= P(x_{t+1} = x,x_t = x')
+\intertext{We will drop some of the notation for conciseness}
+P(x'|x)P(x) &= P(x|x')P(x)
+}
+
+Essentially, $P(x'|x)$ is the transition probability. We have constructed the transition procedure such that $P(x'|x) = A(x'|x) \pi(x'|x)$ where $A$ is the acceptance probability and $\pi$ is the proposal distribution.
+
+\eq{
+  A(x'|x) \pi(x'|x) P(x) &= A(x|x') \pi(x|x') P(x') \\
+  \frac{A(x'|x)}{A(x|x')} &= \frac{P(x') \pi(x|x')}{P(x) \pi(x'|x)} \\
+  &= \frac{P(x')}{P(x)}
+}
+
+Consider that we have set
+
+\eq{
+  A(x'|x) &= \min \paren{\frac{P(x')}{P(x)}, 1}
+}
+
+Now it remainds to verify that our choice of the acceptance probability satisfies the conditions we have set. Without loss of generality, suppose that $P(x') > P(x)$.
+
+\eq{
+  \frac{A(x'|x)}{A(x|x')} &= \frac{1}{\frac{P(x)}{P(x')}} \\
+  &= \frac{P(x')}{P(x)}
+}
+
+By symmetry, the other case also works.
+
+\subsubsection{Metropolis Hastings}
+
+Metropolis hastings is a generalization of the metropolis algorithm which allows proposal distributions to be non-symmetric. In addition, it adjusts the acceptance probailities to compensate for the non-symmetric distributions. The new acceptance chance is
+
+\eq{
+  A(x'|x) &= \min \paren{\frac{P(x') \pi(x|x')}{P(x) \pi(x'|x)}, 1}
+}
+
+The proof is very similar. We want to satisfy the condition
+
+\eq{
+  \frac{A(x'|x)}{A(x|x')} &= \frac{P(x') \pi(x|x')}{P(x) \pi(x'|x)} \\
+}
+
+Assuming $P(x')\pi(x|x') > P(x)\pi(x'|x)$, this is trivially true, and the other case works as well by symmetry. 
+
+\subsubsection{Gibbs Sampling}
+
+Gibbs sampling is a special case of the metropolis hastings algorithm. It is particularly suited for sampling on a joint distribution of many variables, where the probability distribution of one variable on the rest is computationally tractable.
+
+Gibbs sampling can be understood as specifying a specific form for the proposal function. If the current state of the markov chain is $x_1, x_2, \cdots x_n$, then the proposal distribution will keep $x_2, \cdots x_n$ the same and sample $x_1$ conditional on all other variables. In the next timestep, the proposal distribution will freeze $x_1$ and $x_3, \cdots x_n$, and sample $x_2$, again conditioned on all other variables. This repeats for every variable in our set. 
+
+We claim that the acceptance ratio of gibbs sampling is 1. Proof:
+
+\todo{Proof}
+
 \section{Optimization}
 
 \subsection{Lagrange Multipliers}
@@ -2384,13 +2447,24 @@ Computing $\kl{q}{p(z)}$ is easy, because $p(z)$ has an analytical form (the sta
 
 Naive strategy: Sample $z \sim q$. Compute the gradient of $\log p(x|z)$ in order to approximate gradient of expectation. This is not ideal because the gradient will not backpropagate to the network $q$. Solution: use reparameterization trick.  
 
-\subsection{Architectures }
+\subsection{Architectures}
 
 This section briefly describes a few novel neural architectures.
 
-\subsubsection{Neural Turing Machine *}
-.
-%https://arxiv.org/pdf/1410.5401.pdf
+\subsubsection{Neural Turing Machine}
+
+The neural turing machine is an RNN with several parts. The component which takes inputs and produces outputs is the controller. The controller manipulates the read and write heads, which interacts with the memory bank, which corresponds to the tape in a turing machine. Cruicially, the entire design is fully differentiable. 
+
+Now we must answer some questions -- what is stored on the memory bank, how does the controller direct the read and write heads, how do the write heads know what to write, and what do the read heads report back to the controller.
+
+The memory bank itself has size $N$, where each memory location is an $M$-dimensional vector. Reads from the memory bank are a weighted average from all $N$ locations. The write happens in two stages -- an erase, and an add. This mirrors the LSTM memory gating procedure. First, between 0 and 1 of the original memory is wiped. Next, new information is added. Both the erase and add are multipled by some weight vector which directs the erasing and adding. Each erase and add vector have dimension $M$ while the weight vector has dimension $N$.
+
+Next we must dicsuss the production of the weight vector, which is the addressing mechanism. There are four stages to the addressing mechanism. In the first stage, the head generates an $M$ dimensional key, which is used to weigh more similar memory locations higher than dissimilar memory locations. This produces the initial weighting. In the second stage, the head emits a single gating value between 0 and 1. The current weighting is averaged with the last weighting, using the gating value as the weight. Therefore, the gating mechanism could prevent weights from shifting completely. In the third stage, the head emits a probability distribution over possible shiftings of the current weight vector. The weight vector is then shifted by various amounts with various weights to produce a new weight vector. In the final stage, the head outputs a parameter $\gamma$ which performs sharpening on the weight vector. Each weight is exponentiated by $\gamma$ and then the weights are renormalized.
+
+The controller itself is an LSTM. Each timestep, it takes as input the read value and the external inputs. The LSTM then generates the output. It also generates inputs to each of the heads, which generate all the vectors needed for addressing and writing and reading. 
+
+The NTM achieved basic competance in tasks such as copying and showed some degree of generalization ability. 
+
 \subsubsection{Neural GPU}
 
 A neural GPU is almost a fully convolutional network with a few twists. First, the convolutional network is applied $T$ times to itself, so that it acts in a recursive manner. Note that the output and input must have the same shape for this to work. The network itself is composed of $L$ layers, each of which is a convolutional GRU layer. Within each layer, the weights are the same. A convolutional GRU layer performs a convolution, and then inputs the result into a standard GRU unit. 
@@ -2403,7 +2477,7 @@ The NGPU performed extremely well at binary addition and multiplication and seem
 
 The idea behind grid LSTM is to employ the ability of LSTMs to remember on more than just the time-dimension. For example, LSTM connections can also be performed along the depth-axis of a neural network in order to keep gradients flowing properly. 
 
-A 3-
+The authors used Grid LSTM for a translation model. The model was WxHx2, where W was the number of words in the input sentence and H was the number of words in the output sentence. On the input face of the LSTM, the sentence was fed in forwards on the first depth coordinate, and backwards on the second depth coordinate. On the W axis, the source sentence is repeatedly re-encoded. Since the source sentence is re-encoded once for every new word in the output sentence, this provides a form of implicit attention.
 
 \section{Mathematical Background}
 
@@ -2963,6 +3037,7 @@ The translation matrix takes the form
 }
 
 Given a 3 by 3 rotation matrix, the homogeneous rotation matrix is simply $\sparen{ \begin{array}{c|c} R & 0 \\ \hline 0 & 1 \end{array}}$
+
 Given angles $\alpha$, $\beta$, and $\gamma$ for rotation about the $x$, $y$, and $z$ axes, the 3 by 3 rotation matrix can be written as a product of rotation matrices:
 
 \eq{
