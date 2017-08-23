@@ -74,6 +74,8 @@
 \nec{\sos}[1]{#1^T #1}
 \nec{\scov}[1]{#1 #1^T}
 
+\nec{\bmat}[1]{\begin{bmatrix} #1 \end{bmatrix}}
+\nec{\mat}[1]{\begin{matrix} #1 \end{matrix}}
 \nec{\vt}[2]{\begin{bmatrix} #1 \\ #2 \end{bmatrix}}
 \nec{\mt}[4]{\begin{bmatrix} #1 & #2 \\ #3 & #4 \end{bmatrix}}
 \nec{\vtx}{\vt{x_a}{x_b}}
@@ -120,6 +122,14 @@
 \nec{\veck}{\vec k}
 \nec{\vecm}{\vec m}
 
+%for rotation matrix convenience
+\nec{\calpha}{\cos(\alpha)}
+\nec{\salpha}{\sin(\alpha)}
+\nec{\cbeta}{\cos(\beta)}
+\nec{\sbeta}{\sin(\beta)}
+\nec{\cgamma}{\cos(\gamma)}
+\nec{\sgamma}{\sin(\gamma)}
+
 \begin{document}
 \maketitle
 
@@ -132,9 +142,9 @@ These are a collection of personal notes, and are not intended to teach or intro
 \paragraph{Todo}
 
 \itmz{
-\item bayesian models
-\item mpc and ilqr
-\item variational methods and CRFs
+\item natural PG
+\item architectures
+\item approximate inference
 }
   
 \section{Probability Theory}
@@ -688,6 +698,37 @@ Note that in the simple case where $A = I$ and $b = \vec 0$ we have
   x | y & \sim \nml{(L + \Lambda)^{-1} Ly + \Lambda \mu}{(L + \Lambda)^{-1}} \\
   y &\sim \nml{\mu}{\minv L + \minv \Lambda}
 }
+
+\subsubsection{Orthogonal marginalization}
+
+Let's consider a formulation for the problem of marginalizing out all but one axis of a multivariate gaussian variable. We will abuse $\nml{}{}$ to mean a probability distribution here. First notice the technique of using the dirac function to write our integral in a nice manner.
+
+\eq{
+	f(x) &= \int \nml{\mu}{\Sigma}([x,\x_{-1}]) d\x_{-1} \\
+	&= \int \delta(x - \x_1) \nml{\mu}{\Sigma}(\x) d\x \\
+}
+
+This formulation is useful if we want to consider the case of projecting a gaussian along a line, or, in other words, marginalizing all directions orthogonal to a certain vector. Formally, we want to compute:
+
+\eq{
+	f(a) &= \int \delta(a-w^T \x) \nml{\mu}{\Sigma}(\x) d\x
+}
+
+Our line $w$ can be rotated in space so that it lies entirely on one axis. That is, there exists some matrix $R$ such that $Rw$ is non-zero on the first component and 0 on all the other components. Let us rotate both the line and also the gaussian.
+
+\eq{
+	f(a) &= \int \delta(a-(Rw)^T \x) \nml{R\mu}{R \Sigma R^T}(\x) d\x
+}
+
+Note that $(Rw)^T \x = ||w|| \x_1$ so we have
+
+\eq{
+	f(a) &= \int \delta(a-||w|| \x_1) \nml{R\mu}{R \Sigma R^T}(\x) d\x \\
+    &=  \int \delta \paren{\frac{a}{||w||} - \x_1} \nml{R\mu}{R \Sigma R^T}(\x) d\x \\
+    &=  \int \nml{R\mu}{R \Sigma R^T}([a||w||^{-1}, \x_{-1}]) d\x_{-1} \\
+}
+
+So this is simply a scaled version of our toy example of marginalizing all but one variable in a multivariate gaussian.
 
 \subsection{Information Theory}
 
@@ -1502,7 +1543,7 @@ So we have collectively:
   &= \alpha \hat w^T \hat w + \beta \sos{(y-X^T \hat w)} + 2 \beta \hat w^T XX^T \hat w \\
 }
 
-If we pup back the last term inside the $\beta$ coefficient, we get $2\hat w^T XX^T \hat w$ which cancels out perfectly with the other term left over. This leaves us with
+If we pop back the last term inside the $\beta$ coefficient, we get $2\hat w^T XX^T \hat w$ which cancels out perfectly with the other term left over. This leaves us with
 
 \eq{
   \alpha \hat w^T \hat w + \beta \sos{(y-X^T \hat w)}
@@ -1570,42 +1611,145 @@ First we will tackle the log determinant.
     &= \tr(\Sigma d\beta XX^T)
 }
 
-So the derivative comes out to $\tr(X^T \Sigma X)$. We want to find the inverse of this matrix and take the eigenvectors, because the sum of those yields the trace.
+So the derivative comes out to $\tr(\Sigma XX^T)$. Recall that the trace is equivalent to the sum of the eigenvalues. Denote the eigenvalues of $\Sigma XX^T$ as $\xi_i$. We will manipulate the matrix $\Sigma XX^T$ into another form and watch how the eigenvectors change
 
 \eq{
-  (X^T \Sigma X)^{-1} &= \minv X (X^T \Sigma)^{-1} \\
-  &= \minv X \minv \Sigma (X^T)^{-1} \\
-  &= \minv X (\alpha I + \beta XX^T) (X^T)^{-1} \\
-  &= \alpha \minv X (X^T)^{-1} + \beta \minv X X X^T (X^T)^{-1} \\
-  &= \alpha (X^TX)^{-1} + \beta I\\
+	\xi_i &\leftrightarrow \Sigma XX^T \\
+	\frac{1}{\xi_i} &\leftrightarrow (\Sigma XX^T)^{-1} \\
+	\frac{1}{\xi_i} &\leftrightarrow (XX^T)^{-1} \minv \Sigma \\
+	\frac{1}{\xi_i} &\leftrightarrow (XX^T)^{-1} (\alpha I + \beta XX^T) \\
+	\frac{1}{\xi_i} &\leftrightarrow \alpha (XX^T)^{-1} + \beta I \\
+	\frac{1}{\xi_i} - \beta &\leftrightarrow \alpha (XX^T)^{-1} \\
+	\frac{1}{\alpha} \paren{ \frac{1}{\xi_i} - \beta } &\leftrightarrow (XX^T)^{-1} \\
+	\frac{\alpha}{\frac{1}{\xi_i} - \beta} &\leftrightarrow XX^T \\
+	\frac{\alpha \beta}{\frac{1}{\xi_i} - \beta} & \leftrightarrow \beta XX^T
 }
 
-Then the eigenvectors are:
+So we have
 
 \eq{
-  \alpha (X^TX)^{-1} v_i + \beta I v_i &= \lambda_i v_i \\
-  \alpha (X^TX)^{-1} v_i &= (\lambda_i - \beta) v_i
+	\frac{\alpha \beta}{\frac{1}{\xi_i} - \beta} &= \lambda_i \\
+	\frac{\alpha \beta}{\frac{1 - \beta \xi_i }{\xi_i}} &= \lambda_i \\
+	\frac{\alpha \beta \xi_i}{1 - \beta \xi_i } &= \lambda_i \\
+    \frac{1 - \beta \xi_i}{\alpha \beta \xi_i} &= \frac{1}{\lambda_i}\\
+    \frac{1}{\alpha \beta \xi_i} - \frac{\beta \xi_i}{\alpha \beta \xi_i} &= \frac{1}{\lambda_i} \\
+    \frac{1}{\alpha \beta \xi_i} - \frac{1}{\alpha} &= \frac{1}{\lambda_i} \\
+    \frac{1}{\alpha \beta \xi_i} &= \frac{1}{\lambda_i} + \frac{1}{\alpha}\\
+    \frac{1}{\xi_i} &= \alpha \beta \paren{\frac{1}{\lambda_i} + \frac{1}{\alpha}} \\
+    \frac{1}{\xi_i} &= \alpha \beta \frac{\lambda_i + \alpha}{\lambda_i \alpha} \\    
+    \frac{1}{\xi_i} &= \beta \frac{\lambda_i + \alpha}{\lambda_i} \\    
+    \xi_i &= \frac{1}{\beta} \frac{\lambda_i}{\lambda_i + \alpha}
 }
 
-And the gradient of the log determinant comes out to:
+Substituting this back in, we retrieve the expression for the trace.
 
 \eq{
-  \sum_i \frac{1}{\lambda_i + \beta}
+	\tr(\Sigma XX^T) &= \frac{1}{\beta} \sum_i \frac{\lambda_i}{\lambda_i + \alpha} \\
 }
-
-\todo{check this}
 
 \subsubsection{Multivariate Linear Regression *}
 
 This is quite a bit more involved that the univariate version because our weight matrix $W$ is now an $n$ by $m$ matrix. We say that the vectorized form of $W$ is gaussian.
 
-\subsection{Bayesian Logistic Regression *}
-.
-\subsubsection{Laplace Approximation *}
-.
+\subsection{Bayesian Logistic Regression}
+
+In logistic regression, the setup is similar:
+\eq{
+	w &\sim \nml{0}{\alpha I} \\
+    y|w &\sim \text{Bernoulli}(\sigma(w^T x))
+}
+
+Problematically, the likelihood is no longer gaussian, which poses difficulties for an analytical solution. We can no longer solve $p(w|y)$ as easily. Therefore, we will use the laplace approximation, described in a later section. First consider the log posterior distribution, dropping the constant terms:
+
+\eq{
+	\ln p(w|y) &= -\frac{\alpha}{2} w^Tw + \sum_i y_i \log \sigma(w^Tx) + (1-y_i) \log (1-\sigma(w^Tx)) + \text{const}
+}
+
+We need to take the first derivative in order to find the mode and the second derivative in order to find the hessian. But first for convenience we show some identites:
+\eq{
+	d \sigma(z) &= d (1+e^{-z})^{-1} \\
+    &= -(1+e^{-z})^{-2} de^{-z} \\
+    &= \frac{e^{-z}}{(1+e^{-z})^{2}} dz \\
+    &= \sigma(z) (1-\sigma(z)) dz \\
+	d \log \sigma(z) &= \frac{1}{\sigma(z)} d \sigma(z) \\
+    &= (1-\sigma(z))dz \\
+    d \log (1-\sigma(z)) &= \frac{1}{1-\sigma(z)} d (1-\sigma(z)) \\
+    &= \frac{- \sigma(z) (1-\sigma(z))}{(1-\sigma(z))} dz\\
+    &= - \sigma(z) dz
+}
+
+\eq{
+	\grad_w \ln p(w|y) &= -\alpha w + \sum_i y_i (1-\sigma) x + (1-y_i) (-\sigma) x \\
+    &= -\alpha w + \sum_i (y_i-\sigma(w^Tx_i)) x_i
+}
+
+Therefore, we see that MAP estimation for logistic regression is equivalent to weight penalized MLE estimation of parameters. Now we will continue to find the hessian.
+
+\eq{
+	\hess \ln p(w|x) &= \grad_w -\alpha w + \sum_i (y_i-\sigma(w^Tx_i)) x_i \\
+    &= - \alpha I - \sum_i \grad_w \sigma(w^Tx) x \\
+    &= - \alpha I - \sum_i \sigma_i (1-\sigma_i) x_i x_i^T \\
+}
+
+Then our approximation gives us the posterior distribution
+
+\eq{
+	w|y &\sim \nml{\hat w}{-\hess \ln p(w|y)}
+}
+
+Computing the predicative distribution for logistic regression is more challenging because we can no longer use the linear gaussian model as we did in linear regression. 
+
+\eq{
+	p(y'|w,y) &= \int p(y'|w)p(w|y) dw \\
+    &= \int \sigma(w^T x')p(w|y) dw \\
+}
+
+Notice that all $w$ that are orthogonal to $x'$ will produce the same value for $\sigma(w^Tx')$ so we can rewrite the integral as two parts: the inner level collapses $w$ space into the probability density of $\sigma(w^Tx' = a)$ and an outer level that carries out the integral
+
+\eq{
+	&= \int \sigma(a) p(w^Tx' = a | y) da \\
+	&= \int \sigma(a) \int \delta(a-w^Tx') p(w|y) dw da \\
+}
+
+As we have shown earlier, the inner integral results in a gaussian density. The mean is simply the transformed mean of $w|y$, so $\mu_a = \hat w^T x'$. The variance can be computed as follows:
+
+\eq{
+	\sigma_a^2 &= \int p(a) \paren{a - E[a]}^2 da \\
+    &= \int q(w) \paren{w^Tx' - \hat w^T x'}^2 dw \\
+    &= \int q(w) (x'^T (w-\hat w))^2 dw \\
+    &= \int q(w) \qf{x'}{(w-\hat w)(w-\hat w)^T} dw \\
+    &= \qf{x'}{\paren{\int q(w) (w-\hat w)(w-\hat w)^T dw}} \\
+    &= \qf{x'}{\paren{\int q'(w) ww^T dw}} \\
+    &= \qf{x'}{\Sigma_q}
+}
+
+Where we use $q$ to denote the posterior distribution on weights and $q'$ to denote a shifted version of $q$ which sets the mean to be 0 and keeps the same covariance.
+
+Now we are left with this integral:
+
+\eq{
+	\int \sigma(a) \nml{\mu_a}{\sigma_a}(a) da
+}
+
+This is intractable, but we can approximate the sigmoid function with something called a probit function, and solve analytically. The details of this are not shown here.
+
+\subsubsection{Laplace Approximation}
+
+For the normal distribution, the negative hessian of the log density function happens to be the precision matrix. The mode of the density function happens to be the mean. The laplace approximation approximates other probability distributions as a multivariate gaussian by taking advantage of this fact. Given a density $p(x)$, we can set $\hat \Lambda = - \hess_x \log p(x)$ and $\hat \mu = \argmax_x p(x)$ and then construct a normal distribution accordingly. Although this approximation is not always great, it can be used in a relatively large range of scenarios. 
+
 \subsection{Spline and Wavelet Bases *}
 .
-\subsection{Bayesian Neural Networks *}
+\subsection{Bayesian Neural Networks}
+
+Similar to bayesian logistic regression, we make use of the laplace approximation in order to render the posterior distribution as gaussian. All this requires is a mode of the posterior distribution and also the hessian, which we can computing using finite differences or automatic differentiation. The mode of the posterior is simply whatever weights the training converges to, when using weight regularization (which is equivalent to a bayesian prior on the weights with covariance $\alpha^{-1} I$). 
+
+Now we will ask how the predicative distribution can be calculated, which is nontrivial in a similar manner to bayesian logistic regression. We are trying to perform the integral:
+
+\eq{
+	p(y'|y) &= \int p(y'|w) p(w|y) dw
+}
+
+Where $w|y$ is gaussian. $y'|w$ is also gaussian, but not in a nice way. In linear models, $y'|w$ would be gaussian with mean $w^T x'$ but in a neural network, the mean may be something like $f(x',w)$ for some arbitrary function $f$. This means we can't use the results we previously derived for conditional gaussians. The solution is to approximate $f$ by some function $f'$ which is linear in $w$ around $x'$ and $\hat w$. This is done using taylor expansions in the standard way. After this is done, the predicative distribution is straightforward to derive.
 
 \section{Approximate Inference *}
 
@@ -2023,8 +2167,12 @@ To summarize our expressions:
 
 This concludes the proof.
 
-\subsubsection{MPC and ILQR *}
-.
+\subsubsection{MPC and ILQR}
+
+ILQR is an adaptation of LQR to nonlinear systems. It consists of successively rolling out a trajectory and using finite differences to linearize / quadratisize the dynamics and the cost function at each point in time, and then resolving for the optimal trajectory using the new dynamics and cost model. Each successive iteration of trajectory optimization should start from the previous iteration in order to help convergence. 
+
+MPC runs ILQR and then takes the first action proposed in the trajectory. However, model predicative control is different in that ILQR should be re-run once for every time-step, allowing it to do well at stochastic scenarios. 
+
 \subsubsection{Stochastic Optimal Control *}
 .
 \subsection{Q-Learning}
@@ -2109,8 +2257,14 @@ Now let's focus on the start state, Let $\mu_{\pol}(s) = \mu_{\pol}(s;s_0)$.
 
 Note that we have managed to eliminate the sums into expectations (this was not previously possible), which means we can perform it by sampling.
 
-\subsubsection{Natural Policy Gradients *}
-.
+\subsubsection{Natural Policy Gradients}
+
+In the previous section, we parameterized the policy with a neural network with weights. Although a neural network can express any function, we might find it rather strange that the parameterization of our policy determines the training -- a different network architecture would take a different path in parameter space and therefore a different path -- perhaps better or worse -- in policy space. 
+
+The idea of natural PG is to move directly in policy space, therefore in principle, the network architecture would not matter. 
+
+\todo{write this section}
+
 \subsubsection{Counterfactual Multi-Agent Policy Gradients}
 
 We want to play some cooperative multi-player game with imperfect information. How can the policy gradients framework be applied? One naive method might be Independent Actor Critic -- each player runs actor critic by itself, and comes up with its own policy. However, this doesn't work well because of the credit assignment problem. Since all agents are simultaneously updating their policies, an agent does not know whether or not the reward was due to their action or not.
@@ -2230,14 +2384,27 @@ Computing $\kl{q}{p(z)}$ is easy, because $p(z)$ has an analytical form (the sta
 
 Naive strategy: Sample $z \sim q$. Compute the gradient of $\log p(x|z)$ in order to approximate gradient of expectation. This is not ideal because the gradient will not backpropagate to the network $q$. Solution: use reparameterization trick.  
 
-\subsection{Architectures *}
+\subsection{Architectures }
+
+This section briefly describes a few novel neural architectures.
 
 \subsubsection{Neural Turing Machine *}
 .
-\subsubsection{Neural GPU *}
-.
-\subsubsection{Grid LSTM *}
-.
+%https://arxiv.org/pdf/1410.5401.pdf
+\subsubsection{Neural GPU}
+
+A neural GPU is almost a fully convolutional network with a few twists. First, the convolutional network is applied $T$ times to itself, so that it acts in a recursive manner. Note that the output and input must have the same shape for this to work. The network itself is composed of $L$ layers, each of which is a convolutional GRU layer. Within each layer, the weights are the same. A convolutional GRU layer performs a convolution, and then inputs the result into a standard GRU unit. 
+
+The inspiration for neural GPU came from cellular automata, which are similar to the NGPU in that operations are local but highly parallel and also iterate over time. From details in the paper, training of the NGPU was non-trivial and involved techniques such as curriculum learning, parameter sharing relaxation, hyperparameter search, and noise injection in the gradients.
+
+The NGPU performed extremely well at binary addition and multiplication and seemed to have nearly perfect generalization ability on different number lengths.
+
+\subsubsection{Grid LSTM}
+
+The idea behind grid LSTM is to employ the ability of LSTMs to remember on more than just the time-dimension. For example, LSTM connections can also be performed along the depth-axis of a neural network in order to keep gradients flowing properly. 
+
+A 3-
+
 \section{Mathematical Background}
 
 \subsection{Matrix Differentials}
@@ -2714,7 +2881,7 @@ This expression can now be optimized using your favorite convex optimization pro
 
 We can recover $b$ by computing the expression $v^Tx_i$ for all positive samples. Since we know we have satisfied the constraint $v^Tx_i - b > 1$, and in fact, $min(v^Tx_i -b) = 1$ when the constraint is tight, therefore, $min(v^Tx_i)-1 = b$. 
 
-\subsubsection{Kernel}
+\subsubsection{Kernel Trick}
 
 The most interesting thing about this dual form is that none of the vectors $x_i$ must be explicitly computed. Instead, it is sufficient that the dot product of $x_i^T x_j$ be computed. In fact, we can transform the inputs arbitrarily, and compute $K(x_i, x_j) = \phi(x_i)^T \phi(x_j)$ even if computing $\phi$ itself is computationally expensive. The traditional euclidean kernel is $K(x_i, x_j) = x_i^Tx_j$. We can also use the gaussian kernel
 
@@ -2758,7 +2925,7 @@ Let's try to solve this with maximum likelihood.
   \log p(s) &= \log |U| + \sum_{u \in U} \log \sigma'(u^T x)
 }
 
-Now at this point you just run gradient descent to get the answer. 
+At this point you just run gradient descent to get the answer. 
 
 Another ICA algorithm involves kurtosis, which is a measure of nongaussianity. Kurtosis is the expected value of $x^4$. One may ask why we do not use skewness, which is the expectation of $x^3$. I'm not sure myself, although I have read vague and unsubstantiated claims to the effect that kurtosis somehow encompasses skewness through something called a one-bit-matching theorem.
 The algorithm performs kurtosis maximization in order to find the directions along which the data is projected into the least gaussian shape possible, but that's all I know about it.
@@ -2781,11 +2948,70 @@ p(c|x) &\propto q(x|c)p(c) \\
 
 Therefore the correct method of correcting for class redistribution is to multiply probabilities by the ratio $\frac{p(c)}{q(c)}$. Remember to renormalize afterwards.
 
+\subsection{Perspective geometry}
+
+A point in 3-D space can be represented in homogeneous coordinates as $\bmat{ x \\ y \\ z \\ s}$ which is equivalent to the 3D point $\bmat{ x/s \\ y/s \\ z/s }$.
+
+We will now introduce three matrices -- the translation, rotation, and projection matrix.
+
+The translation matrix takes the form
+
+\eq{
+	T &= I + \sparen{ \begin{array}{c|c} 0 & \mat{\Delta x \\ \Delta y \\ \Delta z} \\ \hline \mat{\,&0&\,} & 0 \end{array}} \\
+\intertext{We can see the effect of the translation matrix on a point}
+    T \bmat{x \\ y \\ z \\ s} &= \bmat{x \\ y \\ z \\ s} + s \bmat{\Delta x \\ \Delta y \\ \Delta z \\ 0}
+}
+
+Given a 3 by 3 rotation matrix, the homogeneous rotation matrix is simply $\sparen{ \begin{array}{c|c} R & 0 \\ \hline 0 & 1 \end{array}}$
+Given angles $\alpha$, $\beta$, and $\gamma$ for rotation about the $x$, $y$, and $z$ axes, the 3 by 3 rotation matrix can be written as a product of rotation matrices:
+
+\eq{
+	R &= \bmat{1 & 0 & 0 \\ 0 & \calpha & -\salpha \\ 0 & \salpha & \calpha} 
+    \bmat{\cbeta & 0 & \sbeta \\ 0 & 1 & 0 \\ -\sbeta & 0 & \cbeta} 
+    \bmat{\cgamma & -\sgamma & 0 \\ \sgamma & \cgamma & 0 \\ 0 & 0 & 1}
+}
+
+Note that the rotation and translation matrix can multiplied and combined as
+\eq{
+	\sparen{ \begin{array}{c|c} R & T \\ \hline 0 & 1 \end{array}}
+}
+
+Finally, the projection matrix projects a 3D point onto a 2D camera plane when we have given focal lengths $f_x$ and $f_y$.
+
+\eq{
+	K &= \bmat{f_x & 0 & 0 & 0 \\ 0 & f_y & 0 & 0 \\ 0 & 0 & 1 & 0}
+}
+
+Finally, we can transform to image coordinates by off-setting the points half of the image width and height and by flipping the $y$ axis:
+
+\eq{
+	C &= \bmat{1 & 0 & c_x \\ 0 & -1 & -c_y \\ 0 & 0 & 1}
+}
+
+Therefore the full transformation from world coordinates to image points is computed by the transformation:
+
+\eq{
+	M &= CKRT
+}
+
+\subsubsection{Inverse graphics}
+
+The transformation carried out by the projection matrix is essentially:
+
+\eq{
+	x &= \frac{f_x X}{Z}
+}
+
+Therefore if we are given the depth of each point on the camera plane, we may invert the process:
+
+\eq{
+	X &= \frac{Z}{f_x}x
+}
+
 \section{Category Theory}
 
-\subsection{Pentagrams}
+\subsection{Diagrams}
 
-% draw a pentagram
 \begin{tikzcd}[column sep=1.0em, row sep=18.0]
   {}&{}&\Omega
   \ar[rddddd, two heads, "\beta" near start]  
