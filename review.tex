@@ -2898,10 +2898,10 @@ Formally,
 
 Writing this as a lagrangian, we want to solve
 \eq{
-  L(x,\lambda) = &-\int f(x) \log f(x) dx + \\
-  &\left( \lambda_1 \int f(x) dx -1 \right) + \\
-  &\left( \lambda_2 \int xf(x) dx \right) + \\
-  &\left( \lambda_3 \int x^2 f(x) dx -1 \right) \\
+  L(x,\lambda) = &-\int f(x) \log f(x) dx\\
+  &\qquad +\left( \lambda_1 \int f(x) dx -1 \right)\\
+  &\qquad +\left( \lambda_2 \int xf(x) dx \right)\\
+  &\qquad +\left( \lambda_3 \int x^2 f(x) dx -1 \right) \\
   \lambda &\neq 0\\
   &\nabla_x L(x,\lambda) = 0
 }
@@ -3118,7 +3118,7 @@ Now our optimization problem is in the form
   &\lambda_i \geq 0
 }
 
-This expression can now be optimized using your favorite convex optimization problem. One simple algorithm which works well is dual coordinate ascent. Simply select two $\lambda_i$ and $\lambda_j$ and line search greedily for a better solution. Repeat. When finished, we can recover an expression for $v$.
+This expression can now be optimized using your favorite convex optimization algorithm. One simple algorithm which works well is dual coordinate ascent. Simply select two $\lambda_i$ and $\lambda_j$ and line search greedily for a better solution. Repeat. When finished, we can recover an expression for $v$.
 
 We can recover $b$ by computing the expression $v^Tx_i$ for all positive samples. Since we know we have satisfied the constraint $v^Tx_i - b > 1$, and in fact, $min(v^Tx_i -b) = 1$ when the constraint is tight, therefore, $min(v^Tx_i)-1 = b$. 
 
