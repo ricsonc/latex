@@ -1668,7 +1668,7 @@ How can we maximize $\lag$ with respect to $q$? We can try minimizing the second
 
 Now to run EM, we simply need to derive an analytical expression for $\lag(P(Z|X, \theta), \theta)$ and then repeatedly maximize with respect to $\theta$ until we converge at the optimal solution.
 
-\subsection{Gaussian Mixture Model}
+\subsubsection{Gaussian Mixture Model}
 
 A gaussian mixture model is one such example of a hidden variable model. There are $k$ gaussian components composed together in a mixture density, and there are $n$ datapoints. Each datapoint was generated from the mixture. The task is to infer the mixture means and covariances. In other words, $X$ are the datapoint positions, $Z$ are which mixture component each datapoint ``belongs'' to and $\theta = (\mu, \Sigma, \pi)$ are the means, covariances, and weights of each mixture component. The joint distribution for this model can be written:
 
@@ -1733,13 +1733,50 @@ This gives us the updated values of $\pi$. Intuitively since, $\gamma_{ij}$ is t
 
 Now for the update of $\mu$:
 \eq{
-  0 &= 0
+  \grad_{\mu_k} \lag &= \sum_i \gamma_{ik} \grad_{\mu_k}
+  \paren{X_i^T \minv \Sigma_k \mu_k \nhaf \qf{\mu_k}{\minv \Sigma_k} } \\
+  &= \sum_i \gamma_{ik} \paren{ (\minv \Sigma_k)^T X_i - \minv \Sigma_k \mu_k } \\
+  &= \minv \Sigma_k \sum_i \gamma_{ik} (X_i-\mu_k)
 }
 
-And finally for $\Sigma$:
+Assuming $\minv \Sigma_k$ isn't degenerate in some way, this means:
+
 \eq{
-  0 &= 0
+  0 &= \sum_i \gamma_{ik} (X_i-\mu_k) \\
+  \mu_k \Gamma_k &= \sum_i \gamma_{ik} X_i \\
+  \mu_k &= \sum_i \frac{\gamma_{ik}}{\Gamma_k} X_i 
 }
+
+This should intuitively make sense -- each component mean is the weighted average of all points in the dataset, where the average is weighted by how much a point belongs to that mixture component.
+
+And finally for $\Sigma$: 
+\eq{
+  \grad_{\Sigma_k} \lag &= \sum_i \gamma_{ij} \paren{\nhaf} \paren{ \grad_{\Sigma_k} (\log |\Sigma_k|) + \grad_{\Sigma_k} \qfo{X_i}{\minv \Sigma_k}{\mu_k} } 
+}
+
+Recall that $\grad \log |\Sigma_k| = \minv \Sigma_k$. Also for the second term, we can take the gradient using traces:
+
+\eq{
+  d \qfo{X_i}{\minv \Sigma_k}{\mu_k} &= d \tr \paren{ \qfo{X_i}{\minv \Sigma_k}{\mu_k} } \\
+  &= d \tr \paren{ \scov{(X_i-\mu_k)} \minv \Sigma_k } \\
+  &= \tr \paren{ \scov{(X_i-\mu_k)} d\minv \Sigma_k } \\
+  &= \tr \paren{ \scov{(X_i-\mu_k)} \paren{-\minv \Sigma_k d \Sigma_k \minv \Sigma_k} } \\
+  &= -\tr \paren{\minv \Sigma_k  \scov{(X_i-\mu_k)} \minv \Sigma_k d\Sigma_k }\\
+  \grad_{\Sigma_k} \qfo{X_i}{\Sigma_k}{\mu_k} &= -\minv \Sigma_k \scov{(X_i-\mu_k)} \minv \Sigma_k
+}
+
+Plugging these values back in:
+
+\eq{
+  0 &= \sum_i \gamma_{ik} \paren{\nhaf} \paren{ \minv \Sigma_k - \minv \Sigma_k \scov{(X_i-\mu_k)} \minv \Sigma_k} \\
+  \minv \Sigma_k \Gamma_k &= \sum_i \gamma_{ij} \minv \Sigma_k \scov{(X_i-\mu_k)} \minv \Sigma_k\\
+  \minv \Sigma_k \Gamma_k &= \minv \Sigma_k \paren{\sum_i \gamma_{ij} \scov{(X_i-\mu_k)} }\minv \Sigma_k\\
+  \Gamma_k &= \paren{\sum_i \gamma_{ij} \scov{(X_i-\mu_k)} }\minv \Sigma_k\\
+  \Gamma_k \Sigma_k &= \sum_i \gamma_{ij} \scov{(X_i-\mu_k)} \\
+  \Sigma_k &= \sum_i \frac{\gamma_{ij}}{\Gamma_k} \scov{(X_i-\mu_k)}
+}
+
+And again this matches up with our intuition.
 
 In conclusion, the GMM inference algorithm with expectation maximization alternates between recomputing values of $\gamma$ and values for $\mu$, $\Sigma$, and $\pi$.
 
