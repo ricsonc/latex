@@ -14,13 +14,9 @@ These are a collection of personal notes, and are not intended to teach or intro
 
 \newpage
 
-\paragraph{Todo}
-
-\itmz{
-\item natural PG
-\item architectures
-\item approximate inference
-}
+% todo:
+% expectation maximization
+% variational methods
   
 \section{Probability Theory}
 
@@ -796,7 +792,7 @@ There are many confusing interpretations of the fisher information matrix.
 In my opinion, it is best seen as the hessian of the KL-divergence.
 
 \eq{
-  \kl{p}{q_\theta} &= -E_p[\log \frac{p(x)}{q(x)}] \\
+  \kl{p}{q_\theta} &= -E_p \sparen{ \log \frac{p(x)}{q(x)}} \\
   &= -E_p[\log p(x) - \log q(x)] \\
   \hess_\theta \kl{p}{q_\theta} &= -\hess_\theta E_p[\log p(x) -\log q_\theta(x)] \\
   &= \hess_\theta E_p[\log q_\theta(x)] \\
@@ -1233,7 +1229,7 @@ Another small detail is that we actually send $k$ messages at a time, one for ea
 
 How can we generalize this algorithm to general graphs, possibly with cycles? Well it turns out that if we initialize all the messages to 1, and then iteratively run this algorithm to simultaneously update all messages, you eventually get the right answer. Maybe. 
 
-\section{Linear and Nonlinear Bayesian Models}
+\section{Bayesian Models}
 
 The Bayesian models we discuss all operate in the same way. First, we have a prior on the weights/parameters of the model. Then, we can describe the likelihood of the data given the parameters. This gives us a posterior distribution on the parameters. Finally, we can solve for the predicative distribution by integrating predictions across the posterior. 
 
@@ -1626,11 +1622,128 @@ Now we will ask how the predicative distribution can be calculated, which is non
 
 Where $w|y$ is gaussian. $y'|w$ is also gaussian, but not in a nice way. In linear models, $y'|w$ would be gaussian with mean $w^T x'$ but in a neural network, the mean may be something like $f(x',w)$ for some arbitrary function $f$. This means we can't use the results we previously derived for conditional gaussians. The solution is to approximate $f$ by some function $f'$ which is linear in $w$ around $x'$ and $\hat w$. This is done using taylor expansions in the standard way. After this is done, the predicative distribution is straightforward to derive.
 
-\section{Approximate Inference *}
+\section{Hidden Variable Models}
 
-\subsection{Expectation Maximization *}
-.
-\subsection{Variational Inference}
+Often, we will deal with models with both observed and unobserved variables. For example, in part of speech tagging, the words are observed variables where as the POS tag of each word is unobserved. In a clustering problem, the position of each point is observed by the label on each point is unobserved. Both the EM algorithm and variational inference are used to deal with these types of models.
+
+\subsection{Expectation Maximization }
+
+There are three important variables: the observed variables $X$, the hidden variables $Z$ and the parameters of the model $\theta$. We want to solve the following optimization problem:
+
+\eq{
+  \max_\theta P(X|\theta)
+}
+
+But we only have a tractable form for the joint distribution $P(X,Z|\theta)$. Note that naive marginalization is intractable:
+
+\eq{
+  P(X|\theta) &= \sum_Z P(X,Z|\theta)
+}
+
+However, we can also break this into an expectation:
+\eq{
+  P(X|\theta) &= \sum_Z P(Z)P(X|Z, \theta) \\
+  &= E_{Z \sim P} [P(X|Z, \theta)]
+}
+
+Unfortunately, we do not have the distribution $P(Z)$ either (and it is intractable to compute. But this gives us the idea to consider the expectation under some other arbitrary distribution $q$.
+
+\eq{
+  \log P(X|\theta) &= \log P(X|\theta) \sum_Z q(Z) \\
+  &= \sum_z q(Z) \log P(X|\theta) \\
+  &= E_{Z \sim q} [\log P(X|\theta)] \\
+  &= E_{Z \sim q} \sparen{ \log \frac{P(X|\theta)P(Z|X, \theta)}{P(Z|X, \theta)} } \\
+  &= E_{Z \sim q} \sparen{ \log \frac{P(X,Z|\theta)}{P(Z|X,\theta)} } \\
+  &= E_{Z \sim q} \sparen{ \log P(X,Z|\theta) - \log q(Z) + \log q(Z) - P(Z|X,\theta) } \\
+  &= E_{Z \sim q} \sparen{ \log \frac{P(X,Z|\theta)}{q(Z)} + \log \frac{q(Z)}{P(Z|X,\theta)} } \\
+  &= E_{Z \sim q} \sparen{ \log \frac{P(X,Z|\theta)}{q(Z)}} + E_{Z \sim q} \sparen{ \log \frac{q(Z)}{P(Z|X,\theta)} } \\
+  &= \lag(q, \theta) + \kl{q}{P}
+}
+
+Where $\lag$ is called the variational lower bound. 
+
+Now the algorithm is simply repeating the following two steps: expectation -- which is maximizing $\lag$ with respect to $q$, and maximization, which is maximizing $\lag$ with respect to $\theta$. This will converge to the optimal $\theta$, which is what we want. Note that we don't directly optimize $P(X|\theta)$ but instead maximizing a lower bound on the quantity.
+
+How can we maximize $\lag$ with respect to $q$? We can try minimizing the second term $\kl{q}{P(Z|X,\theta)}$ instead, this is trivially done by setting $q(Z) = P(Z|X,\theta)$. This means that when $\theta$ converges to some maxima $\theta^*$, then the kl divergence will be zero, so that the lower bound is exactly the log likelihood.
+
+Now to run EM, we simply need to derive an analytical expression for $\lag(P(Z|X, \theta), \theta)$ and then repeatedly maximize with respect to $\theta$ until we converge at the optimal solution.
+
+\subsection{Gaussian Mixture Model}
+
+A gaussian mixture model is one such example of a hidden variable model. There are $k$ gaussian components composed together in a mixture density, and there are $n$ datapoints. Each datapoint was generated from the mixture. The task is to infer the mixture means and covariances. In other words, $X$ are the datapoint positions, $Z$ are which mixture component each datapoint ``belongs'' to and $\theta = (\mu, \Sigma, \pi)$ are the means, covariances, and weights of each mixture component. The joint distribution for this model can be written:
+
+\eq{
+  &P(X,Z|\mu, \Sigma, \pi) \\
+  &= \prod_i \prod_j P(X_i|\mu_j,\Sigma_j, \pi_j)^{Z_{ij}} \\
+  &= \prod_i \prod_j \paren{\pi_j \mvnml{X_i}{\mu_j}{\Sigma_j}}^{Z_{ij}} \\
+  &\log P(X,Z|\mu,\Sigma, \pi) \\
+  &= \sum_i \sum_j Z_{ij} \log \paren{\pi_j \mvnml{X_i}{\mu_j}{\Sigma_j}} \\
+  &= \sum_i \sum_j Z_{ij} \paren{\log \pi_j \nhaf \log |\Sigma_j| \nhaf \qfo{X_i}{\minv \Sigma_j}{\mu_j}} + \const \\
+  &E_{Z \sim q}[\log P(X,Z|\mu, \Sigma, \pi)] \\
+  &= \sum_i \sum_j E_q[Z_{ij}] \paren{\log \pi_j \nhaf \log |\Sigma_j| \nhaf \qfo{X_i}{\minv \Sigma_j}{\mu_j}} + \const \\
+}
+
+Define
+\eq{
+  \gamma_{ij} &= E_q[Z_{ij}]
+  \intertext{Now let $q = P(Z|X,\theta)$} 
+  &= P(Z_{ij}=1|X, \theta) \\
+  &= \frac{P(X|Z_{ij}=1, \theta)P(Z_{ij}=1|\theta)}{P(X)} \\
+  &= \frac{P(X|Z_{ij}=1, \theta)P(Z_{ij}=1|\theta)}{\sum_{j'} P(Z_{ij'}=1|X,\theta)} \\
+  &= \frac{P(X|Z_{ij}=1, \theta)P(Z_{ij}=1|\theta)}{\sum_{j'} P(X|Z_{ij'}=1, \theta) P(Z_{ij'}=1|\theta)} \\
+  &= \frac{P(X|Z_{ij}=1, \theta) \pi_j }{\sum_{j'} P(X|Z_{ij'}=1, \theta) \pi_{j'}} \\
+}
+
+Furthermore, recall that by definition of a gaussian density
+
+\eq{
+  P(X|Z_{ij}=1) &= \mvnml{X_i}{\mu_j}{\Sigma_j} 
+}
+
+So now we are able to compute $\gamma_{ij}$, so we have a closed form for $E_{Z \sim q}[\log P(X,Z|\mu, \Sigma, \pi)]$. Moreover, $\lag(q,\theta) = E_{Z \sim q}[\log P(X,Z|\mu, \Sigma, \pi)] + H[q]$ and the entropy term is constant with respect to $\theta$. Therefore the next step is to maximize $E_{Z \sim q}[\log P(X,Z|\mu, \Sigma, \pi)]$ with respect to $\mu$, $\Sigma$, and $\pi$. Note that when we maximize, we treat $\gamma_{ij}$ as a fixed constant, even though the computation of $\gamma$ depends on $\theta$. We do this because $\gamma$ was actually derived from an expectation of some variational distribution $q$, and $q$ is supposed to be fixed.
+
+Now we have the following constrained optimization problem:
+
+\eq{
+  & \max_{\mu, \Sigma, \pi} \sum_i \sum_j \gamma_{ij} \paren{\log \pi_j \nhaf \log |\Sigma_j| \nhaf \qfo{X_i}{\minv \Sigma_j}{\mu_j}}\\
+  \st & \sum_j \pi_j = 1
+}
+
+The lagrangian is in the form:
+
+\eq{
+  \lag(\mu, \Sigma, \pi, \lambda) &= \sum_i \sum_j \gamma_{ij} \paren{\log \pi_j \nhaf \log |\Sigma_j| \nhaf \qfo{X_i}{\minv \Sigma_j}{\mu_j}} \\
+  & \qquad + \lambda \paren{ \sum_j \pi_j -1 }
+}
+
+Now we will solve for $\lambda$ first:
+
+\eq{
+  \grad_{\pi_k} \lag &= \frac{1}{\pi_k} \sum_i \gamma_{ik} + \lambda \\
+  \intertext{For convenience, denote $\Gamma_k = \sum_i \gamma_{ik}$}
+  0 &= \frac{\Gamma_k}{\pi_k}+\lambda \\
+  \pi_k &= -\frac{\Gamma_k}{\lambda} \\
+  \sum_j \pi_j &= - \sum_j \frac{\Gamma_k}{\lambda} \\
+  1 &= -\sum_j \frac{\Gamma_k} {\lambda} \\
+  \lambda &= -\sum_j \Gamma_k \\
+  \pi_k &= \frac{\Gamma_k}{\sum_j \Gamma_j}
+}
+
+This gives us the updated values of $\pi$. Intuitively since, $\gamma_{ij}$ is the probability that point $i$ is in mixture component $j$, $\Gamma_j$ is the expected number of points in mixture component $j$. So the weight on each cluster is precisely the expected number of points in that mixture over the total expected number of points in all mixtures. 
+
+Now for the update of $\mu$:
+\eq{
+  0 &= 0
+}
+
+And finally for $\Sigma$:
+\eq{
+  0 &= 0
+}
+
+In conclusion, the GMM inference algorithm with expectation maximization alternates between recomputing values of $\gamma$ and values for $\mu$, $\Sigma$, and $\pi$.
+
+\subsection{Variational Inference*}
 .
 \subsubsection{Inference for FC Gaussian CRFS *}
 
@@ -2203,7 +2316,84 @@ In the previous section, we parameterized the policy with a neural network with 
 
 The idea of natural PG is to move directly in policy space, therefore in principle, the network architecture would not matter. 
 
-\todo{write this section}
+Formally speaking, in normal policy gradients, the task is the following constraint maximization:
+
+\eq{
+  \max_{\Delta \theta} J(\theta+ \Delta \theta) \\
+  \st ||\Delta \theta|| < \epsilon
+}
+
+In natural policy gradients, the problem can be rephrased in terms of the policy $\pi$. We abuse notation and allow $J$ to take in a policy instead of the parameter.
+
+\eq{
+  \max_{\pi'} J(\pi') \\
+  \st d(\pi, \pi') < \epsilon
+}
+
+Where $\pi$ was the previous policy and $d$ is some measure of distance. What is a suitable distance function? Since $\pi$ is a policy, something like KL-divergence may be a good idea, however, this is not well-defined because $\pi$ is a different policy for every state.
+
+Recall $\mu_\pi(s)$ from the discussion on policy gradients -- which is the expected discounted visitation counts to state $s$ under policy $\pi$. This gives us the idea of letting $d$ be the expected KL-divergence over all states where the expectation is from the distribution $\mu_\pi$. Formally, we say:
+
+\eq{
+  d(\pi, \pi') &= E_{\mu_\pi} \sparen{ \kl{\pi}{\pi'} }
+}
+
+So now we have 
+
+\eq{
+  &\max_{\pi'} J(\pi') \\
+  \st &E_{\mu_\pi} \sparen{ \kl{\pi(s)}{\pi'(s)} } < \epsilon 
+}
+
+This can be converted back to the parameterized form:
+
+\eq{
+  &\max_{\theta'} J(\theta') \\
+  \st &E_{\mu_{\pi_\theta}} \sparen{ \kl{\pi_\theta(s)}{\pi_{\theta'}(s)} } < \epsilon 
+}
+
+We will approximate the KL-divergence of the new distribution with a second order taylor expansion. To be painfully precise and avoid confusion, we define a new function $g_s$ for each state $s$:
+
+\eq{
+  g_s(\theta') = \kl{\pi_\theta(s)}{\pi_{\theta'}(s)}
+}
+
+And we approximate $g_s$ with a taylor expansion around $\theta$. As it happens, the zeroth and first order terms are zero because $\theta$ is a local minimum of $g_s$ and $g_s(\theta) = 0$. Not only that, but recall that the hessian of KL-divergence is the fisher matrix, so we have:
+
+\eq{
+  (H_{\theta'}) g_s &= F_s(\theta')
+}
+
+Therefore we have the approximation:
+
+\eq{
+  g(\theta') &\approx \haf \qfo{\theta'}{F_s}{\theta} \\
+  &= \qf{\dtheta}{F_s} \\
+  E_{\mu_{\pi_\theta}} \sparen{ \kl{\pi_\theta(s)}{\pi_{\theta'}(s)} } &= \haf E[ \qf{\dtheta}{F_s} ] \\
+  &= \haf \qf{\dtheta}{F}
+}
+
+Where we define the expected fisher matrix $F = E_{s \sim \mu}[F_s]$. In practice, each $F_s$ can be computed easily using automatic differentiation.
+
+We must now solve the constrained optimization problem:
+
+\eq{
+  &\max_{\dtheta} J(\theta + \dtheta) \\
+  \st &\haf \qf{\dtheta}{F} < \epsilon
+}
+
+The lagrangian to this constrained optimization problem is:
+
+\eq{
+  \lag(\dtheta, \lambda) &= J(\theta + \dtheta) + \lambda \paren{\haf \qf{\dtheta}{F} - \eps} \\
+  \grad_{\dtheta} \lag &= \grad_{\dtheta} J(\theta+\dtheta) + \lambda F \dtheta \\
+  &= \grad_{\theta'} J(\theta') + \lambda F \dtheta
+  \intertext{We want to set this quantity to be 0}
+  \grad J &= - \lambda F \dtheta \\
+  \dtheta &= -\frac{1}{\lambda} \minv F \grad J 
+}
+
+Therefore it is apparent that the direction of steepest descent is $\minv F \grad J$.
 
 \subsubsection{Counterfactual Multi-Agent Policy Gradients}
 

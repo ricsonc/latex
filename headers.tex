@@ -9,6 +9,9 @@
 \usepackage{tikz-cd}
 \usepackage{color}
 \usepackage{soul}
+\usepackage{natbib}
+
+\bibliographystyle{abbrv}
 
 \allowdisplaybreaks
 
@@ -47,10 +50,12 @@
 \nec{\argmax}{\text{argmax}}
 
 \nec{\inv}[1]{\frac{1}{#1}}
+\nec{\eps}{\epsilon}
 
 %calculus
 \nec{\grad}{\nabla}
 \nec{\gradt}{\nabla_\theta}
+\nec{\dtheta}{\Delta \theta}
 \nec{\jac}{\mathbf{J}}
 \nec{\hess}{\mathbf{H}}
 \nec{\parf}[2]{\frac{\partial #1}{\partial #2}}
@@ -83,7 +88,7 @@
 \nec{\nml}[2]{\mathcal{N}(#1, #2)}
 \nec{\kl}[2]{\mathcal{D}_\text{KL}(#1||#2)}
 \nec{\cov}{\text{Cov}}
-
+\nec{\var}{\text{Var}}
 \nec{\gammadist}[3]{\frac{#3^{#2}}{\Gamma(#2)} #1^{#2-1} e^{-#3 #1}}
 \nec{\gam}[2]{\mathbf{\Gamma}(#1, #2)}
 \nec{\avgsum}{\frac{1}{n}\sum}
