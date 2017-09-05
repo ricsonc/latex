@@ -1,4 +1,4 @@
-\title{Study Notes}
+\title{Stat/ML Notes}
 \author{Ricson Cheng}
 \date{\today}
 \documentclass[12pt]{article}
@@ -8,15 +8,14 @@
 \begin{document}
 \maketitle
 
-These are a collection of personal notes, and are not intended to teach or introduce material.
+The goal of these notes is to provide fully worked derivations for common topics without skipping any steps.
 
 \tableofcontents
 
 \newpage
 
 % todo:
-% expectation maximization
-% variational methods
+% gaussian crfs
   
 \section{Probability Theory}
 
@@ -1622,7 +1621,7 @@ Now we will ask how the predicative distribution can be calculated, which is non
 
 Where $w|y$ is gaussian. $y'|w$ is also gaussian, but not in a nice way. In linear models, $y'|w$ would be gaussian with mean $w^T x'$ but in a neural network, the mean may be something like $f(x',w)$ for some arbitrary function $f$. This means we can't use the results we previously derived for conditional gaussians. The solution is to approximate $f$ by some function $f'$ which is linear in $w$ around $x'$ and $\hat w$. This is done using taylor expansions in the standard way. After this is done, the predicative distribution is straightforward to derive.
 
-\section{Hidden Variable Models}
+\section{Latent Variable Models}
 
 Often, we will deal with models with both observed and unobserved variables. For example, in part of speech tagging, the words are observed variables where as the POS tag of each word is unobserved. In a clustering problem, the position of each point is observed by the label on each point is unobserved. Both the EM algorithm and variational inference are used to deal with these types of models.
 
@@ -1780,11 +1779,75 @@ And again this matches up with our intuition.
 
 In conclusion, the GMM inference algorithm with expectation maximization alternates between recomputing values of $\gamma$ and values for $\mu$, $\Sigma$, and $\pi$.
 
-\subsection{Variational Inference*}
-.
-\subsubsection{Inference for FC Gaussian CRFS *}
+\subsection{Variational Inference}
 
-A very popular class of CRFs are dense gaussian crfs, used for image processing. In this case, variables are arranged in an n by n grid, with given unary potentials and pairwise potentials between every pair of points in the grid.
+In approximate inference, the setup is very similar. Recall the decomposition:
+
+\eq{
+  \log p(X) &= \lag(q) + \kl{q}{p}
+}
+
+In variational inference, we constrain $q$ to be a tractable distribution which is easy to work with. One common choice of $q$ is a factorized distribution. For example, if $Z$ is a set of variables $z_i, \cdots, z_n$ then we can force $q$ to be in the form $q(Z) = \prod_i q_i(z_i)$. Since $q$ is now tractable, hopefully we can maximize $\lag(q)$ now.
+
+Why is this approach necessary when we already have the EM algorithm? I suspect, but am not sure, that this algorithm is more general and works in situations where EM does not. In particular, the maximization step of EM algorithm might not have a closed form in some cases.
+
+Now all that remains is to solve for $q_1, \cdots, q_n$ which maximizes $\lag(q)$. For convenience, we abuse notation and write $q_i(z_i)$ as $q_i$. 
+
+\eq{
+  \lag(q) &= \int q(Z) \log \frac{P(X,Z)}{q(Z)} dZ \\
+  &= \int \prod_i q_i \paren{ \log P(X,Z) - \sum_i \log q_i } dZ \\
+  \intertext{Now let's try to single out a particular $q_k$}
+  &= \int \int q_k \prod_{i \neq k} q_i \paren{ \log P(X,Z) - \sum_{i\neq k} \log q_i - \log q_k} dZ_{i\neq k} dZ_k\\
+  &= \int \int q_k \prod_{i \neq k} q_i \paren{ \log P(X,Z) - \sum_{i\neq k} \log q_i} dZ_{i\neq k} dZ_k \\
+  &\qquad - \int \int q_k \prod_{i \neq k} q_i \log q_k dZ_{i\neq k} dZ_k\\
+  &= \int q_k \paren{ \int \prod_{i \neq k} q_i \paren{ \log P(X,Z) - \sum_{i\neq k} \log q_i } dZ_{i\neq k} } dZ_k \\
+  &\qquad - \int q_k \log q_k \paren{ \int \prod_{i\neq k} q_i dZ_{i\neq k} } dZ_k\\
+  &= \int q_k \paren{ \int \prod_{i \neq k} q_i \paren{ \log P(X,Z) - \sum_{i\neq k} \log q_i } dZ_{i\neq k} } dZ_k \\
+  &\qquad - \int q_k \log q_k dZ_k\\
+}
+
+Let's simplify the inner integrand:
+
+\eq{
+  &\int \prod_{i \neq k} q_i \paren{ \log P(X,Z) - \sum_{i\neq k} \log q_i } dZ_{i\neq k} \\
+  &= \int q_{i\neq k}(Z) \log P(X,Z)\, dZ_{i\neq k} - \int q_{i\neq k}(Z) \sum_{i\neq k} q_i\, dZ_{i\neq k} \\
+  \intertext{Since we are maximizing with respect to $q_k$, and the second term doesn't contain any variables associated with $q_k$ or $x_k$ or $z_k$, we can treat it as constant.}
+    &= E_{q_{i\neq k}}[\log P(X,Z)] + \const
+}
+
+Note that this expression is a function of $Z_k$ because $Z_k$ is only specified in the outer integrand:
+
+\eq{
+  \lag(q) &= \int q_k \paren{E_{q_{i\neq k}}[\log P(X,Z)] +\const} dZ_k - \int q_k \log q_k\, dZ_k  \\
+}
+
+Notice the following identity:
+
+\eq{
+  \kl{q}{\tilde p} &= -\int q(z) \paren{\log \tilde p(z) - \log q(z)} dz
+}
+
+Now if we want to minimize the kl-divergence, we simply set $q = \tilde p$. This would minimize the integral:
+\eq{
+  \int q(z) \paren{\log \tilde p(z) - \log q(z)} dz
+}
+
+This integral closely parallelizes the integral we want to solve, so it is clear what $\tilde p$ is now.
+
+\eq{
+  \log \tilde p(Z_k) &= E_{q_{i\neq k}}[\log P(X,Z)] + \const\\
+  q^*(Z_k) &\propto \bexp{ E_{q_{i\neq k}}[\log P(X,Z)] }\\
+}
+
+Usually normalization of $q^*$ isn't performed because it isn't useful.
+
+\subsubsection{Dense Gaussian CRFS}
+
+A very popular class of CRFs are dense gaussian crfs, used for image processing. In this case, variables are arranged in an n by n grid (one variable per pixel), with unary potentials for every variable on the grid and pairwise potentials between every pair of variables. For a medium sized image with $10^7$ pixels, this means there are over 100 trillion potentials, making this problem intractable to solve for traditional methods.
+
+The task is to solve for the posterior distribution on $Z$, given X. The distribution on $Z$ is a discrete distribution for each pixel which represents the segmentation class of that pixel.
+
+\todo{write me}
 
 \section{Sampling Algorithms}
 
