@@ -4,6 +4,7 @@
 \usepackage[expansion=false]{microtype}
 \usepackage{lmodern}
 \usepackage{hyperref}
+\usepackage{multicol}
 \usepackage{algpseudocode}
 \usepackage{tikz}
 \usepackage{tikz-cd}
@@ -48,6 +49,7 @@
 \nec{\smx}{\text{softmax}}
 \nec{\samp}{\text{sample}}
 \nec{\argmax}{\text{argmax}}
+\nec{\argmin}{\text{argmin}}
 
 \nec{\inv}[1]{\frac{1}{#1}}
 \nec{\eps}{\epsilon}
@@ -72,7 +74,7 @@
 \nec{\sos}[1]{#1^T #1}
 \nec{\scov}[1]{#1 #1^T}
 \nec{\magsq}[1]{\left| \left| #1 \right| \right|^2}
-
+\nec{\diag}{\text{diag}}
 
 \nec{\bmat}[1]{\begin{bmatrix} #1 \end{bmatrix}}
 \nec{\mat}[1]{\begin{matrix} #1 \end{matrix}}
@@ -129,3 +131,33 @@
 \nec{\sbeta}{\sin(\beta)}
 \nec{\cgamma}{\cos(\gamma)}
 \nec{\sgamma}{\sin(\gamma)}
+
+
+% stats class
+\nec{\bhz}{\hat{\beta_0}}
+\nec{\bho}{\hat{\beta_1}}
+\nec{\bz}{\beta_0}
+\nec{\bo}{\beta_1}
+\nec{\yb}{\bar y}
+\nec{\xb}{\bar x}
+\nec{\epshat}{\hat \eps}
+\nec{\cxy}{c_{XY}}
+\nec{\sx}{s_X}
+
+\nec{\seh}{\hat{\text{se}}}
+\nec{\se}{\text{se}}
+\nec{\mh}{\hat m}
+\nec{\sigh}{\hat \sigma^2}
+\nec{\corr}{\text{Corr}}
+\nec{\sst}{\text{SST}}
+\nec{\sse}{\text{SSE}}
+\nec{\rss}{\text{RSS}}
+\nec{\ssr}{\text{SS}_\text{reg}}
+\nec{\mse}{\text{MSE}}
+\nec{\msr}{\text{MS}_\text{reg}}
+\nec{\msres}{\text{MS}_\text{res}}
+
+% Graphics
+
+\nec{\img}[1]{\includegraphics[width=\textwidth]{#1}}
+\nec{\imgsmall}[1]{\includegraphics[width=0.4\textwidth]{#1}}

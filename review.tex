@@ -65,7 +65,7 @@ Ideally, we want a distribution for $x$ so that when we multiply by this term, w
   &= \nmz \exp\left(\nhaf \left( \frac{(y-x)^2}{\sigma^2} + \frac{(x-\mu)^2}{\sigma_0^2} \right)\right)
 }
 
-We can simply the guts of this expression. At this point, notice that we only need the quadratic and linear terms of $x$. 
+We can simply examine the guts of this expression. At this point, notice that we only need the quadratic and linear terms of $x$. 
 
 \eq{
   \frac{(y-x)^2}{\sigma^2} + \frac{(x-\mu)^2}{\sigma_0^2} &= \frac{\sigma_0^2 (y-x)^2 + \sigma^2 (x-\mu)^2 }{\sigma^2 \sigma_0^2} \\
@@ -1060,6 +1060,87 @@ Now it remains to prove that $E[xx^T] = \Sigma + \mu\mu^T$
   &= \Sigma_{ij} + \mu_i \mu_j
 }
 
+\subsection{Statistical Decision Theory}
+
+Suppose we are trying to predict labels $t$ from data $x$. Let our prediction function be $y(x) : x \rightarrow t$. In addition, we have a loss function $L(t, y)$. We wish to minimize the expected loss:
+
+\eq{
+  E_{x,t} [L(t,y)] &= \int \int L(t,y(x)) p(x,t) dx dt \\
+}
+
+\subsubsection{Continuous Domain}
+
+One special case of the loss, Minkowsky loss, is of the form $L(t, y) = |y-t|^q$. 
+
+\eq{
+  E[L] &= \int \int |y(x) - t|^q p(x,t) dt dx \\
+  &= \int \int |y(x) - t|^q p(t|x)\, dt\, p(x)\,dx \\
+}
+
+Now consider any value of $x$. We want to pick the value $y$ which minimizes the following integral. Consider $q = 1$.
+\eq{
+  \int |y - t| p(t|x)\, dt
+}
+
+We want to set the derivative of this expression with respect to $y$ to be 0, in order to minimize the expression:
+\eq{
+  \frac{\partial}{\partial y} \int |y-t| p(t|x)\, dt &= \int \frac{\partial}{\partial y} |y-t| p(t|x)\, dt \\
+  &= \int \text{sgn}(y > t)p(t|x) dt
+  \intertext{Where sgn is the sign function, so that it evaluates to 1 when $y > t$ and -1 when $y < t$ and 0 otherwise.}
+  &= -\int_{-\infty}^y p(t|x) dt + \int_y^\infty p(t|x) dt
+}
+
+
+If we set this to zero, we get the equation:
+
+\eq{
+  \int_{-\infty}^y p(t|x) dt &= \int_y^\infty p(t|x) dt \\
+  P(y > t | x) &= P(y < t | x)
+}
+
+Therefore, the optimal $y(x)$ is the median of the conditional distribution $t|x$. 
+
+Now let's try $q = 0$. The expected loss is:
+
+\eq{
+  \int \int \mathbf{1}[y(x) = t] p_t(t|x)\, dt\, p(x)\, dx
+}
+
+Where $\mathbf{1}$ evaluates to 1 if the expression inside is true and otherwise evaluates to 0. Just like the previous problem, we pick an arbitrary fixed $x$ and look at the inner integral:
+
+\eq{
+  &\int \mathbf{1}[y = t] p_t(t|x)\, dt
+  \intertext{The integrand is 0 unless $y = t$, leaving us with the following quantity}
+  &= p_t(y|x)\, dt
+}
+
+Now we know the optimal function $y(x)$ will maximize $p_t(y|x)$. In other words, it is the mode of the conditional distribution $t|x$.
+
+\subsubsection{Discrete Domain}
+
+For discrete problems, we can consider $L(t,y)$ as a matrix of loss values.
+
+\eq{
+  E[L] &= \sum_t \int L_{t,y(x)} P(x,t) dx \\
+  &= \sum_t P(t) \int L_{t,y(x)} P(x|t) dx \\
+  &= \sum_t P(t) \int L_{t,y(x)} P(x,t) dx \\
+  &= \sum_t P(t) \sum_y \int_{x \in R_y} L_{t, y} P(x|t) dx
+  \intertext{where $R_y$ denotes the set of $x$ such that $y(x) = y$}
+  &= \sum_t P(t) \sum_y L_{t,y} \int_{x \in R_y} P(x|t) dx \\
+  &= \sum_t P(t) \sum_y L_{t,y} \int_{x \in R_y} P(t|x)\frac{P(x)}{P(t)} dx \\
+  &= \sum_t \sum_y L_{t,y} \int_{x \in R_y} P(t|x)P(x) dx \\
+  &= \sum_y \int_{x \in R_y} P(x) \sum_t L_{t,y} P(t|x) dx \\
+}
+
+Therefore, we want to put each $x$ in the region $R_y$ which minimizes the integrand:
+
+\eq{
+  c(y, x) &= P(x) \sum_t L_{t,y} P(t|x) \\
+  &\propto \sum_t L_{t,y} P(t|x) \\
+  R_{y^*} &= \{x | y^* = \argmin_{y} c(y,x) \} \\
+  y(x) &= y: x \in R_y
+}
+
 \section{Probabilistic Graphical Models}
 \subsection{Forward Backward Algorithm}
 
@@ -1665,7 +1746,15 @@ Now the algorithm is simply repeating the following two steps: expectation -- wh
 
 How can we maximize $\lag$ with respect to $q$? We can try minimizing the second term $\kl{q}{P(Z|X,\theta)}$ instead, this is trivially done by setting $q(Z) = P(Z|X,\theta)$. This means that when $\theta$ converges to some maxima $\theta^*$, then the kl divergence will be zero, so that the lower bound is exactly the log likelihood.
 
-Now to run EM, we simply need to derive an analytical expression for $\lag(P(Z|X, \theta), \theta)$ and then repeatedly maximize with respect to $\theta$ until we converge at the optimal solution.
+To summarize, here is the algorithm for EM:
+\enum{
+\item Fix $q = P(Z|X, \theta)$
+\item Find an analytical form for $\lag(q, \theta)$
+\item Maximize $\lag$ with respect to $\theta$
+\item repeat until converged
+}
+
+Note that step 2 is computing the expectation, which is why it is called the expectation step. Step 3 is maximization, giving us the name Expectation-Maximization.
 
 \subsubsection{Gaussian Mixture Model}
 
@@ -1778,6 +1867,24 @@ Plugging these values back in:
 And again this matches up with our intuition.
 
 In conclusion, the GMM inference algorithm with expectation maximization alternates between recomputing values of $\gamma$ and values for $\mu$, $\Sigma$, and $\pi$.
+
+\subsubsection{Hard EM}
+
+Apparently there is a popular variant of EM called hard EM which replaces the expectation with another maximization step. Another way to look at it is that we restrict $q$ to be a point distribution.
+
+In soft EM, we had the following lower bound:
+
+\eq{
+  \lag(q, \theta) &= E_{Z \sim q} \sparen{ \log \frac{P(X,Z|\theta)}{q(Z)}}
+}
+
+Here is what hard EM looks like:
+
+\eq{
+  \lag(\theta) &= \max_Z \log P(X,Z|\theta)
+}
+
+This really just makes hard EM and alternation of the optimization of $Z$ and $\theta$. 
 
 \subsection{Variational Inference}
 
